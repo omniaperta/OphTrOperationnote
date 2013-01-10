@@ -289,6 +289,47 @@ $(document).ready(function() {
 			$('#ElementCataract_iol_position_id').val(4);
 		}
 	});
+
+	// IOL barcode scanning
+	$(this).delegate('.ElementCataract .iol_scan .scan','click', function(e) {
+		$(this).replaceWith('<span class="scan_cancel">Waiting... <a href="#"">cancel</a></span>');
+		var keypress_handler = function(e) {
+			var value = $('.ElementCataract .iol_scan input').val();
+			if(e.which == 13) {
+				// Reset form
+				$('.ElementCataract .iol_scan input').val('');
+				$('.ElementCataract .iol_scan .scan_cancel').replaceWith('<a href="#" class="scan">Scan</a>')
+				$(document).unbind('keypress', keypress_handler);
+				
+				// Submit barcode
+				$.ajax({
+					'type': 'GET',
+					'dataType': 'json',
+					'url': baseUrl + '/OphTrOperationnote/default/getioltype',
+					'data': { barcode: value },
+					'success': function(iol_data) {
+						$('#ElementCataract_iol_type_id').val(iol_data.type_id);
+						$('#ElementCataract_iol_power').val(iol_data.power);
+					},
+					'error': function() {
+						alert('IOL not found');
+					}
+				});
+			} else {
+				// Append to input
+				$('.ElementCataract .iol_scan input').val(value + String.fromCharCode(e.which));
+			}
+			e.preventDefault();
+		}
+		$('.ElementCataract .iol_scan .scan_cancel a').click(function(e) {
+			$('.ElementCataract .iol_scan .scan_cancel').replaceWith('<a href="#" class="scan">Scan</a>')
+			$(document).unbind('keypress', keypress_handler);
+		});
+		$('.ElementCataract .iol_scan input').val('');
+		$(document).keypress(keypress_handler);
+		e.preventDefault();
+	});
+
 });
 
 function callbackVerifyAddProcedure(proc_name,durations,short_version,callback) {
@@ -387,3 +428,4 @@ AnaestheticGivenBySlide.prototype = {
 
 var anaestheticSlide = new AnaestheticSlide;
 var anaestheticGivenBySlide = new AnaestheticGivenBySlide;
+

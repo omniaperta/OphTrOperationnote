@@ -196,6 +196,18 @@ class DefaultController extends BaseEventTypeController {
 		}
 	}
 
+	public function actionGetIOLType() {
+		$iol = OphTrOperationnoteCataractIOL::model()->find('barcode = :barcode', array(':barcode' => @$_GET['barcode']));
+		if($iol) {
+			echo CJavaScript::jsonEncode(array(
+					'type_id' => $iol->type_id,
+					'power' => $iol->power,
+			));
+		} else {
+			throw new CHttpException(404, 'Unknown IOL');
+		}
+	}
+	
 	public function actionVerifyprocedure() {
 		$list = Yii::app()->session['Procedures'];
 		$found = false;
