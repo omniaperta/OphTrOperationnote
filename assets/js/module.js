@@ -291,43 +291,62 @@ $(document).ready(function() {
 	});
 
 	// IOL barcode scanning
-	$(this).delegate('.ElementCataract .iol_scan .scan','click', function(e) {
-		$(this).replaceWith('<span class="scan_cancel">Waiting... <a href="#"">cancel</a></span>');
-		var keypress_handler = function(e) {
-			var value = $('.ElementCataract .iol_scan input').val();
-			if(e.which == 13) {
-				// Reset form
-				$('.ElementCataract .iol_scan input').val('');
-				$('.ElementCataract .iol_scan .scan_cancel').replaceWith('<a href="#" class="scan">Scan</a>')
-				$(document).unbind('keypress', keypress_handler);
-				
-				// Submit barcode
-				$.ajax({
-					'type': 'GET',
-					'dataType': 'json',
-					'url': baseUrl + '/OphTrOperationnote/default/getioltype',
-					'data': { barcode: value },
-					'success': function(iol_data) {
-						$('#ElementCataract_iol_type_id').val(iol_data.type_id);
-						$('#ElementCataract_iol_power').val(iol_data.power);
-					},
-					'error': function() {
-						alert('IOL not found');
-					}
-				});
-			} else {
-				// Append to input
-				$('.ElementCataract .iol_scan input').val(value + String.fromCharCode(e.which));
-			}
-			e.preventDefault();
-		}
-		$('.ElementCataract .iol_scan .scan_cancel a').click(function(e) {
-			$('.ElementCataract .iol_scan .scan_cancel').replaceWith('<a href="#" class="scan">Scan</a>')
+	var keypress_handler = function(e) {
+		var value = $('#iol_scan_scanning input').val();
+		if(e.which == 13) {
+			// Reset form
+			$('#iol_scan_scanning input').val('');
+			//$('#iol_scan_scanning').dialog('close');
 			$(document).unbind('keypress', keypress_handler);
-		});
-		$('.ElementCataract .iol_scan input').val('');
-		$(document).keypress(keypress_handler);
+			
+			// Submit barcode
+			$.ajax({
+				'type': 'GET',
+				'dataType': 'json',
+				'url': baseUrl + '/OphTrOperationnote/default/getioltype',
+				'data': { barcode: value },
+				'success': function(iol_data) {
+					$('#ElementCataract_iol_type_id').val(iol_data.type_id);
+					$('#ElementCataract_iol_power').val(iol_data.power);
+					$('#iol_scan_scanning p.active').hide();
+					$('#iol_scan_scanning p.message').replaceWith('<p class="message">Found IOL</p>').show();
+				},
+				'error': function() {
+					$('#iol_scan_scanning p.active').hide();
+					$('#iol_scan_scanning p.message').replaceWith('<p class="message">Error: IOL not found</p>').show();
+				},
+				'complete': function() {
+					$('#iol_scan_scanning').dialog('option', 'buttons', [{
+						text: 'Close',
+						click: function() {
+							$(this).dialog('close');
+						}
+					}]);
+				}
+			});
+		} else {
+			// Append to input
+			$('#iol_scan_scanning input').val(value + String.fromCharCode(e.which));
+		}
 		e.preventDefault();
+	};
+	$(this).delegate('.iol_scan', 'click', function(e) {
+		$('#iol_scan_scanning').dialog('open');
+		$('#iol_scan_scanning input').val('');
+		$(document).bind('keypress', keypress_handler);
+		e.preventDefault();
+		
+	});
+	$(this).delegate('#iol_scan_scanning', 'dialogclose', function() {
+		$('#iol_scan_scanning p.active').show();
+		$('#iol_scan_scanning p.message').replaceWith('<p class="message"></p>').hide();
+		$('#iol_scan_scanning').dialog('option', 'buttons', [{
+			text: 'Cancel',
+			click: function() {
+				$(this).dialog('close');
+			}
+		}]);
+		$(document).unbind('keypress', keypress_handler);
 	});
 
 });
@@ -429,3 +448,18 @@ AnaestheticGivenBySlide.prototype = {
 var anaestheticSlide = new AnaestheticSlide;
 var anaestheticGivenBySlide = new AnaestheticGivenBySlide;
 
+function OphTrOperationnote_Cataract_init() {
+	$("#iol_scan_scanning").dialog({
+		autoOpen: false,
+		modal: true,
+		resizable: false,
+		title: 'Scan IOL',
+		width: 280,
+		buttons: [{
+			text: 'Cancel',
+			click: function() {
+				$(this).dialog('close');
+			}
+		}]
+	});
+}

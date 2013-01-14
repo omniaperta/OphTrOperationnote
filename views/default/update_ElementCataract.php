@@ -64,9 +64,11 @@
 		<div class="right" style="width:35%;">
 			<div class="halfHeight">
 				<?php echo $form->dropDownList($element, 'iol_type_id', array(CHtml::listData($element->IOLTypes_NHS,'id','name'),CHtml::listData($element->IOLTypes_Private,'id','name')),array('empty'=>'- Please select -','divided'=>true))?>
-				<div class="iol_scan">
+				<a href="#" class="iol_scan">Scan</a>
+				<div id="iol_scan_scanning">
+					<p class="active"><img src="<?php echo $this->assetPath ?>/img/barcode-scanning.gif"/></p>
+					<p class="message"></p>
 					<input type="hidden"/>
-					<a href="#" class="scan">Scan</a>
 				</div>
 				<?php echo $form->textField($element, 'iol_power', array('size' => '10'))?>
 				<?php echo $form->dropDownList($element, 'iol_position_id', CHtml::listData(IOLPosition::model()->findAll(array('order'=>'display_order')), 'id', 'name'),array('empty'=>'- Please select -'))?>
@@ -77,3 +79,6 @@
 		</div>
 	</div>
 </div>
+<script type="text/javascript">
+	OphTrOperationnote_Cataract_init();
+</script>
