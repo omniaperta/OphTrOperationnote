@@ -309,11 +309,11 @@ $(document).ready(function() {
 					$('#ElementCataract_iol_type_id').val(iol_data.type_id);
 					$('#ElementCataract_iol_power').val(iol_data.power);
 					$('#iol_scan_scanning p.active').hide();
-					$('#iol_scan_scanning p.message').replaceWith('<p class="message">Found IOL</p>').show();
+					$('#iol_scan_scanning p.message').replaceWith('<p class="message">Found IOL<br/>Type: '+iol_data.type+', Power: '+iol_data.power+'</p>').show();
 				},
 				'error': function() {
 					$('#iol_scan_scanning p.active').hide();
-					$('#iol_scan_scanning p.message').replaceWith('<p class="message">Error: IOL not found</p>').show();
+					$('#iol_scan_scanning p.message').replaceWith('<p class="message">Error: Unknown IOL</p>').show();
 				},
 				'complete': function() {
 					$('#iol_scan_scanning').dialog('option', 'buttons', [{
