@@ -200,6 +200,7 @@ class DefaultController extends BaseEventTypeController {
 			echo CJavaScript::jsonEncode(array(
 					'type_id' => $iol->type_id,
 					'power' => $iol->power,
+					'type' => $iol->type->name
 			));
 		} else {
 			throw new CHttpException(404, 'Unknown IOL');
