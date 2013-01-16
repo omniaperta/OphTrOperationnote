@@ -323,4 +323,11 @@ class ElementCataract extends BaseEventTypeElement
 
 		return parent::beforeValidate();
 	}
+
+	public function wrap() {
+		return parent::wrap(array(
+			'et_ophtroperationnote_cataract_complication' => 'cataract_id',
+			'et_ophtroperationnote_cataract_operative_device' => 'cataract_id',
+		));
+	}
 }

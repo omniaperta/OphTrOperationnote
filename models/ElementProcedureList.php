@@ -257,4 +257,10 @@ class ElementProcedureList extends BaseEventTypeElement
 
 		return parent::getFormOptions($table);
 	}
+
+	public function wrap() {
+		return parent::wrap(array(
+			'et_ophtroperationnote_procedurelist_procedure_assignment' => 'procedurelist_id',
+		));
+	}
 }

@@ -314,4 +314,11 @@ class ElementAnaesthetic extends BaseEventTypeElement
 
 		return parent::beforeValidate();
 	}
+
+	public function wrap() {
+		return parent::wrap(array(
+			'et_ophtroperationnote_anaesthetic_anaesthetic_agent' => 'et_ophtroperationnote_anaesthetic_id',
+			'et_ophtroperationnote_anaesthetic_anaesthetic_complication' => 'et_ophtroperationnote_anaesthetic_id',
+		));
+	}
 }
