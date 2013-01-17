@@ -197,4 +197,10 @@ class ElementPostOpDrugs extends BaseEventTypeElement
 		}
 		return $ids;
 	}
+
+	public function wrap() {
+		return parent::wrap(array(
+			'OperationDrug' => 'et_ophtroperationnote_postop_drugs_id',
+		));
+	}
 }

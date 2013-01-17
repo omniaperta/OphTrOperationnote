@@ -323,4 +323,11 @@ class ElementCataract extends BaseEventTypeElement
 
 		return parent::beforeValidate();
 	}
+
+	public function wrap() {
+		return parent::wrap(array(
+			'CataractComplication' => 'cataract_id',
+			'CataractOperativeDevice' => 'cataract_id',
+		));
+	}
 }
