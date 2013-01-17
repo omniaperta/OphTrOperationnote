@@ -315,7 +315,7 @@ class ElementAnaesthetic extends BaseEventTypeElement
 		return parent::beforeValidate();
 	}
 
-	public function wrap() {
+	public function wrap($params=array()) {
 		return parent::wrap(array(
 			'OperationAnaestheticAgent' => 'et_ophtroperationnote_anaesthetic_id',
 			'AnaestheticComplication' => 'et_ophtroperationnote_anaesthetic_id',

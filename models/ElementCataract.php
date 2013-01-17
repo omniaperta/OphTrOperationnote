@@ -324,7 +324,7 @@ class ElementCataract extends BaseEventTypeElement
 		return parent::beforeValidate();
 	}
 
-	public function wrap() {
+	public function wrap($params=array()) {
 		return parent::wrap(array(
 			'CataractComplication' => 'cataract_id',
 			'CataractOperativeDevice' => 'cataract_id',
