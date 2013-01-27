@@ -41,7 +41,7 @@ div.ElementComments > h4 { background-color: #fff; margin-bottom: 5px !important
 
 input.widgetSlider { width: 300px !important; }
 
-button.cardioReport { margin-left: 10px; }
+button.cardioReport { margin-left: 10px !important; }
 
 table.catheterList { margin-bottom: 10px; }
 .catheterList tr { padding: 5px; }
