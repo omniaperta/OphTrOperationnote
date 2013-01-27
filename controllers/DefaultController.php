@@ -265,4 +265,40 @@ class DefaultController extends BaseEventTypeController {
 
 		return false;
 	}
+
+	public function actionCatheterRow() {
+		if (!isset($_GET['id'])) {
+			throw new Exception("Missing id");
+		}
+
+		$id = $_GET['id'];
+
+		?>
+			<tr>
+				<td>
+					<?php echo CHtml::dropDownList("catheter_id$id",@$_POST['catheter_id'.$id],CHtml::listData(OphTrOperationnote_Catheter::model()->findAll(array('order'=>'display_order')),'id','name'),array('empty' => '- Select -'))?>
+				</td>
+				<td>
+					<?php echo CHtml::dropDownList("access_id$id",@$_POST['access_id'.$id],CHtml::listData(OphTrOperationnote_Coronary_Access::model()->findAll(array('order'=>'display_order')),'id','name'),array('empty' => '- Select -'))?>
+				</td>
+				<td>
+					<?php echo CHtml::dropDownList("side_id$id",@$_POST['side_id'.$id],CHtml::listData(OphTrOperationnote_Coronary_Side::model()->findAll(array('order'=>'display_order')),'id','name'),array('empty' => '- Select -'))?>
+				</td>
+				<td>
+					<?php echo CHtml::dropDownList("vein_artery_id$id",@$_POST['vein_artery_id'.$id],CHtml::listData(OphTrOperationnote_Coronary_Vein_Artery::model()->findAll(array('order'=>'display_order')),'id','name'))?>
+				</td>
+				<td>
+					<?php echo CHtml::dropDownList("type_id$id",@$_POST['type_id'.$id],CHtml::listData(OphTrOperationnote_Coronary_Type::model()->findAll(array('order'=>'display_order')),'id','name'),array('empty' => '- Select -'))?>
+				</td>
+				<td>
+					<?php echo CHtml::dropDownList("success$id",@$_POST['success'.$id],array(1=>'Success',0=>'Failed'))?>
+				</td>
+				<td>
+					<a href="#" class="removeCatheter">
+						<img src="<?php echo Yii::app()->createUrl("/img/_elements/icons/extra-element_remove.png")?>" />
+					</a>
+				</td>
+			</tr>
+		<?php
+	}
 }

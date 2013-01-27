@@ -30,7 +30,7 @@
  * The followings are the available model relations:
  * @property Event $event
  */
-class OphTrOperationnote_Coronary_Catheter extends BaseEventTypeElement
+class OphTrOperationnote_Catheter extends BaseEventTypeElement
 {
 	/**
 	 * Returns the static model of the specified AR class.
@@ -46,7 +46,7 @@ class OphTrOperationnote_Coronary_Catheter extends BaseEventTypeElement
 	 */
 	public function tableName()
 	{
-		return 'ophtroperationnote_coronary_catheter';
+		return 'ophtroperationnote_catheter';
 	}
 
 	/**
@@ -57,8 +57,6 @@ class OphTrOperationnote_Coronary_Catheter extends BaseEventTypeElement
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('event_id, element_id, side_id, access_id, vein_artery_id, type_id, catheter_id, success, display_order', 'safe'),
-			array('side_id, access_id, type_id, catheter_id, success, display_order', 'required'),
 		);
 	}
 	
@@ -70,11 +68,6 @@ class OphTrOperationnote_Coronary_Catheter extends BaseEventTypeElement
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			'access' => array(self::BELONGS_TO, 'OphTrOperationnote_Coronary_Access', 'access_id'),
-			'side' => array(self::BELONGS_TO, 'OphTrOperationnote_Coronary_Side', 'side_id'),
-			'vein_artery' => array(self::BELONGS_TO, 'OphTrOperationnote_Coronary_Vein_Artery', 'vein_artery_id'),
-			'type' => array(self::BELONGS_TO, 'OphTrOperationnote_Coronary_Type', 'type_id'),
-			'catheter' => array(self::BELONGS_TO, 'OphTrOperationnote_Catheter', 'catheter_id'),
 		);
 	}
 

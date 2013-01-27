@@ -64,10 +64,80 @@
 		<div class="right" style="width:55%;">
 			<div class="halfHeight">
 				<?php echo $form->textField($element, 'local_anaesthetic_time', array('style'=>'width: 50px'))?>
-				<?php echo $form->radioButtons($element, 'side_id', 'ophtroperationnote_coronary_side')?>
-				<?php echo $form->radioButtons($element, 'access_id', 'ophtroperationnote_coronary_access')?>
-				<?php echo $form->radioButtons($element, 'vein_artery_id' ,'ophtroperationnote_coronary_vein_artery', null, false, ($element->access_id != 2))?>
-				<?php echo $form->dropDownList($element, 'type_id', CHtml::listData(OphTrOperationnote_Coronary_Type::model()->findAll(array('order'=>'display_order')),'id','name'))?>
+				<div class="whiteBox">
+					<p>
+						<strong>Catheters</strong>
+					</p>
+					<table class="catheterList">
+						<thead>
+							<tr>
+								<th>Type</th>
+								<th>Access</th>
+								<th>Side</th>
+								<th>Vessel</th>
+								<th>Use</th>
+								<th>Result</th>
+							</tr>
+						</thead>
+						<tbody>
+							<?php /*
+							<tr>
+								<td>
+									<?php echo CHtml::dropDownList("catheter_id0",@$_POST['catheter_id0'],CHtml::listData(OphTrOperationnote_Catheter::model()->findAll(array('order'=>'display_order')),'id','name'),array('empty' => '- Select -'))?>
+								</td>
+								<td>
+									<?php echo CHtml::dropDownList("access_id0",@$_POST['access_id0'],CHtml::listData(OphTrOperationnote_Coronary_Access::model()->findAll(array('order'=>'display_order')),'id','name'),array('empty' => '- Select -'))?>
+								</td>
+								<td>
+									<?php echo CHtml::dropDownList("side_id0",@$_POST['side_id0'],CHtml::listData(OphTrOperationnote_Coronary_Side::model()->findAll(array('order'=>'display_order')),'id','name'),array('empty' => '- Select -'))?>
+								</td>
+								<td>
+									<?php echo CHtml::dropDownList("vein_artery_id0",@$_POST['vein_artery_id0'],CHtml::listData(OphTrOperationnote_Coronary_Vein_Artery::model()->findAll(array('order'=>'display_order')),'id','name'))?>
+								</td>
+								<td>
+									<?php echo CHtml::dropDownList("type_id0",@$_POST['type_id0'],CHtml::listData(OphTrOperationnote_Coronary_Type::model()->findAll(array('order'=>'display_order')),'id','name'),array('empty' => '- Select -'))?>
+								</td>
+								<td>
+									<?php echo CHtml::dropDownList("success0",@$_POST['success0'],array(1=>'Success',0=>'Failed'))?>
+								</td>
+							</tr>
+							*/?>
+							<?php foreach ($element->formCatheters as $id => $data) {?>
+								<tr>
+									<td>
+										<?php echo CHtml::dropDownList("catheter_id$id",$data['catheter_id'],CHtml::listData(OphTrOperationnote_Catheter::model()->findAll(array('order'=>'display_order')),'id','name'),array('empty' => '- Select -'))?>
+									</td>
+									<td>
+										<?php echo CHtml::dropDownList("access_id$id",$data['access_id'],CHtml::listData(OphTrOperationnote_Coronary_Access::model()->findAll(array('order'=>'display_order')),'id','name'),array('empty' => '- Select -'))?>
+									</td>
+									<td>
+										<?php echo CHtml::dropDownList("side_id$id",$data['side_id'],CHtml::listData(OphTrOperationnote_Coronary_Side::model()->findAll(array('order'=>'display_order')),'id','name'),array('empty' => '- Select -'))?>
+									</td>
+									<td>
+										<?php echo CHtml::dropDownList("vein_artery_id$id",$data['vein_artery_id'],CHtml::listData(OphTrOperationnote_Coronary_Vein_Artery::model()->findAll(array('order'=>'display_order')),'id','name'))?>
+									</td>
+									<td>
+										<?php echo CHtml::dropDownList("type_id$id",$data['type_id'],CHtml::listData(OphTrOperationnote_Coronary_Type::model()->findAll(array('order'=>'display_order')),'id','name'),array('empty' => '- Select -'))?>
+									</td>
+									<td>
+										<?php echo CHtml::dropDownList("success$id",$data['success'],array(1=>'Success',0=>'Failed'))?>
+									</td>
+									<?php if ($id != 0) {?>
+										<td>
+											<a href="#" class="removeCatheter">
+												<img src="<?php echo Yii::app()->createUrl("/img/_elements/icons/extra-element_remove.png")?>" />
+											</a>
+										</td>
+									<?php }?>
+								</tr>
+							<?php }?>
+						</tbody>
+					</table>
+					<button class="addCatheter classy green mini" type="button">
+						<span class="button-span button-span-green">Add</span>
+					</button>
+				</div>
+				<div style="height: 1em;"></div>
 				<?php echo $form->textField($element, 'edv', array('style'=>'width: 50px', 'right_text'=>'mL'))?>
 				<?php echo $form->textField($element, 'pullback_gradiant', array('style'=>'width: 50px', 'right_text'=>'mmHg'))?>
 				<?php echo $form->radioBoolean($element, 'dccv')?>
@@ -77,7 +147,6 @@
 				<?php echo $form->textField($element, 'xray_amount', array('style'=>'width: 50px','right_text'=>'mSv'))?>
 				<?php echo $form->radioBoolean($element, 'angeo_seal')?>
 				<?php echo $form->radioBoolean($element, 'tr_band')?>
-				<?php echo $form->dropDownList($element, 'catheter_id', CHtml::listData(OphTrOperationnote_Coronary_Catheter::model()->findAll(array('order'=>'display_order')),'id','name'),array('empty'=>'-- Please select --'))?>
 				<?php echo $form->dropDownList($element, 'stenosis_type', CHtml::listData(OphTrOperationnote_Coronary_Stenosis_Type::model()->findAll(array('order'=>'display_order')),'name','name'))?>
 				<?php echo $form->textField($element, 'stenosis_percent', array('style'=>'width: 50px','right_text'=>'%'))?>
 			</div>
@@ -101,6 +170,39 @@ $('input[name="ElementCoronarycatheterisation[dccv]"]').unbind('click').click(fu
 });
 $('button.cardioReport').unbind('click').click(function() {
 	$('#ElementCoronarycatheterisation_eyedraw_report').text(ed_drawing_edit_RPS.report());
+	return false;
+});
+
+$('select[name^="access_id"]').die('change').live('change',function() {
+	var id = $(this).attr('name').match(/[0-9]+/);
+
+	if (parseInt($(this).val()) == 1) {
+		$('#vein_artery_id'+id).val(2);
+	}
+});
+
+$('button.addCatheter').unbind('click').click(function() {
+	var max_id = 0;
+	$('table.catheterList').children('tbody').children('tr').map(function() {
+		var id = $(this).children('td:first').children('select').attr('name').match(/[0-9]+/);
+		if (parseInt(id) > max_id) {
+			max_id = parseInt(id);
+		}
+	});
+
+	max_id += 1;
+
+	$.ajax({
+		'type': 'GET',
+		'url': baseUrl+'/OphTrOperationnote/Default/catheterRow?id='+max_id,
+		'success': function(html) {
+			$('table.catheterList').children('tbody').append(html);
+		}
+	});
+});
+
+$('a.removeCatheter').die('click').live('click',function() {
+	$(this).parent().parent().remove();
 	return false;
 });
 </script>

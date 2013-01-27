@@ -41,6 +41,7 @@
 					<td width="30%"><?php echo CHtml::encode($element->getAttributeLabel('local_anaesthetic_time'))?>:</td>
 					<td><span class="big"><?php echo substr($element->local_anaesthetic_time,0,5)?></span></td>
 				</tr>
+				<?php /*
 				<tr>
 					<td><?php echo CHtml::encode($element->getAttributeLabel('side_id'))?>:</td>
 					<td><span class="big"><?php echo $element->side->name?></span></td>
@@ -59,6 +60,7 @@
 					<td><?php echo CHtml::encode($element->getAttributeLabel('type_id'))?>:</td>
 					<td><span class="big"><?php echo CHtml::encode($element->type->name)?></span></td>
 				</tr>
+				*/?>
 				<tr>
 					<td><?php echo CHtml::encode($element->getAttributeLabel('edv'))?>:</td>
 					<td><span class="big"><?php echo CHtml::encode($element->edv)?> mL</span></td>
@@ -91,10 +93,12 @@
 					<td><?php echo CHtml::encode($element->getAttributeLabel('tr_band'))?>:</td>
 					<td><span class="big"><?php echo CHtml::encode($element->tr_band ? 'Yes' : 'No')?></span></td>
 				</tr>
+				<?php /*
 				<tr>
 					<td><?php echo CHtml::encode($element->getAttributeLabel('catheter_id'))?>:</td>
 					<td><span class="big"><?php echo CHtml::encode($element->catheter->name)?></span></td>
 				</tr>
+				*/?>
 				<tr>
 					<td><?php echo CHtml::encode($element->getAttributeLabel('stenosis_type'))?>:</td>
 					<td><span class="big"><?php echo CHtml::encode($element->stenosis_type)?></span></td>
@@ -109,7 +113,7 @@
 </div>
 
 <div class="colsX clearfix">
-	<div class="colThird">
+	<div class="colFourth">
 		<h4>Catheterisation report</h4>
 		<div class="eventHighlight medium">
 			<h4>
@@ -120,22 +124,37 @@
 		</div>
 	</div>
 
-<?php /*
-	<div class="colThird">
-		<h4>Cataract devices</h4>
+	<div class="colFourth">
+		<h4>Catheters used</h4>
 		<div class="eventHighlight medium">
-			<?php if (!$element->operative_devices) {?>
-				<h4>None</h4>
-			<?php } else {?>
-				<h4>
-					<?php foreach ($element->operative_devices as $device) {?>
-						<?php echo $device->name?><br/>
+			<table class="catheterListView">
+				<thead>
+					<tr>
+						<th>Type</th>
+						<th>Access</th>
+						<th>Side</th>
+						<th>Vessel</th>
+						<th>Use</th>
+						<th>Result</th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach ($element->catheters as $catheter) {?>
+						<tr>
+							<td><?php echo $catheter->catheter->name?></td>
+							<td><?php echo $catheter->access->name?></td>
+							<td><?php echo $catheter->side->name?></td>
+							<td><?php echo $catheter->vein_artery->name?></td>
+							<td><?php echo $catheter->type->name?></td>
+							<td><?php echo $catheter->success ? 'Success' : 'Failed'?></td>
+						</tr>
 					<?php }?>
-				</h4>
-			<?php }?>
+				</tbody>
+			</table>
 		</div>
 	</div>
-	
+
+<?php /*
 	<div class="colThird">
 		<h4>Cataract complications</h4>
 		<div class="eventHighlight medium">

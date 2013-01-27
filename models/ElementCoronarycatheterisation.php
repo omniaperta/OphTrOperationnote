@@ -74,8 +74,8 @@ class ElementCoronarycatheterisation extends BaseEventTypeElement
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('event_id, local_anaesthetic_time, access_id, side_id, vein_artery_id, type_id, edv, pullback_gradiant, dccv, dccv_notes, completion_time, contrast_given, xray_amount, angeo_seal, tr_band, catheter_id, eyedraw, stenosis_type, stenosis_percent, eyedraw_report', 'safe'),
-			array('local_anaesthetic_time, access_id, side_id, type_id, edv, pullback_gradiant, dccv, completion_time, contrast_given, xray_amount, angeo_seal, tr_band, catheter_id, eyedraw, stenosis_type, stenosis_percent', 'required'),
+			array('event_id, local_anaesthetic_time, edv, pullback_gradiant, dccv, dccv_notes, completion_time, contrast_given, xray_amount, angeo_seal, tr_band, eyedraw, stenosis_type, stenosis_percent, eyedraw_report', 'safe'),
+			array('local_anaesthetic_time, edv, pullback_gradiant, dccv, completion_time, contrast_given, xray_amount, angeo_seal, tr_band, eyedraw, stenosis_type, stenosis_percent', 'required'),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
 			//array('id, event_id, incision_site_id, length, meridian, incision_type_id, eyedraw, report, wound_burn, iris_trauma, zonular_dialysis, pc_rupture, decentered_iol, iol_exchange, dropped_nucleus, op_cancelled, corneal_odema, iris_prolapse, zonular_rupture, vitreous_loss, iol_into_vitreous, other_iol_problem, choroidal_haem', 'on' => 'search'),
@@ -93,11 +93,7 @@ class ElementCoronarycatheterisation extends BaseEventTypeElement
 			'event' => array(self::BELONGS_TO, 'Event', 'event_id'),
 			'user' => array(self::BELONGS_TO, 'User', 'created_user_id'),
 			'usermodified' => array(self::BELONGS_TO, 'User', 'last_modified_user_id'),
-			'access' => array(self::BELONGS_TO, 'OphTrOperationnote_Coronary_Access', 'access_id'),
-			'side' => array(self::BELONGS_TO, 'OphTrOperationnote_Coronary_Side', 'side_id'),
-			'vein_artery' => array(self::BELONGS_TO, 'OphTrOperationnote_Coronary_Vein_Artery', 'vein_artery_id'),
-			'type' => array(self::BELONGS_TO, 'OphTrOperationnote_Coronary_Type', 'type_id'),
-			'catheter' => array(self::BELONGS_TO, 'OphTrOperationnote_Coronary_Catheter', 'catheter_id'),
+			'catheters' => array(self::HAS_MANY, 'OphTrOperationnote_Coronary_Catheter', 'element_id', 'order' => 'display_order'),
 		);
 	}
 
@@ -180,6 +176,135 @@ class ElementCoronarycatheterisation extends BaseEventTypeElement
 
 	protected function afterSave()
 	{
+		foreach (OphTrOperationnote_Coronary_Catheter::model()->findAll('element_id=?',array($this->id)) as $catheter) {
+			$catheter->delete();
+		}
+
+		foreach ($_POST as $key => $value) {
+			if (preg_match('/^catheter_id([0-9]+)$/',$key,$m)) {
+				$id = (int)$m[1];
+
+				$catheter = new OphTrOperationnote_Coronary_Catheter;
+				$catheter->element_id = $this->id;
+				$catheter->display_order = $id;
+				$catheter->catheter_id = $value;
+				$catheter->access_id = @$_POST["access_id$id"];
+				$catheter->side_id = @$_POST["side_id$id"];
+				$catheter->vein_artery_id = @$_POST["vein_artery_id$id"];
+				$catheter->type_id = @$_POST["type_id$id"];
+				$catheter->success = @$_POST["success$id"];
+				if (!$catheter->save()) {
+					throw new Exception("Failed to save catheter: ".print_r($catheter->getErrors(),true));
+				}
+			}
+		}
+
 		return parent::afterSave();
+	}
+
+	public function beforeValidate() {
+		$errors = array();
+
+		foreach ($_POST as $key => $value) {
+			if (preg_match('/^catheter_id([0-9]+)$/',$key,$m)) {
+				$id = (int)$m[1];
+
+				if (!@$_POST["catheter_id$id"]) {
+					if (!in_array('catheter_id',$errors)) {
+						$this->addError('catheter_id','Catheter type must be specified for all catheters');
+						$errors[] = 'catheter_id';
+					}
+				}
+				if (!@$_POST["access_id$id"]) {
+					if (!in_array('access_id',$errors)) {
+						$this->addError('access_id','Catheter access must be specified for all catheters');
+						$errors[] = 'access_id';
+					}
+				}
+				if (!@$_POST["side_id$id"]) {
+					if (!in_array('side_id',$errors)) {
+						$this->addError('side_id','Catheter side must be specified for all catheters');
+						$errors[] = 'side_id';
+					}
+				}
+				if (!@$_POST["vein_artery_id$id"]) {
+					if (!in_array('vein_artery_id',$errors)) {
+						$this->addError('vein_artery_id','Catheter vessel must be specified for all catheters');
+						$errors[] = 'vein_artery_id';
+					}
+				}
+				if (!@$_POST["type_id$id"]) {
+					if (!in_array('type_id',$errors)) {
+						$this->addError('type_id','Catheter use must be specified for all catheters');
+						$errors[] = 'type_id';
+					}
+				}
+			}
+		}
+
+		return parent::beforeValidate();
+	}
+
+	public function getFormCatheters() {
+		if (Yii::app()->getController()->getAction()->id == 'create' || Yii::app()->getController()->getAction()->id == 'loadElementByProcedure') {
+			if (empty($_POST)) {
+				return array(
+					0 => array(
+						'catheter_id' => '',
+						'access_id' => '',
+						'side_id' => '',
+						'vein_artery_id' => '',
+						'type_id' => '',
+						'success' => '',
+					),
+				);
+			} else {
+				return $this->cathetersFromPost();
+			}
+		} else {
+			if (empty($_POST)) {
+				$catheters = array();
+
+				foreach ($this->catheters as $id => $catheter) {
+					$catheters[$id] = array(
+						'catheter_id' => $catheter->catheter_id,
+						'access_id' => $catheter->access_id,
+						'side_id' => $catheter->side_id,
+						'vein_artery_id' => $catheter->vein_artery_id,
+						'type_id' => $catheter->type_id,
+						'success' => $catheter->success,
+					);
+				}
+
+				return $catheters;
+
+			} else {
+				return $this->cathetersFromPost();
+			}
+		}
+	}
+
+	public function cathetersFromPost() {
+		$ids = array();
+		foreach ($_POST as $key => $value) {
+			if (preg_match('/^catheter_id([0-9]+)$/',$key,$m)) {
+				$ids[] = (int)$m[1];
+			}
+		}
+
+		$catheters = array();
+
+		foreach ($ids as $id) {
+			$catheters[$id] = array(
+				'catheter_id' => @$_POST["catheter_id$id"],
+				'access_id' => @$_POST["access_id$id"],
+				'side_id' => @$_POST["side_id$id"],
+				'vein_artery_id' => @$_POST["vein_artery_id$id"],
+				'type_id' => @$_POST["type_id$id"],
+				'success' => @$_POST["success$id"],
+			);
+		}
+
+		return $catheters;
 	}
 }
