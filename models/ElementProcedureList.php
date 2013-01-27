@@ -92,7 +92,7 @@ class ElementProcedureList extends BaseEventTypeElement
 		return array(
 			'id' => 'ID',
 			'event_id' => 'Event',
-			'eye_id' => 'Eye',
+			'eye_id' => 'Side',
 		);
 	}
 
