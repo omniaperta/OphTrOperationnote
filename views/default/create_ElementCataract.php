@@ -31,7 +31,7 @@
 			$this->widget('application.modules.eyedraw2.OEEyeDrawWidget', array(
 				'doodleToolBarArray' => array(
 					0 => array('PhakoIncision','SidePort','IrisHook','PCIOL','ACIOL','PI'),
-					1 => array('MattressSuture','CapsularTensionRing','CornealSuture','ToricPCIOL','LimbalRelaxingIncision'),
+					1 => array('MattressSuture','CapsularTensionRing','CornealSuture','ToricPCIOL','LimbalRelaxingIncision','Rubeosis','PosteriorSynechia'),
 				),
 				'onReadyCommandArray' => array(
 					array('addDoodle', array('AntSeg')),
