@@ -3,7 +3,7 @@
  * OpenEyes
  *
  * (C) Moorfields Eye Hospital NHS Foundation Trust, 2008-2011
- * (C) OpenEyes Foundation, 2011-2012
+ * (C) OpenEyes Foundation, 2011-2013
  * This file is part of OpenEyes.
  * OpenEyes is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  * OpenEyes is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
@@ -13,7 +13,7 @@
  * @link http://www.openeyes.org.uk
  * @author OpenEyes <info@openeyes.org.uk>
  * @copyright Copyright (c) 2008-2011, Moorfields Eye Hospital NHS Foundation Trust
- * @copyright Copyright (c) 2011-2012, OpenEyes Foundation
+ * @copyright Copyright (c) 2011-2013, OpenEyes Foundation
  * @license http://www.gnu.org/licenses/gpl-3.0.html The GNU General Public License V3.0
  */
 
@@ -56,7 +56,7 @@ class ElementProcedureList extends BaseEventTypeElement
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('event_id, eye_id', 'safe'),
+			array('event_id, eye_id, booking_event_id', 'safe'),
 			array('eye_id', 'required'),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
@@ -81,6 +81,7 @@ class ElementProcedureList extends BaseEventTypeElement
 			'eye' => array(self::BELONGS_TO, 'Eye', 'eye_id'),
 			'procedures' => array(self::MANY_MANY, 'Procedure', 'et_ophtroperationnote_procedurelist_procedure_assignment(procedurelist_id, proc_id)', 'order' => 'display_order ASC'),
 			'procedure_assignments' => array(self::HAS_MANY, 'ProcedureListProcedureAssignment', 'procedurelist_id', 'order' => 'display_order ASC'),
+			'bookingEvent' => array(self::BELONGS_TO, 'Event', 'booking_event_id'),
 		);
 	}
 
@@ -164,6 +165,12 @@ class ElementProcedureList extends BaseEventTypeElement
 			throw new Exception('Unable to change episode status for episode '.$this->event->episode->id);
 		}
 
+		if (Yii::app()->getController() && Yii::app()->getController()->getAction()->id == 'create') {
+			if ($this->booking_event_id && $api = Yii::app()->moduleAPI->get('OphTrOperationbooking')) {
+				$api->setOperationStatus($this->booking_event_id, 'Completed');
+			}
+		}
+
 		return parent::afterSave();
 	}
 
@@ -177,26 +184,10 @@ class ElementProcedureList extends BaseEventTypeElement
 
 	public function getSelected_procedures() {
 		if (Yii::app()->getController()->getAction()->id == 'create') {
-			// Get the procedure list and eye from the most recent booking for the episode of the current user's subspecialty
-			if (!$patient = Patient::model()->findByPk(@$_GET['patient_id'])) {
-				throw new SystemException('Patient not found: '.@$_GET['patient_id']);
+			if (ctype_digit($_GET['booking_event_id']) && $api = Yii::app()->moduleAPI->get('OphTrOperationbooking')) {
+				return $api->getProceduresForOperation($_GET['booking_event_id']);
 			}
-
-			$selected_procedures = array();
-
-			if ($episode = $patient->getEpisodeForCurrentSubspecialty()) {
-				$bookings = $episode->getBookingsForToday();
-
-				if (count($bookings) == 1) {
-					$booking = Booking::model()->findByPk($bookings[0]['id']);
-
-					foreach ($booking->elementOperation->procedures as $procedure) {
-						$selected_procedures[] = $procedure;
-					}
-				}
-			}
-
-			return $selected_procedures;
+			return array();
 		}
 
 		if (Yii::app()->getController()->getAction()->id == 'update') {
@@ -205,18 +196,8 @@ class ElementProcedureList extends BaseEventTypeElement
 	}
 
 	public function getSelectedEye() {
-		// Get the procedure list and eye from the most recent booking for the episode of the current user's subspecialty
-		if (!$patient = Patient::model()->findByPk(@$_GET['patient_id'])) {
-			throw new SystemException('Patient not found: '.@$_GET['patient_id']);
-		}
-
-		if ($episode = $patient->getEpisodeForCurrentSubspecialty()) {
-			$bookings = $episode->getBookingsForToday();
-
-			if (count($bookings) == 1) {
-				$booking = Booking::model()->findByPk($bookings[0]['id']);
-				return $booking->elementOperation->eye;
-			}
+		if (ctype_digit(@$_GET['booking_event_id']) && $api = Yii::app()->moduleAPI->get('OphTrOperationbooking')) {
+			return $api->getEyeForOperation($_GET['booking_event_id']);
 		}
 	}
 
