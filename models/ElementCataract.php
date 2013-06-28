@@ -333,7 +333,7 @@ class ElementCataract extends BaseEventTypeElement
 			$eyedraw = json_decode($_POST['ElementCataract']['eyedraw']);
 
 			foreach ($eyedraw as $object) {
-				if (in_array($object->subclass,Yii::app()->params['eyedraw_iol_classes'])) {
+				if (in_array($object->subclass,Config::get('eyedraw_iol_classes'))) {
 					return false;
 				}
 			}
@@ -344,7 +344,7 @@ class ElementCataract extends BaseEventTypeElement
 		if ($eyedraw = @json_decode($this->eyedraw)) {
 			if (is_array($eyedraw)) {
 				foreach ($eyedraw as $object) {
-					if (in_array($object->subclass,Yii::app()->params['eyedraw_iol_classes'])) {
+					if (in_array($object->subclass,Config::get('eyedraw_iol_classes'))) {
 						return false;
 					}
 				}

@@ -309,7 +309,7 @@ class ElementAnaesthetic extends BaseEventTypeElement
 	}
 
 	public function beforeValidate() {
-		if (Yii::app()->params['fife']) {
+		if (Config::get('fife')) {
 			if (@$_POST['ElementAnaesthetic']['anaesthetist_id'] == 3) {
 				if (!@$_POST['ElementAnaesthetic']['anaesthetic_witness_id']) {
 					$this->addError('anaesthetic_witness_id','Please select a witness');

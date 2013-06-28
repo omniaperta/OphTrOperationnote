@@ -74,8 +74,9 @@ class ReportController extends BaseController {
 
 		$ages = array();
 
-		if (!($db = Yii::app()->params['report_db'])) {
-			$db = 'db';
+		$db = 'db';
+		if (Config::has('report_db')) {
+			$db = Config::get('report_db');
 		}
 
 		foreach (Yii::app()->$db->createCommand()
@@ -122,8 +123,9 @@ class ReportController extends BaseController {
 		$data['pc_rupture_average']['number'] = 0;
 		$data['complication_average']['number'] = 0;
 
-		if (!($db = Yii::app()->params['report_db'])) {
-			$db = 'db';
+		$db = 'db';
+		if (Config::has('report_db')) {
+			$db = Config::get('report_db');
 		}
 
 		foreach (Yii::app()->$db->createCommand()
@@ -178,8 +180,9 @@ class ReportController extends BaseController {
 			$where .= " and ($clause)";
 		}
 
-		if (!($db = Yii::app()->params['report_db'])) {
-			$db = 'db';
+		$db = 'db';
+		if (Config::has('report_db')) {
+			$db = Config::get('report_db');
 		}
 
 		foreach (Yii::app()->$db->createCommand()
