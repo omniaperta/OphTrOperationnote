@@ -3,7 +3,7 @@
  * OpenEyes
  *
  * (C) Moorfields Eye Hospital NHS Foundation Trust, 2008-2011
- * (C) OpenEyes Foundation, 2011-2012
+ * (C) OpenEyes Foundation, 2011-2013
  * This file is part of OpenEyes.
  * OpenEyes is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  * OpenEyes is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
@@ -13,7 +13,7 @@
  * @link http://www.openeyes.org.uk
  * @author OpenEyes <info@openeyes.org.uk>
  * @copyright Copyright (c) 2008-2011, Moorfields Eye Hospital NHS Foundation Trust
- * @copyright Copyright (c) 2011-2012, OpenEyes Foundation
+ * @copyright Copyright (c) 2011-2013, OpenEyes Foundation
  * @license http://www.gnu.org/licenses/gpl-3.0.html The GNU General Public License V3.0
  */
 
@@ -66,7 +66,7 @@ class ElementVitrectomy extends BaseEventTypeElement
 			array('id, event_id, gauge_id, pvd_induced', 'safe', 'on' => 'search'),
 		);
 	}
-	
+
 	/**
 	 * @return array relational rules.
 	 */
@@ -110,7 +110,7 @@ class ElementVitrectomy extends BaseEventTypeElement
 		$criteria->compare('event_id', $this->event_id, true);
 		$criteria->compare('gauge_id', $this->gauge_id);
 		$criteria->compare('pvd_induced', $this->pvd_induced);
-		
+
 		return new CActiveDataProvider(get_class($this), array(
 				'criteria' => $criteria,
 			));
@@ -123,13 +123,15 @@ class ElementVitrectomy extends BaseEventTypeElement
 	{
 	}
 
-	public function getEye() {
+	public function getEye()
+	{
 		if ($this->event_id && $pl = ElementProcedureList::model()->find('event_id=?',array($this->event_id))) {
 			return $pl->eye;
 		}
 	}
 
-	public function getSelectedEye() {
+	public function getSelectedEye()
+	{
 		if (Yii::app()->getController()->getAction()->id == 'create') {
 			// Get the procedure list and eye from the most recent booking for the episode of the current user's subspecialty
 			if (!$patient = Patient::model()->findByPk(@$_GET['patient_id'])) {
@@ -137,8 +139,10 @@ class ElementVitrectomy extends BaseEventTypeElement
 			}
 
 			if ($episode = $patient->getEpisodeForCurrentSubspecialty()) {
-				if ($booking = $episode->getMostRecentBooking()) {
-					return $booking->elementOperation->eye;
+				if ($api = Yii::app()->moduleAPI->get('OphTrOperationbooking')) {
+					if ($booking = $api->getMostRecentBookingForEpisode($patient, $episode)) {
+						return $booking->operation->eye;
+					}
 				}
 			}
 		}

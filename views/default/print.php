@@ -3,7 +3,7 @@
  * OpenEyes
  *
  * (C) Moorfields Eye Hospital NHS Foundation Trust, 2008-2011
- * (C) OpenEyes Foundation, 2011-2012
+ * (C) OpenEyes Foundation, 2011-2013
  * This file is part of OpenEyes.
  * OpenEyes is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  * OpenEyes is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
@@ -13,7 +13,7 @@
  * @link http://www.openeyes.org.uk
  * @author OpenEyes <info@openeyes.org.uk>
  * @copyright Copyright (c) 2008-2011, Moorfields Eye Hospital NHS Foundation Trust
- * @copyright Copyright (c) 2011-2012, OpenEyes Foundation
+ * @copyright Copyright (c) 2011-2013, OpenEyes Foundation
  * @license http://www.gnu.org/licenses/gpl-3.0.html The GNU General Public License V3.0
  */
 ?>
@@ -25,9 +25,9 @@
 		</div>
 		<div class="headerInfo">
 			<div class="patientDetails">
-				<strong><?php echo $this->patient->addressname?></strong>
+				<strong><?php echo $this->patient->contact->fullName?></strong>
 				<br />
-				<?php echo $this->patient->address ? $this->patient->address->getLetterHtml() : ''?>
+				<?php echo $this->patient->getLetterAddress(array('delimiter'=>'<br/>'))?>
 				<br>
 				<br>
 				Hospital No: <strong><?php echo $this->patient->hos_num ?></strong>
@@ -37,7 +37,7 @@
 				DOB: <strong><?php echo Helper::convertDate2NHS($this->patient->dob) ?> (<?php echo $this->patient->getAge()?>)</strong>
 			</div>
 			<div class="headerDetails">
-				<strong><?php echo $this->event->episode->firm->getConsultant()->contact->getFullName() ?></strong>
+				<strong><?php echo $this->event->episode->firm->consultant->fullName?></strong>
 				<br>
 				Service: <strong><?php echo $this->event->episode->firm->getSubspecialtyText() ?></strong>
 			</div>
@@ -48,7 +48,7 @@
 			</div>
 		</div>
 	</div>
-	
+
 	<div class="body">
 		<div class="operationMeta">
 			<div class="detailRow leftAlign">
@@ -58,14 +58,14 @@
 				<div class="value pronounced">
 					<?php
 						$operations_perf = ElementProcedureList::model()->find("event_id = ?", array($this->event->id));
-						foreach($operations_perf->procedures as $procedure){
+						foreach ($operations_perf->procedures as $procedure) {
 							echo "<strong>{$operations_perf->eye->name} {$procedure->term}</strong><br>";
 						}
 					?>
 				</div>
 			</div>
 			<div class="surgeonList">
-				<?php 
+				<?php
 					$surgeon_element = ElementSurgeon::model()->find("event_id = ?", array($this->event->id));
 					$surgeon_name = ($surgeon = User::model()->findByPk($surgeon_element->surgeon_id)) ? $surgeon->getFullNameAndTitle() : "Unknown";
 					$assistant_name = ($assistant = User::model()->findByPk($surgeon_element->assistant_id)) ? $assistant->getFullNameAndTitle() : "None";
@@ -88,12 +88,12 @@
 				</div>
 			</div>
 		</div>
-		
+
 		<h2>Operation Details</h2>
 		<div class="operationDetails details">
 			<?php $this->renderPartial('print_OperationDetails') ?>
 		</div>
-		
+
 		<h2>Anaesthetic Details</h2>
 		<?php
 			$anaesthetic_element = ElementAnaesthetic::model()->find("event_id = ?", array($this->event->id));
@@ -129,7 +129,7 @@
 				</div>
 				<div class="value">
 					<?php
-						foreach ($anaesthetic_element->anaesthetic_agents as $agent){
+						foreach ($anaesthetic_element->anaesthetic_agents as $agent) {
 							echo "{$agent->name}<br>\n";
 						}
 					?>
@@ -141,7 +141,7 @@
 				</div>
 				<div class="value">
 					<?php
-						foreach ($anaesthetic_element->anaesthetic_complications as $complication){
+						foreach ($anaesthetic_element->anaesthetic_complications as $complication) {
 							echo "{$complication->name}<br>\n";
 						}
 					?>
@@ -194,3 +194,8 @@
 		</div>
 	</div>
 </div>
+<script type="text/javascript">
+	$(document).ready(function() {
+		window.print();
+	});
+</script>

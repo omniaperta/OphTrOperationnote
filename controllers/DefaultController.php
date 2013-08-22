@@ -1,23 +1,118 @@
 <?php
+/**
+ * OpenEyes
+ *
+ * (C) Moorfields Eye Hospital NHS Foundation Trust, 2008-2011
+ * (C) OpenEyes Foundation, 2011-2013
+ * This file is part of OpenEyes.
+ * OpenEyes is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * OpenEyes is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License along with OpenEyes in a file titled COPYING. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @package OpenEyes
+ * @link http://www.openeyes.org.uk
+ * @author OpenEyes <info@openeyes.org.uk>
+ * @copyright Copyright (c) 2008-2011, Moorfields Eye Hospital NHS Foundation Trust
+ * @copyright Copyright (c) 2011-2013, OpenEyes Foundation
+ * @license http://www.gnu.org/licenses/gpl-3.0.html The GNU General Public License V3.0
+ */
 
-class DefaultController extends BaseEventTypeController {
-	public function actionCreate() {
-		parent::actionCreate();
+class DefaultController extends BaseEventTypeController
+{
+	protected function beforeAction($action)
+	{
+		$this->assetPath = Yii::app()->getAssetManager()->publish(Yii::getPathOfAlias('application.modules.'.$this->getModule()->name.'.assets'), false, -1, YII_DEBUG);
+		Yii::app()->clientScript->registerScriptFile($this->assetPath.'/js/eyedraw.js');
+
+		return parent::beforeAction($action);
 	}
 
-	public function actionUpdate($id) {
+	public function actionCreate()
+	{
+		$errors = array();
+
+		if (!$this->patient = Patient::model()->findByPk(@$_GET['patient_id'])) {
+			throw new Exception("Patient not found: ".@$_GET['patient_id']);
+		}
+
+		if (!empty($_POST)) {
+			if (preg_match('/^booking([0-9]+)$/',@$_POST['SelectBooking'],$m)) {
+				return $this->redirect(array('/OphTrOperationnote/Default/create?patient_id='.$this->patient->id.'&booking_event_id='.$m[1]));
+			} elseif (@$_POST['SelectBooking'] == 'emergency') {
+				return $this->redirect(array('/OphTrOperationnote/Default/create?patient_id='.$this->patient->id.'&booking_event_id=emergency'));
+			}
+
+			$errors = array('Operation' => array('Please select a booked operation'));
+		}
+
+		if (isset($_GET['booking_event_id']) || @$_GET['unbooked']) {
+			$this->jsVars['eyedraw_iol_classes'] = Yii::app()->params['eyedraw_iol_classes'];
+			parent::actionCreate();
+		} else {
+			$bookings = array();
+
+			if ($api = Yii::app()->moduleAPI->get('OphTrOperationbooking')) {
+				if ($episode = $this->patient->getEpisodeForCurrentSubspecialty()) {
+					$bookings = $api->getOpenBookingsForEpisode($episode->id);
+				}
+			}
+
+			$this->event_type = EventType::model()->find('class_name=?',array('OphTrOperationnote'));
+			$this->title = "Please select booking";
+			$this->event_tabs = array(
+					array(
+							'label' => 'Select a booking',
+							'active' => true,
+					),
+			);
+			$cancel_url = ($this->episode) ? '/patient/episode/'.$this->episode->id : '/patient/episodes/'.$this->patient->id;
+			$this->event_actions = array(
+					EventAction::link('Cancel',
+							Yii::app()->createUrl($cancel_url),
+							array('colour' => 'red', 'level' => 'secondary')
+					)
+			);
+			$this->processJsVars();
+			$this->renderPartial('select_event',array(
+				'errors' => $errors,
+				'bookings' => $bookings,
+			), false, true);
+		}
+	}
+
+	public function actionUpdate($id)
+	{
+		$this->jsVars['eyedraw_iol_classes'] = Yii::app()->params['eyedraw_iol_classes'];
 		parent::actionUpdate($id);
 	}
 
-	public function actionView($id) {
+	public function actionView($id)
+	{
+		$cs = Yii::app()->getClientScript();
+		$cs->registerScript('scr_opnote_view', "opnote_print_url = '" . Yii::app()->createUrl('OphTrOperationnote/Default/print/'.$id) . "';\nmodule_css_path = '" . $this->assetPath . "/css';", CClientScript::POS_READY);
 		parent::actionView($id);
 	}
 
-	public function actionPrint($id) {
+	public function actionDelete($id)
+	{
+		$proclist = ElementProcedureList::model()->find('event_id=?',array($id));
+
+		if (parent::actionDelete($id)) {
+			if ($proclist && $proclist->booking_event_id) {
+				if ($api = Yii::app()->moduleAPI->get('OphTrOperationbooking')) {
+					$api->setOperationStatus($proclist->booking_event_id, 'Scheduled or Rescheduled');
+				}
+			}
+		}
+	}
+
+	public function actionPrint($id)
+	{
 		return parent::actionPrint($id);
 	}
 
-	public function getDefaultElements($action, $event_type_id=false, $event=false) {
+	public function getDefaultElements($action, $event_type_id=false, $event=false)
+	{
 		$elements = parent::getDefaultElements($action, $event_type_id, $event);
 
 		// If we're loading the create form and there are procedures pulled from the booking which map to elements
@@ -72,28 +167,28 @@ class DefaultController extends BaseEventTypeController {
 
 		// Procedure list elements need to be shown in the order they were selected, not the default sort order from the element_type
 		// TODO: This probably needs replacing with a some better code
-			
+
 		// Get correct order for procedure elements
-		if($this->event) {
+		if ($this->event) {
 			$procedure_list = ElementProcedureList::model()->find(
 					'event_id = :event_id',
 					array(':event_id' => $this->event->id)
 			);
 			$procedure_classes = array();
-			foreach($procedure_list->procedure_assignments as $procedure_assignment) {
+			foreach ($procedure_list->procedure_assignments as $procedure_assignment) {
 				$procedure_classes[] = ProcedureListOperationElement::model()->find('procedure_id = ?', array($procedure_assignment->proc_id))->element_type->class_name;
 			}
-			
+
 			// Resort procedure elements
 			// This code assumes that the elements are grouped into three distinct blocks, with the procedures in the middle
 			$sorted_elements = array();
 			$index = 0;
 			$section = 'top';
-			foreach($elements as $element) {
-				if(in_array(get_class($element), $procedure_classes)) {
+			foreach ($elements as $element) {
+				if (in_array(get_class($element), $procedure_classes)) {
 					$section = 'procedure';
 					$index = 1000 + array_search(get_class($element), $procedure_classes);
-				} else if($section == 'procedure') {
+				} elseif ($section == 'procedure') {
 					$section = 'bottom';
 					$index = 2000;
 				} else {
@@ -108,8 +203,9 @@ class DefaultController extends BaseEventTypeController {
 		return $elements;
 	}
 
-	public function actionLoadElementByProcedure() {
-		if (!$proc = Procedure::model()->findByPk((integer)@$_GET['procedure_id'])) {
+	public function actionLoadElementByProcedure()
+	{
+		if (!$proc = Procedure::model()->findByPk((integer) @$_GET['procedure_id'])) {
 			throw new SystemException('Procedure not found: '.@$_GET['procedure_id']);
 		}
 
@@ -137,8 +233,9 @@ class DefaultController extends BaseEventTypeController {
 		}
 	}
 
-	public function actionGetElementsToDelete() {
-		if (!$proc = Procedure::model()->findByPk((integer)@$_POST['procedure_id'])) {
+	public function actionGetElementsToDelete()
+	{
+		if (!$proc = Procedure::model()->findByPk((integer) @$_POST['procedure_id'])) {
 			throw new SystemException('Procedure not found: '.@$_POST['procedure_id']);
 		}
 
@@ -155,36 +252,39 @@ class DefaultController extends BaseEventTypeController {
 		die(json_encode($elements));
 	}
 
-	public function getProcedureSpecificElements($procedure_id) {
+	public function getProcedureSpecificElements($procedure_id)
+	{
 		$criteria = new CDbCriteria;
 		$criteria->compare('procedure_id',$procedure_id);
 		$criteria->order = 'display_order asc';
 
 		return ProcedureListOperationElement::model()->findAll($criteria);
 	}
-	
-	public function getAllProcedureElements($action){
+
+	public function getAllProcedureElements($action)
+	{
 		$elements = $this->getDefaultElements($action);
 		$current_procedure_elements = array();
-		
-		foreach($elements as $element){
+
+		foreach ($elements as $element) {
 			$element_type = ElementType::model()->find('class_name = ?', array(get_class($element)));
 			$procedure_elements = ProcedureListOperationElement::model()->find('element_type_id = ?', array($element_type->id));
-			if($procedure_elements){
+			if ($procedure_elements) {
 				$current_procedure_elements[] = $element;
 			}
 		}
-		
+
 		return $current_procedure_elements;
 	}
-	
-	public function renderAllProcedureElements($action, $form=false, $data=false) {
+
+	public function renderAllProcedureElements($action, $form=false, $data=false)
+	{
 		$elements = $this->getAllProcedureElements($action);
 		$count = count($elements);
 		$i = 0;
 		$last = false;
 		foreach ($elements as $element) {
-			if($count == ($i + 1)){
+			if ($count == ($i + 1)) {
 				$last = true;
 			}
 			$this->renderPartial(
@@ -196,7 +296,8 @@ class DefaultController extends BaseEventTypeController {
 		}
 	}
 
-	public function actionVerifyprocedure() {
+	public function actionVerifyprocedure()
+	{
 		$list = Yii::app()->session['Procedures'];
 		$found = false;
 
@@ -220,13 +321,8 @@ class DefaultController extends BaseEventTypeController {
 
 			// if not in the session, check in the db
 			if (!$found) {
-				$procedure = Yii::app()->db->createCommand()
-					->select('*')
-					->from('proc')
-					->where('term=:term', array(':term'=>$_GET['name']))
-					->queryRow();
-				if (!empty($procedure)) {
-					if ($this->procedure_requires_eye($procedure['id'])) {
+				if ($procedure = Procedure::model()->find('term=:term',array(':term'=>$_GET['name']))) {
+					if ($this->procedure_requires_eye($procedure->id)) {
 						echo "no";
 					} else {
 						echo "yes";
@@ -254,7 +350,8 @@ class DefaultController extends BaseEventTypeController {
 	}
 
 	// returns true if the passed procedure id requires the selection of 'left' or 'right' eye
-	function procedure_requires_eye($procedure_id) {
+	public function procedure_requires_eye($procedure_id)
+	{
 		foreach (ProcedureListOperationElement::model()->findAll('procedure_id=?',array($procedure_id)) as $plpa) {
 			$element_type = ElementType::model()->findByPk($plpa->element_type_id);
 

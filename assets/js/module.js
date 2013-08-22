@@ -1,3 +1,20 @@
+/**
+ * OpenEyes
+ *
+ * (C) Moorfields Eye Hospital NHS Foundation Trust, 2008-2011
+ * (C) OpenEyes Foundation, 2011-2013
+ * This file is part of OpenEyes.
+ * OpenEyes is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * OpenEyes is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License along with OpenEyes in a file titled COPYING. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @package OpenEyes
+ * @link http://www.openeyes.org.uk
+ * @author OpenEyes <info@openeyes.org.uk>
+ * @copyright Copyright (c) 2008-2011, Moorfields Eye Hospital NHS Foundation Trust
+ * @copyright Copyright (c) 2011-2013, OpenEyes Foundation
+ * @license http://www.gnu.org/licenses/gpl-3.0.html The GNU General Public License V3.0
+ */
 
 function callbackAddProcedure(procedure_id) {
 	var eye = $('input[name="ElementProcedureList\[eye_id\]"]:checked').val();
@@ -17,7 +34,9 @@ function callbackAddProcedure(procedure_id) {
 					if ($('div.procedureItem').length == 0) {
 						$('#procedureList').hide();
 					}
-					alert("You must select either the right or the left eye to add this procedure.");
+					new OpenEyes.Dialog.Alert({
+						content: "You must select either the right or the left eye to add this procedure."
+					}).open();
 				} else {
 					var m = html.match(/data-element-type-class="(Element.*?)"/);
 					if (m) {
@@ -44,7 +63,7 @@ function callbackAddProcedure(procedure_id) {
 function callbackRemoveProcedure(procedure_id) {
 	var procedures = '';
 
-	$('input[name="Procedures[]"]').map(function() {
+	$('input[name="Procedures_procs[]"]').map(function() {
 		if (procedures.length >0) {
 			procedures += ',';
 		}
@@ -54,7 +73,7 @@ function callbackRemoveProcedure(procedure_id) {
 	$.ajax({
 		'type': 'POST',
 		'url': baseUrl+'/OphTrOperationnote/Default/getElementsToDelete',
-		'data': "remaining_procedures="+procedures+"&procedure_id="+procedure_id,
+		'data': "remaining_procedures="+procedures+"&procedure_id="+procedure_id+"&YII_CSRF_TOKEN="+YII_CSRF_TOKEN,
 		'dataType': 'json',
 		'success': function(data) {
 			$.each(data, function(key, val) {
@@ -79,59 +98,38 @@ function setCataractInput(key, value) {
 }
 
 $(document).ready(function() {
-	$('#et_save').unbind('click').click(function() {
-		if (!$(this).hasClass('inactive')) {
-			disableButtons();
-
-			if ($('#ElementBuckle_report').length >0) {
-				$('#ElementBuckle_report').val(ed_drawing_edit_Buckle.report());
-			}
-			if ($('#ElementCataract_report2').length >0) {
-				$('#ElementCataract_report2').val(ed_drawing_edit_Cataract.report());
-			}
-
-			return true;
+	handleButton($('#et_save'),function() {
+		if ($('#ElementBuckle_report').length >0) {
+			$('#ElementBuckle_report').val(ed_drawing_edit_Buckle.report());
 		}
-		return false;
+		if ($('#ElementCataract_report2').length >0) {
+			$('#ElementCataract_report2').val(ed_drawing_edit_Cataract.report());
+		}
 	});
 
-	$('#et_cancel').unbind('click').click(function() {
-		if (!$(this).hasClass('inactive')) {
-			disableButtons();
-
-			if (m = window.location.href.match(/\/update\/[0-9]+/)) {
-				window.location.href = window.location.href.replace('/update/','/view/');
-			} else {
-				window.location.href = baseUrl+'/patient/episodes/'+et_patient_id;
-			}
+	handleButton($('#et_cancel'),function(e) {
+		if (m = window.location.href.match(/\/update\/[0-9]+/)) {
+			window.location.href = window.location.href.replace('/update/','/view/');
+		} else {
+			window.location.href = baseUrl+'/patient/episodes/'+OE_patient_id;
 		}
-		return false;
+		e.preventDefault();
 	});
 
-	$('#et_deleteevent').unbind('click').click(function() {
-		if (!$(this).hasClass('inactive')) {
-			disableButtons();
-			return true;
+	handleButton($('#et_deleteevent'));
+
+	handleButton($('#et_canceldelete'),function(e) {
+		if (m = window.location.href.match(/\/delete\/[0-9]+/)) {
+			window.location.href = window.location.href.replace('/delete/','/view/');
+		} else {
+			window.location.href = baseUrl+'/patient/episodes/'+OE_patient_id;
 		}
-		return false;
+		e.preventDefault();
 	});
 
-	$('#et_canceldelete').unbind('click').click(function() {
-		if (!$(this).hasClass('inactive')) {
-			disableButtons();
-
-			if (m = window.location.href.match(/\/delete\/[0-9]+/)) {
-				window.location.href = window.location.href.replace('/delete/','/view/');
-			} else {
-				window.location.href = baseUrl+'/patient/episodes/'+et_patient_id;
-			}
-		}
-		return false;
-	});
-
-	$('#et_print').unbind('click').click(function() {
-		window.print_iframe.print();
-		return false;
+	handleButton($('#et_print'),function(e) {
+		OphTrOperationnote_do_print();
+		e.preventDefault();
 	});
 
 	var last_ElementProcedureList_eye_id = null;
@@ -159,9 +157,13 @@ $(document).ready(function() {
 						if (result != 'yes') {
 							$('#ElementProcedureList_eye_id_'+last_ElementProcedureList_eye_id).attr('checked','checked');
 							if (parseInt(result.split("\n").length) == 1) {
-								alert("The following procedure requires a specific eye selection and cannot be entered for both eyes at once:\n\n"+result);
+								new OpenEyes.Dialog.Alert({
+								  content: "The following procedure requires a specific eye selection and cannot be entered for both eyes at once:\n\n"+result
+								}).open();
 							} else {
-								alert("The following procedures require a specific eye selection and cannot be entered for both eyes at once:\n\n"+result);
+								new OpenEyes.Dialog.Alert({
+								  content: "The following procedures require a specific eye selection and cannot be entered for both eyes at once:\n\n"+result
+								}).open();
 							}
 							return false;
 						} else {
@@ -194,7 +196,7 @@ $(document).ready(function() {
 				$('#typeProcedure').slideToggle('fast');
 			}
 
-			changeEye();	
+			changeEye();
 			last_ElementProcedureList_eye_id = $(this).val();
 
 			return true;
@@ -221,6 +223,12 @@ $(document).ready(function() {
 		}
 		return true;
 	});
+
+	$('tr.clickable').disableSelection();
+
+	$('tr.clickable').click(function() {
+		$(this).children('td:first').children('input[type="radio"]').attr('checked',true);
+	});
 });
 
 function callbackVerifyAddProcedure(proc_name,durations,short_version,callback) {
@@ -238,7 +246,9 @@ function callbackVerifyAddProcedure(proc_name,durations,short_version,callback) 
 			if (result == 'yes') {
 				callback(true);
 			} else {
-				alert("You must select either the right or the left eye before adding this procedure.");
+				new OpenEyes.Dialog.Alert({
+				  content: "You must select either the right or the left eye before adding this procedure."
+				}).open();
 				callback(false);
 			}
 		}
@@ -325,10 +335,10 @@ function sidePortController(_drawing)
 	var phakoIncision;
 	var sidePort1;
 	var sidePort2;
-	
+
 	// Register controller for notifications
-	_drawing.registerForNotifications(this, 'notificationHandler', ['ready', 'parameterChanged']);
-	
+	_drawing.registerForNotifications(this, 'notificationHandler', ['ready', 'parameterChanged', 'doodleAdded', 'doodleDeleted']);
+
 	// Method called for notification
 	this.notificationHandler = function(_messageArray)
 	{
@@ -338,7 +348,7 @@ function sidePortController(_drawing)
 			case 'ready':
 				// Get reference to the phakoIncision
 				phakoIncision = _drawing.firstDoodleOfClass('PhakoIncision');
-				
+
 				// If this is a newly created drawing, add two sideports
 				if (_drawing.isNew)
 				{
@@ -349,10 +359,12 @@ function sidePortController(_drawing)
 				// Else cancel sync for an updated drawing
 				else
 				{
-					phakoIncision.willSync = false;
+					if (typeof(phakoIncision) != 'undefined') {
+						phakoIncision.willSync = false;
+					}
 				}
 				break;
-			
+
 			// Parameter change notification
 			case 'parameterChanged':
 				// Only sync for new drawings
@@ -368,9 +380,11 @@ function sidePortController(_drawing)
 					// Stop syncing if PhakoIncision or a SidePort is changed
 					if (masterDoodle.drawing.isActive && (masterDoodle.className == 'PhakoIncision' || masterDoodle.className == 'SidePort'))
 					{
-						phakoIncision.willSync = false;
+						if (typeof(phakoIncision) != 'undefined') {
+							phakoIncision.willSync = false;
+						}
 					}
-			
+
 					// Keep sideports in sync with PhakoIncision while surgeon is still syncing with it
 					if (masterDoodle.className == "PhakoIncision" && masterDoodle.willSync)
 					{
@@ -385,6 +399,32 @@ function sidePortController(_drawing)
 					}
 				}
 				break;
+			case 'doodleDeleted':
+				if ($.inArray(_messageArray['object'],eyedraw_iol_classes) != -1) {
+					$('#div_ElementCataract_iol_type_id').hide();
+					$('#div_ElementCataract_iol_power').hide();
+					$('#div_ElementCataract_iol_position_id').hide();
+					$('#ElementCataract_iol_position_id').children('option').map(function() {
+						if ($(this).text() == 'None') {
+							$(this).attr('selected','selected');
+						}
+					});
+				}
+				break;
+			case 'doodleAdded':
+				if ($.inArray(_messageArray['object']['className'],eyedraw_iol_classes) != -1) {
+					$('#div_ElementCataract_iol_type_id').show();
+					$('#div_ElementCataract_iol_power').show();
+					$('#div_ElementCataract_iol_position_id').show();
+					if ($('#ElementCataract_iol_position_id').children('option:selected').text() == 'None') {
+						$('#ElementCataract_iol_position_id').children('option').map(function() {
+							if ($(this).text() == '- Please select -') {
+								$(this).attr('selected','selected');
+							}
+						});
+					}
+				}
+				break;
 		}
 	}
 }
@@ -394,12 +434,22 @@ function changeEye() {
 	var drawingEdit1 = window['ed_drawing_edit_Position'];
 	var drawingEdit2 = window['ed_drawing_edit_Cataract'];
 
-	if (drawingEdit1.eye == ED.eye.Right) drawingEdit1.eye = ED.eye.Left;
-	else drawingEdit1.eye = ED.eye.Right;
-	if (drawingEdit2.eye == ED.eye.Right) drawingEdit2.eye = ED.eye.Left;
-	else drawingEdit2.eye = ED.eye.Right;
-	
-	// Set surgeon position to temporal side
-	var doodle = drawingEdit1.firstDoodleOfClass('Surgeon');
-	doodle.setParameterWithAnimation('surgeonPosition', 'Temporal');
+	if (typeof(drawingEdit1) != 'undefined') {
+		if (drawingEdit1.eye == ED.eye.Right) drawingEdit1.eye = ED.eye.Left;
+		else drawingEdit1.eye = ED.eye.Right;
+
+		// Set surgeon position to temporal side
+		var doodle = drawingEdit1.firstDoodleOfClass('Surgeon');
+		doodle.setParameterWithAnimation('surgeonPosition', 'Temporal');
+	}
+
+	if (typeof(drawingEdit2) != 'undefined') {
+		if (drawingEdit2.eye == ED.eye.Right) drawingEdit2.eye = ED.eye.Left;
+		else drawingEdit2.eye = ED.eye.Right;
+	}
+}
+
+function OphTrOperationnote_do_print() {
+	printIFrameUrl(OE_print_url, null);
+	enableButtons();
 }

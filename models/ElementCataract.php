@@ -3,7 +3,7 @@
  * OpenEyes
  *
  * (C) Moorfields Eye Hospital NHS Foundation Trust, 2008-2011
- * (C) OpenEyes Foundation, 2011-2012
+ * (C) OpenEyes Foundation, 2011-2013
  * This file is part of OpenEyes.
  * OpenEyes is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  * OpenEyes is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
@@ -13,7 +13,7 @@
  * @link http://www.openeyes.org.uk
  * @author OpenEyes <info@openeyes.org.uk>
  * @copyright Copyright (c) 2008-2011, Moorfields Eye Hospital NHS Foundation Trust
- * @copyright Copyright (c) 2011-2012, OpenEyes Foundation
+ * @copyright Copyright (c) 2011-2013, OpenEyes Foundation
  * @license http://www.gnu.org/licenses/gpl-3.0.html The GNU General Public License V3.0
  */
 
@@ -74,16 +74,17 @@ class ElementCataract extends BaseEventTypeElement
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('event_id, incision_site_id, length, meridian, incision_type_id, iol_position_id, iol_type_id, iol_power, eyedraw, report, complication_notes, eyedraw2, report2', 'safe'),
+			array('event_id, incision_site_id, length, meridian, incision_type_id, iol_position_id, iol_type_id, iol_power, eyedraw, report, complication_notes, eyedraw2, report2, predicted_refraction', 'safe'),
 			array('incision_site_id, length, meridian, incision_type_id, iol_position_id, eyedraw, report, eyedraw2', 'required'),
 			array('length', 'numerical', 'integerOnly' => false, 'numberPattern' => '/^[0-9](\.[0-9])?$/', 'message' => 'Length must be 0 - 9.9 in increments of 0.1'),
 			array('meridian', 'numerical', 'integerOnly' => false, 'numberPattern' => '/^[0-9]{1,3}(\.[0-9])?$/', 'min' => 000, 'max' => 360, 'message' => 'Meridian must be 000.5 - 360.0 degrees'),
+			array('predicted_refraction', 'numerical', 'integerOnly' => false, 'numberPattern' => '/^\-?[0-9]{1,2}(\.[0-9]{2})?$/', 'min' => -30, 'max' => 30, 'message' => 'Predicted refraction must be between -30.00 and 30.00'),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
 			//array('id, event_id, incision_site_id, length, meridian, incision_type_id, eyedraw, report, wound_burn, iris_trauma, zonular_dialysis, pc_rupture, decentered_iol, iol_exchange, dropped_nucleus, op_cancelled, corneal_odema, iris_prolapse, zonular_rupture, vitreous_loss, iol_into_vitreous, other_iol_problem, choroidal_haem', 'on' => 'search'),
 		);
 	}
-	
+
 	/**
 	 * @return array relational rules.
 	 */
@@ -99,6 +100,7 @@ class ElementCataract extends BaseEventTypeElement
 			'user' => array(self::BELONGS_TO, 'User', 'created_user_id'),
 			'usermodified' => array(self::BELONGS_TO, 'User', 'last_modified_user_id'),
 			'complications' => array(self::HAS_MANY, 'CataractComplication', 'cataract_id'),
+			'complicationItems' => array(self::MANY_MANY, 'CataractComplications', 'et_ophtroperationnote_cataract_complication(cataract_id, complication_id)'),
 			'operative_devices' => array(self::HAS_MANY, 'CataractOperativeDevice', 'cataract_id'),
 			'iol_type' => array(self::BELONGS_TO, 'IOLType', 'iol_type_id'),
 		);
@@ -121,6 +123,7 @@ class ElementCataract extends BaseEventTypeElement
 			'report' => 'Details',
 			'complication_notes' => 'Complication notes',
 			'report2' => 'Details',
+			'predicted_refraction' => 'Predicted refraction',
 		);
 	}
 
@@ -137,7 +140,7 @@ class ElementCataract extends BaseEventTypeElement
 
 		$criteria->compare('id', $this->id, true);
 		$criteria->compare('event_id', $this->event_id, true);
-		
+
 		return new CActiveDataProvider(get_class($this), array(
 				'criteria' => $criteria,
 			));
@@ -157,12 +160,13 @@ class ElementCataract extends BaseEventTypeElement
 	 * Need to delete associated records
 	 * @see CActiveRecord::beforeDelete()
 	 */
-	protected function beforeDelete() {
+	protected function beforeDelete()
+	{
 		CataractComplication::model()->deleteAllByAttributes(array('cataract_id' => $this->id));
 		CataractOperativeDevice::model()->deleteAllByAttributes(array('cataract_id' => $this->id));
 		return parent::beforeDelete();
 	}
-	
+
 	protected function beforeSave()
 	{
 		return parent::beforeSave();
@@ -231,7 +235,8 @@ class ElementCataract extends BaseEventTypeElement
 		return parent::afterSave();
 	}
 
-	public function getSelectedEye() {
+	public function getSelectedEye()
+	{
 		if (Yii::app()->getController()->getAction()->id == 'create') {
 			// Get the procedure list and eye from the most recent booking for the episode of the current user's subspecialty
 			if (!$patient = Patient::model()->findByPk(@$_GET['patient_id'])) {
@@ -239,8 +244,10 @@ class ElementCataract extends BaseEventTypeElement
 			}
 
 			if ($episode = $patient->getEpisodeForCurrentSubspecialty()) {
-				if ($booking = $episode->getMostRecentBooking()) {
-					return $booking->elementOperation->eye;
+				if ($api = Yii::app()->moduleAPI->get('OphTrOperationbooking')) {
+					if ($booking = $api->getMostRecentBookingForEpisode($patient, $episode)) {
+						return $booking->operation->eye;
+					}
 				}
 			}
 		}
@@ -252,15 +259,18 @@ class ElementCataract extends BaseEventTypeElement
 		return new Eye;
 	}
 
-	public function getEye() {
+	public function getEye()
+	{
 		return ElementProcedureList::model()->find('event_id=?',array($this->event_id))->eye;
 	}
 
-	public function getOperative_device_list() {
+	public function getOperative_device_list()
+	{
 		return $this->getDevicesBySiteAndSubspecialty();
 	}
 
-	public function getOperative_device_defaults() {
+	public function getOperative_device_defaults()
+	{
 		$ids = array();
 		foreach ($this->getDevicesBySiteAndSubspecialty(true) as $id => $item) {
 			$ids[] = $id;
@@ -268,28 +278,31 @@ class ElementCataract extends BaseEventTypeElement
 		return $ids;
 	}
 
-	public function getDevicesBySiteAndSubspecialty($default=false) {
-		$firm = Firm::model()->findByPk(Yii::app()->session['selected_firm_id']);
-		$subspecialty_id = $firm->serviceSubspecialtyAssignment->subspecialty_id;
-		$site_id = Yii::app()->request->cookies['site_id']->value;
-
-		$params = array(':subSpecialtyId'=>$subspecialty_id,':siteId'=>$site_id);
+	public function getDevicesBySiteAndSubspecialty($default=false)
+	{
+		$criteria = new CDbCriteria;
+		$criteria->addCondition('subspecialty_id = :subspecialtyId and site_id = :siteId');
+		$criteria->params[':subspecialtyId'] = Firm::model()->findByPk(Yii::app()->session['selected_firm_id'])->serviceSubspecialtyAssignment->subspecialty_id;
+		$criteria->params[':siteId'] = Yii::app()->session['selected_site_id'];
 
 		if ($default) {
-			$where = ' and site_subspecialty_operative_device.default = :default ';
-			$params[':default'] = 1;
+			$criteria->addCondition('siteSubspecialtyAssignments.default = :one');
+			$criteria->params[':one'] = 1;
 		}
 
-		return CHtml::listData(Yii::app()->db->createCommand()
-			->select('operative_device.id, operative_device.name')
-			->from('operative_device')
-			->join('site_subspecialty_operative_device','site_subspecialty_operative_device.operative_device_id = operative_device.id')
-			->where('site_subspecialty_operative_device.subspecialty_id = :subSpecialtyId and site_subspecialty_operative_device.site_id = :siteId'.@$where, $params)
-			->order('operative_device.name asc')
-			->queryAll(), 'id', 'name');
+		$criteria->order = 'name asc';
+
+		return CHtml::listData(OperativeDevice::model()
+			->with(array(
+				'siteSubspecialtyAssignments' => array(
+					'joinType' => 'JOIN',
+				),
+			))
+			->findAll($criteria),'id','name');
 	}
 
-	public function getIOLTypes_NHS() {
+	public function getIOLTypes_NHS()
+	{
 		$criteria = new CDbCriteria;
 
 		$criteria->compare('private', 0);
@@ -298,16 +311,18 @@ class ElementCataract extends BaseEventTypeElement
 		return IOLType::model()->findAll($criteria);
 	}
 
-	public function getIOLTypes_Private() {
+	public function getIOLTypes_Private()
+	{
 		$criteria = new CDbCriteria;
-	
+
 		$criteria->compare('private', 1);
 		$criteria->order = 'display_order asc';
 
 		return IOLType::model()->findAll($criteria);
 	}
 
-	public function beforeValidate() {
+	public function beforeValidate()
+	{
 		$iol_position = IOLPosition::model()->findByPk($this->iol_position_id);
 
 		if (!$iol_position || $iol_position->name != 'None') {
@@ -316,11 +331,39 @@ class ElementCataract extends BaseEventTypeElement
 			}
 			if (!$this->iol_power) {
 				$this->addError('Cataract','IOL power cannot be blank');
-			} else if (!preg_match('/^\-?[0-9]{1,3}(\.[0-9])?$/',$this->iol_power)) {
+			} elseif (!preg_match('/^\-?[0-9]{1,3}(\.[0-9])?$/',$this->iol_power)) {
 				$this->addError('Cataract','IOL power must be a number with an optional single decimal place');
 			}
 		}
 
 		return parent::beforeValidate();
+	}
+
+	public function getIol_hidden()
+	{
+		if (!empty($_POST)) {
+			$eyedraw = json_decode($_POST['ElementCataract']['eyedraw']);
+
+			foreach ($eyedraw as $object) {
+				if (in_array($object->subclass,Yii::app()->params['eyedraw_iol_classes'])) {
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		if ($eyedraw = @json_decode($this->eyedraw)) {
+			if (is_array($eyedraw)) {
+				foreach ($eyedraw as $object) {
+					if (in_array($object->subclass,Yii::app()->params['eyedraw_iol_classes'])) {
+						return false;
+					}
+				}
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

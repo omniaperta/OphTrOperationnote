@@ -3,7 +3,7 @@
  * OpenEyes
  *
  * (C) Moorfields Eye Hospital NHS Foundation Trust, 2008-2011
- * (C) OpenEyes Foundation, 2011-2012
+ * (C) OpenEyes Foundation, 2011-2013
  * This file is part of OpenEyes.
  * OpenEyes is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  * OpenEyes is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
@@ -13,7 +13,7 @@
  * @link http://www.openeyes.org.uk
  * @author OpenEyes <info@openeyes.org.uk>
  * @copyright Copyright (c) 2008-2011, Moorfields Eye Hospital NHS Foundation Trust
- * @copyright Copyright (c) 2011-2012, OpenEyes Foundation
+ * @copyright Copyright (c) 2011-2013, OpenEyes Foundation
  * @license http://www.gnu.org/licenses/gpl-3.0.html The GNU General Public License V3.0
  */
 
@@ -60,7 +60,7 @@ class ElementPostOpDrugs extends BaseEventTypeElement
 			// Please remove those attributes that should not be searched.
 		);
 	}
-	
+
 	/**
 	 * @return array relational rules.
 	 */
@@ -99,7 +99,7 @@ class ElementPostOpDrugs extends BaseEventTypeElement
 
 		$criteria->compare('id', $this->id, true);
 		$criteria->compare('event_id', $this->event_id, true);
-		
+
 		return new CActiveDataProvider(get_class($this), array(
 				'criteria' => $criteria,
 			));
@@ -116,11 +116,12 @@ class ElementPostOpDrugs extends BaseEventTypeElement
 	 * Need to delete associated records
 	 * @see CActiveRecord::beforeDelete()
 	 */
-	protected function beforeDelete() {
+	protected function beforeDelete()
+	{
 		OperationDrug::model()->deleteAllByAttributes(array('et_ophtroperationnote_postop_drugs_id' => $this->id));
 		return parent::beforeDelete();
 	}
-	
+
 	protected function beforeSave()
 	{
 		return parent::beforeSave();
@@ -165,32 +166,36 @@ class ElementPostOpDrugs extends BaseEventTypeElement
 		return parent::beforeValidate();
 	}
 
-	public function getDrug_list() {
+	public function getDrug_list()
+	{
 		return $this->getDrugsBySiteAndSubspecialty();
 	}
 
-	public function getDrugsBySiteAndSubspecialty($default=false) {
-		$firm = Firm::model()->findByPk(Yii::app()->session['selected_firm_id']);
-		$subspecialty_id = $firm->serviceSubspecialtyAssignment->subspecialty_id;
-		$site_id = Yii::app()->request->cookies['site_id']->value;
-
-		$params = array(':subSpecialtyId'=>$subspecialty_id,':siteId'=>$site_id);
+	public function getDrugsBySiteAndSubspecialty($default=false)
+	{
+		$criteria = new CDbCriteria;
+		$criteria->addCondition('subspecialty_id = :subspecialtyId and site_id = :siteId');
+		$criteria->params[':subspecialtyId'] = Firm::model()->findByPk(Yii::app()->session['selected_firm_id'])->serviceSubspecialtyAssignment->subspecialty_id;
+		$criteria->params[':siteId'] = Yii::app()->session['selected_site_id'];
 
 		if ($default) {
-			$where = ' AND et_ophtroperationnote_postop_site_subspecialty_drug.default = :default ';
-			$params[':default'] = 1;
+			$criteria->addCondition('siteSubspecialtyAssignments.default = :one');
+			$criteria->params[':one'] = 1;
 		}
 
-		return CHtml::listData(Yii::app()->db->createCommand()
-			->select('et_ophtroperationnote_postop_drug.id, et_ophtroperationnote_postop_drug.name')
-			->from('et_ophtroperationnote_postop_drug')
-			->join('et_ophtroperationnote_postop_site_subspecialty_drug','et_ophtroperationnote_postop_site_subspecialty_drug.drug_id = et_ophtroperationnote_postop_drug.id')
-			->where('et_ophtroperationnote_postop_site_subspecialty_drug.subspecialty_id = :subSpecialtyId and et_ophtroperationnote_postop_site_subspecialty_drug.site_id = :siteId and et_ophtroperationnote_postop_drug.deleted = 0'.@$where, $params)
-			->order('et_ophtroperationnote_postop_drug.name asc')
-			->queryAll(), 'id', 'name');
+		$criteria->order = 'name asc';
+
+		return CHtml::listData(PostopDrug::model()
+			->with(array(
+				'siteSubspecialtyAssignments' => array(
+					'joinType' => 'JOIN',
+				),
+			))
+			->findAll($criteria),'id','name');
 	}
 
-	public function getDrug_defaults() {
+	public function getDrug_defaults()
+	{
 		$ids = array();
 		foreach ($this->getDrugsBySiteAndSubspecialty(true) as $id => $drug) {
 			$ids[] = $id;
