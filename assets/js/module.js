@@ -61,7 +61,7 @@ function callbackAddProcedure(procedure_id) {
 function callbackRemoveProcedure(procedure_id) {
 	var procedures = '';
 
-	$('input[name="Procedures[]"]').map(function() {
+	$('input[name="Procedures_procs[]"]').map(function() {
 		if (procedures.length >0) {
 			procedures += ',';
 		}
@@ -222,7 +222,6 @@ $(document).ready(function() {
 
 	$('tr.clickable').click(function() {
 		$(this).children('td:first').children('input[type="radio"]').attr('checked',true);
-		return false;
 	});
 
 	// IOL barcode scanning
@@ -428,7 +427,9 @@ function sidePortController(_drawing)
 				// Else cancel sync for an updated drawing
 				else
 				{
-					phakoIncision.willSync = false;
+					if (typeof(phakoIncision) != 'undefined') {
+						phakoIncision.willSync = false;
+					}
 				}
 				break;
 			
@@ -447,7 +448,9 @@ function sidePortController(_drawing)
 					// Stop syncing if PhakoIncision or a SidePort is changed
 					if (masterDoodle.drawing.isActive && (masterDoodle.className == 'PhakoIncision' || masterDoodle.className == 'SidePort'))
 					{
-						phakoIncision.willSync = false;
+						if (typeof(phakoIncision) != 'undefined') {
+							phakoIncision.willSync = false;
+						}
 					}
 			
 					// Keep sideports in sync with PhakoIncision while surgeon is still syncing with it
@@ -499,14 +502,19 @@ function changeEye() {
 	var drawingEdit1 = window['ed_drawing_edit_Position'];
 	var drawingEdit2 = window['ed_drawing_edit_Cataract'];
 
-	if (drawingEdit1.eye == ED.eye.Right) drawingEdit1.eye = ED.eye.Left;
-	else drawingEdit1.eye = ED.eye.Right;
-	if (drawingEdit2.eye == ED.eye.Right) drawingEdit2.eye = ED.eye.Left;
-	else drawingEdit2.eye = ED.eye.Right;
-	
-	// Set surgeon position to temporal side
-	var doodle = drawingEdit1.firstDoodleOfClass('Surgeon');
-	doodle.setParameterWithAnimation('surgeonPosition', 'Temporal');
+	if (typeof(drawingEdit1) != 'undefined') {
+		if (drawingEdit1.eye == ED.eye.Right) drawingEdit1.eye = ED.eye.Left;
+		else drawingEdit1.eye = ED.eye.Right;
+
+		// Set surgeon position to temporal side
+		var doodle = drawingEdit1.firstDoodleOfClass('Surgeon');
+		doodle.setParameterWithAnimation('surgeonPosition', 'Temporal');
+	}
+
+	if (typeof(drawingEdit2) != 'undefined') {
+		if (drawingEdit2.eye == ED.eye.Right) drawingEdit2.eye = ED.eye.Left;
+		else drawingEdit2.eye = ED.eye.Right;
+	}
 }
 
 function OphTrOperationnote_do_print() {
