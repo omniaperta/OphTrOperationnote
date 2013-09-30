@@ -25,9 +25,9 @@
 		</div>
 		<div class="headerInfo">
 			<div class="patientDetails">
-				<strong><?php echo $this->patient->addressname?></strong>
+				<strong><?php echo $this->patient->fullName?></strong>
 				<br />
-				<?php echo $this->patient->address ? $this->patient->address->getLetterHtml() : ''?>
+				<?php echo $this->patient->contact->address ? $this->patient->contact->address->getLetterHtml() : ''?>
 				<br>
 				<br>
 				Hospital No: <strong><?php echo $this->patient->hos_num ?></strong>
@@ -40,6 +40,12 @@
 				<strong><?php echo $this->event->episode->firm->getConsultantName() ?></strong>
 				<br>
 				Service: <strong><?php echo $this->event->episode->firm->getSubspecialtyText() ?></strong>
+				<br/><br/>
+				<div style="border: 1px solid #000; width: 110px; padding: 10px;">
+					Affix prosthesis/<br/>
+					Implant label/ <br/>
+					Cornea graft ID
+				</div>
 			</div>
 			<div class="noteDates">
 				Note Created: <strong><?php echo Helper::convertDate2NHS($this->event->created_date) ?></strong>
@@ -188,6 +194,11 @@
 			<div class="value">
 				<?php echo CHtml::encode($comments_element->comments)?>
 			</div>
+		</div>
+		<div class="detailRow clearVal">
+			_____ I have reviewed the patient information and find the patient appropriate for the described procedure.<br/>
+			_____ I have reviewed and concur with the anaesthesia plan.<br/>
+			_____ I have confirmed that the patient consent form for this procedure is complete.<br/>
 		</div>
 		<div class="footer">
 			Created by <strong><?php echo ($created_user = User::model()->findByPk($this->event->created_user_id)) ? $created_user->getFullName() .' '.$created_user->qualifications : 'Unknown' ?></strong>
