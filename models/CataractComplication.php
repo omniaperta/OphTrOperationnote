@@ -59,7 +59,7 @@ class CataractComplication extends BaseEventTypeElement
 		return array(
 		);
 	}
-	
+
 	/**
 	 * @return array relational rules.
 	 */
@@ -69,11 +69,12 @@ class CataractComplication extends BaseEventTypeElement
 		// class name for the relations automatically generated below.
 		return array(
 			'cataract' => array(self::HAS_ONE, 'ElementCataract', 'cataract_id'),
-			'complication' => array(self::HAS_ONE, 'CataractComplications', 'complication_id'),
+			'complication' => array(self::BELONGS_TO, 'CataractComplications', 'complication_id'),
 		);
 	}
 
-	public function getName() {
+	public function getName()
+	{
 		return CataractComplications::model()->findByPk($this->complication_id)->name;
 	}
 
@@ -104,4 +105,3 @@ class CataractComplication extends BaseEventTypeElement
 			));
 	}
 }
-?>

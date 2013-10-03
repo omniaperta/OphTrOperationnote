@@ -34,7 +34,9 @@ function callbackAddProcedure(procedure_id) {
 					if ($('div.procedureItem').length == 0) {
 						$('#procedureList').hide();
 					}
-					alert("You must select either the right or the left eye to add this procedure.");
+					new OpenEyes.Dialog.Alert({
+						content: "You must select either the right or the left eye to add this procedure."
+					}).open();
 				} else {
 					var m = html.match(/data-element-type-class="(Element.*?)"/);
 					if (m) {
@@ -71,7 +73,7 @@ function callbackRemoveProcedure(procedure_id) {
 	$.ajax({
 		'type': 'POST',
 		'url': baseUrl+'/OphTrOperationnote/Default/getElementsToDelete',
-		'data': "remaining_procedures="+procedures+"&procedure_id="+procedure_id,
+		'data': "remaining_procedures="+procedures+"&procedure_id="+procedure_id+"&YII_CSRF_TOKEN="+YII_CSRF_TOKEN,
 		'dataType': 'json',
 		'success': function(data) {
 			$.each(data, function(key, val) {
@@ -155,9 +157,13 @@ $(document).ready(function() {
 						if (result != 'yes') {
 							$('#ElementProcedureList_eye_id_'+last_ElementProcedureList_eye_id).attr('checked','checked');
 							if (parseInt(result.split("\n").length) == 1) {
-								alert("The following procedure requires a specific eye selection and cannot be entered for both eyes at once:\n\n"+result);
+								new OpenEyes.Dialog.Alert({
+								  content: "The following procedure requires a specific eye selection and cannot be entered for both eyes at once:\n\n"+result
+								}).open();
 							} else {
-								alert("The following procedures require a specific eye selection and cannot be entered for both eyes at once:\n\n"+result);
+								new OpenEyes.Dialog.Alert({
+								  content: "The following procedures require a specific eye selection and cannot be entered for both eyes at once:\n\n"+result
+								}).open();
 							}
 							return false;
 						} else {
@@ -190,7 +196,7 @@ $(document).ready(function() {
 				$('#typeProcedure').slideToggle('fast');
 			}
 
-			changeEye();	
+			changeEye();
 			last_ElementProcedureList_eye_id = $(this).val();
 
 			return true;
@@ -300,7 +306,9 @@ function callbackVerifyAddProcedure(proc_name,durations,short_version,callback) 
 			if (result == 'yes') {
 				callback(true);
 			} else {
-				alert("You must select either the right or the left eye before adding this procedure.");
+				new OpenEyes.Dialog.Alert({
+				  content: "You must select either the right or the left eye before adding this procedure."
+				}).open();
 				callback(false);
 			}
 		}
@@ -403,10 +411,10 @@ function sidePortController(_drawing)
 	var phakoIncision;
 	var sidePort1;
 	var sidePort2;
-	
+
 	// Register controller for notifications
 	_drawing.registerForNotifications(this, 'notificationHandler', ['ready', 'parameterChanged', 'doodleAdded', 'doodleDeleted']);
-	
+
 	// Method called for notification
 	this.notificationHandler = function(_messageArray)
 	{
@@ -416,7 +424,7 @@ function sidePortController(_drawing)
 			case 'ready':
 				// Get reference to the phakoIncision
 				phakoIncision = _drawing.firstDoodleOfClass('PhakoIncision');
-				
+
 				// If this is a newly created drawing, add two sideports
 				if (_drawing.isNew)
 				{
@@ -432,7 +440,7 @@ function sidePortController(_drawing)
 					}
 				}
 				break;
-			
+
 			// Parameter change notification
 			case 'parameterChanged':
 				// Only sync for new drawings
@@ -452,7 +460,7 @@ function sidePortController(_drawing)
 							phakoIncision.willSync = false;
 						}
 					}
-			
+
 					// Keep sideports in sync with PhakoIncision while surgeon is still syncing with it
 					if (masterDoodle.className == "PhakoIncision" && masterDoodle.willSync)
 					{

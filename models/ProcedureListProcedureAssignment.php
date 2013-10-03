@@ -56,7 +56,7 @@ class ProcedureListProcedureAssignment extends BaseEventTypeElement
 		return array(
 		);
 	}
-	
+
 	/**
 	 * @return array relational rules.
 	 */
@@ -65,6 +65,7 @@ class ProcedureListProcedureAssignment extends BaseEventTypeElement
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
+			'procedure' => array(self::BELONGS_TO, 'Procedure', 'proc_id'),
 		);
 	}
 
@@ -95,4 +96,3 @@ class ProcedureListProcedureAssignment extends BaseEventTypeElement
 			));
 	}
 }
-?>

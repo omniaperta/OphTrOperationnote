@@ -60,7 +60,7 @@ class ElementPostOpDrugs extends BaseEventTypeElement
 			// Please remove those attributes that should not be searched.
 		);
 	}
-	
+
 	/**
 	 * @return array relational rules.
 	 */
@@ -99,7 +99,7 @@ class ElementPostOpDrugs extends BaseEventTypeElement
 
 		$criteria->compare('id', $this->id, true);
 		$criteria->compare('event_id', $this->event_id, true);
-		
+
 		return new CActiveDataProvider(get_class($this), array(
 				'criteria' => $criteria,
 			));
@@ -116,11 +116,12 @@ class ElementPostOpDrugs extends BaseEventTypeElement
 	 * Need to delete associated records
 	 * @see CActiveRecord::beforeDelete()
 	 */
-	protected function beforeDelete() {
+	protected function beforeDelete()
+	{
 		OperationDrug::model()->deleteAllByAttributes(array('et_ophtroperationnote_postop_drugs_id' => $this->id));
 		return parent::beforeDelete();
 	}
-	
+
 	protected function beforeSave()
 	{
 		return parent::beforeSave();
@@ -165,32 +166,36 @@ class ElementPostOpDrugs extends BaseEventTypeElement
 		return parent::beforeValidate();
 	}
 
-	public function getDrug_list() {
+	public function getDrug_list()
+	{
 		return $this->getDrugsBySiteAndSubspecialty();
 	}
 
-	public function getDrugsBySiteAndSubspecialty($default=false) {
-		$firm = Firm::model()->findByPk(Yii::app()->session['selected_firm_id']);
-		$subspecialty_id = $firm->serviceSubspecialtyAssignment->subspecialty_id;
-		$site_id = Yii::app()->session['selected_site_id'];
-
-		$params = array(':subSpecialtyId'=>$subspecialty_id,':siteId'=>$site_id);
+	public function getDrugsBySiteAndSubspecialty($default=false)
+	{
+		$criteria = new CDbCriteria;
+		$criteria->addCondition('subspecialty_id = :subspecialtyId and site_id = :siteId');
+		$criteria->params[':subspecialtyId'] = Firm::model()->findByPk(Yii::app()->session['selected_firm_id'])->serviceSubspecialtyAssignment->subspecialty_id;
+		$criteria->params[':siteId'] = Yii::app()->session['selected_site_id'];
 
 		if ($default) {
-			$where = ' AND et_ophtroperationnote_postop_site_subspecialty_drug.default = :default ';
-			$params[':default'] = 1;
+			$criteria->addCondition('siteSubspecialtyAssignments.default = :one');
+			$criteria->params[':one'] = 1;
 		}
 
-		return CHtml::listData(Yii::app()->db->createCommand()
-			->select('et_ophtroperationnote_postop_drug.id, et_ophtroperationnote_postop_drug.name')
-			->from('et_ophtroperationnote_postop_drug')
-			->join('et_ophtroperationnote_postop_site_subspecialty_drug','et_ophtroperationnote_postop_site_subspecialty_drug.drug_id = et_ophtroperationnote_postop_drug.id')
-			->where('et_ophtroperationnote_postop_site_subspecialty_drug.subspecialty_id = :subSpecialtyId and et_ophtroperationnote_postop_site_subspecialty_drug.site_id = :siteId and et_ophtroperationnote_postop_drug.deleted = 0'.@$where, $params)
-			->order('et_ophtroperationnote_postop_drug.name asc')
-			->queryAll(), 'id', 'name');
+		$criteria->order = 'name asc';
+
+		return CHtml::listData(PostopDrug::model()
+			->with(array(
+				'siteSubspecialtyAssignments' => array(
+					'joinType' => 'JOIN',
+				),
+			))
+			->findAll($criteria),'id','name');
 	}
 
-	public function getDrug_defaults() {
+	public function getDrug_defaults()
+	{
 		$ids = array();
 		foreach ($this->getDrugsBySiteAndSubspecialty(true) as $id => $drug) {
 			$ids[] = $id;

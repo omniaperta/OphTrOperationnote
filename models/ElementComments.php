@@ -64,7 +64,7 @@ class ElementComments extends BaseEventTypeElement
 			array('id, event_id, comments, postop_instructions', 'safe', 'on' => 'search'),
 		);
 	}
-	
+
 	/**
 	 * @return array relational rules.
 	 */
@@ -115,18 +115,17 @@ class ElementComments extends BaseEventTypeElement
 		));
 	}
 
-	public function getPostop_instructions_list() {
-		$firm = Firm::model()->findByPk(Yii::app()->session['selected_firm_id']);
-		$subspecialty_id = $firm->serviceSubspecialtyAssignment->subspecialty_id;
-		$site_id = Yii::app()->session['selected_site_id'];
+	public function getPostop_instructions_list()
+	{
+		$criteria = new CDbCriteria;
 
-		$params = array(':subSpecialtyId'=>$subspecialty_id,':siteId'=>$site_id);
+		$criteria->addCondition('subspecialty_id = :subspecialtyId and site_id = :siteId');
+		$criteria->params[':subspecialtyId'] = Firm::model()->findByPk(Yii::app()->session['selected_firm_id'])->serviceSubspecialtyAssignment->subspecialty_id;
+		$criteria->params[':siteId'] = Yii::app()->session['selected_site_id'];
 
-		return CHtml::listData(Yii::app()->db->createCommand()
-			->select('et_ophtroperationnote_site_subspecialty_postop_instructions.id, et_ophtroperationnote_site_subspecialty_postop_instructions.content')
-			->from('et_ophtroperationnote_site_subspecialty_postop_instructions')
-			->where('et_ophtroperationnote_site_subspecialty_postop_instructions.subspecialty_id = :subSpecialtyId and et_ophtroperationnote_site_subspecialty_postop_instructions.site_id = :siteId', $params)
-			->order('et_ophtroperationnote_site_subspecialty_postop_instructions.display_order asc')
-			->queryAll(), 'id', 'content');
+		$criteria->order = 'display_order asc';
+
+		return CHtml::listData(PostopInstruction::model()
+			->findAll($criteria),'id','content');
 	}
 }

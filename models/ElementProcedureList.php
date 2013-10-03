@@ -63,7 +63,7 @@ class ElementProcedureList extends BaseEventTypeElement
 			array('id, event_id, eye_id', 'safe', 'on' => 'search'),
 		);
 	}
-	
+
 	/**
 	 * @return array relational rules.
 	 */
@@ -117,19 +117,20 @@ class ElementProcedureList extends BaseEventTypeElement
 		));
 	}
 
-	protected function afterSave() {
+	protected function afterSave()
+	{
 		if (!empty($_POST['Procedures_procs'])) {
 
 			$existing_procedure_assignments = array();
-			foreach(ProcedureListProcedureAssignment::model()->findAll('procedurelist_id = :id', array(':id' => $this->id)) as $procedure_assignment) {
+			foreach (ProcedureListProcedureAssignment::model()->findAll('procedurelist_id = :id', array(':id' => $this->id)) as $procedure_assignment) {
 				$existing_procedure_assignments[$procedure_assignment->proc_id] = $procedure_assignment;
 			}
 
 			$current_display_order = 1;
-			foreach($_POST['Procedures_procs'] as $procedure_id) {
-				if(isset($existing_procedure_assignments[$procedure_id])) {
+			foreach ($_POST['Procedures_procs'] as $procedure_id) {
+				if (isset($existing_procedure_assignments[$procedure_id])) {
 					$procedure_assignment = $existing_procedure_assignments[$procedure_id];
-					if($procedure_assignment->display_order != $current_display_order) {
+					if ($procedure_assignment->display_order != $current_display_order) {
 						// Updated display order of existing assignment
 						$procedure_assignment->display_order = $current_display_order;
 						if (!$procedure_assignment->save()) {
@@ -150,9 +151,9 @@ class ElementProcedureList extends BaseEventTypeElement
 			}
 
 			foreach ($existing_procedure_assignments as $procedure_id => $procedure_assignment) {
-				if(!in_array($procedure_id, $_POST['Procedures_procs'])) {
+				if (!in_array($procedure_id, $_POST['Procedures_procs'])) {
 					// Delete removed procedure
-					if(!$procedure_assignment->delete()) {
+					if (!$procedure_assignment->delete()) {
 						throw new Exception('Unable to delete procedure assignment: '.print_r($pa->getErrors(),true));
 					}
 				}
@@ -174,7 +175,8 @@ class ElementProcedureList extends BaseEventTypeElement
 		return parent::afterSave();
 	}
 
-	protected function beforeValidate() {
+	protected function beforeValidate()
+	{
 		if (!empty($_POST) && (!isset($_POST['Procedures_procs']) || empty($_POST['Procedures_procs']))) {
 			$this->addError('no_field', 'At least one procedure must be entered');
 		}
@@ -182,7 +184,8 @@ class ElementProcedureList extends BaseEventTypeElement
 		return parent::beforeValidate();
 	}
 
-	public function getSelected_procedures() {
+	public function getSelected_procedures()
+	{
 		if (Yii::app()->getController()->getAction()->id == 'create') {
 			if (ctype_digit($_GET['booking_event_id']) && $api = Yii::app()->moduleAPI->get('OphTrOperationbooking')) {
 				return $api->getProceduresForOperation($_GET['booking_event_id']);
@@ -195,7 +198,8 @@ class ElementProcedureList extends BaseEventTypeElement
 		}
 	}
 
-	public function getSelectedEye() {
+	public function getSelectedEye()
+	{
 		if (ctype_digit(@$_GET['booking_event_id']) && $api = Yii::app()->moduleAPI->get('OphTrOperationbooking')) {
 			$eye = $api->getEyeForOperation($_GET['booking_event_id']);
 
@@ -209,39 +213,29 @@ class ElementProcedureList extends BaseEventTypeElement
 		}
 	}
 
-	public function getFormOptions($table) {
+	public function getFormOptions($table)
+	{
 		if ($table == 'eye') {
 			$event_type = EventType::model()->find('class_name=?',array('OphTrOperationnote'));
 			$element_type = ElementType::model()->find('event_type_id=? and class_name=?',array($event_type->id,'ElementProcedureList'));
 
-			$firm = Firm::model()->findByPk(Yii::app()->session['selected_firm_id']);
+			$criteria = new CDbCriteria;
+			$criteria->addCondition('element_type_id = :elementTypeId');
+			$criteria->params[':elementTypeId'] = $element_type->id;
+			$criteria->order = 't.display_order asc';
 
-			$list = array();
-
-			if (in_array($firm->serviceSubspecialtyAssignment->subspecialty_id,array(2,14))) {
-				foreach (Yii::app()->db->createCommand()
-					->select('eye.id, eye.name')
-					->from('eye')
-					->join('element_type_eye','element_type_eye.eye_id = eye.id')
-					->where('element_type_eye.element_type_id = '.$element_type->id)
-					->order('element_type_eye.display_order asc')
-					->queryAll() as $row) {
-					$list[$row['id']] = $row['name'];
-				}
-				return $list;
+			if (!in_array(Firm::model()->findByPk(Yii::app()->session['selected_firm_id'])->serviceSubspecialtyAssignment->subspecialty->name,array('Adnexal','Strabismus'))) {
+				$criteria->addCondition('t.id != :three');
+				$criteria->params[':three'] = 3;
 			}
 
-			foreach (Yii::app()->db->createCommand()
-				->select('eye.id, eye.name')
-				->from('eye')
-				->join('element_type_eye','element_type_eye.eye_id = eye.id')
-				->where('element_type_eye.element_type_id = '.$element_type->id.' and eye.id != 3')
-				->order('element_type_eye.display_order asc')
-				->queryAll() as $row) {
-				$list[$row['id']] = $row['name'];
-			}
-
-			return $list;
+			return CHtml::listData(Eye::model()
+				->with(array(
+					'elementTypes' => array(
+						'joinType' => 'JOIN',
+					),
+				))
+				->findAll($criteria),'id','name');
 		}
 
 		return parent::getFormOptions($table);

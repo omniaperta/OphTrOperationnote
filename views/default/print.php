@@ -25,9 +25,9 @@
 		</div>
 		<div class="headerInfo">
 			<div class="patientDetails">
-				<strong><?php echo $this->patient->fullName?></strong>
+				<strong><?php echo $this->patient->contact->fullName?></strong>
 				<br />
-				<?php echo $this->patient->contact->address ? $this->patient->contact->address->getLetterHtml() : ''?>
+				<?php echo $this->patient->getLetterAddress(array('delimiter'=>'<br/>'))?>
 				<br>
 				<br>
 				Hospital No: <strong><?php echo $this->patient->hos_num ?></strong>
@@ -37,7 +37,7 @@
 				DOB: <strong><?php echo Helper::convertDate2NHS($this->patient->dob) ?> (<?php echo $this->patient->getAge()?>)</strong>
 			</div>
 			<div class="headerDetails">
-				<strong><?php echo $this->event->episode->firm->getConsultantName() ?></strong>
+				<strong><?php echo $this->event->episode->firm->consultant->fullName?></strong>
 				<br>
 				Service: <strong><?php echo $this->event->episode->firm->getSubspecialtyText() ?></strong>
 				<br/><br/>
@@ -54,7 +54,7 @@
 			</div>
 		</div>
 	</div>
-	
+
 	<div class="body">
 		<div class="operationMeta">
 			<div class="detailRow leftAlign">
@@ -64,14 +64,14 @@
 				<div class="value pronounced">
 					<?php
 						$operations_perf = ElementProcedureList::model()->find("event_id = ?", array($this->event->id));
-						foreach($operations_perf->procedures as $procedure){
+						foreach ($operations_perf->procedures as $procedure) {
 							echo "<strong>{$operations_perf->eye->name} {$procedure->term}</strong><br>";
 						}
 					?>
 				</div>
 			</div>
 			<div class="surgeonList">
-				<?php 
+				<?php
 					$surgeon_element = ElementSurgeon::model()->find("event_id = ?", array($this->event->id));
 					$surgeon_name = ($surgeon = User::model()->findByPk($surgeon_element->surgeon_id)) ? $surgeon->getFullNameAndTitle() : "Unknown";
 					$assistant_name = ($assistant = User::model()->findByPk($surgeon_element->assistant_id)) ? $assistant->getFullNameAndTitle() : "None";
@@ -94,12 +94,12 @@
 				</div>
 			</div>
 		</div>
-		
+
 		<h2>Operation Details</h2>
 		<div class="operationDetails details">
 			<?php $this->renderPartial('print_OperationDetails') ?>
 		</div>
-		
+
 		<h2>Anaesthetic Details</h2>
 		<?php
 			$anaesthetic_element = ElementAnaesthetic::model()->find("event_id = ?", array($this->event->id));
@@ -135,7 +135,7 @@
 				</div>
 				<div class="value">
 					<?php
-						foreach ($anaesthetic_element->anaesthetic_agents as $agent){
+						foreach ($anaesthetic_element->anaesthetic_agents as $agent) {
 							echo "{$agent->name}<br>\n";
 						}
 					?>
@@ -147,7 +147,7 @@
 				</div>
 				<div class="value">
 					<?php
-						foreach ($anaesthetic_element->anaesthetic_complications as $complication){
+						foreach ($anaesthetic_element->anaesthetic_complications as $complication) {
 							echo "{$complication->name}<br>\n";
 						}
 					?>
@@ -205,8 +205,4 @@
 		</div>
 	</div>
 </div>
-<script type="text/javascript">
-	$(document).ready(function() {
-		window.print();
-	}); 
-</script>
+
