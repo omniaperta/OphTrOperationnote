@@ -120,23 +120,32 @@ class Element_OphTrOperationnote_Personnel extends BaseEventTypeElement
 		));
 	}
 
+	public function findByLabel($label)
+	{
+		if (!$cl = ContactLabel::model()->find('name=?',array($label))) {
+			throw new Exception("Unknown contact label: $label");
+		}
+		$contacts =Contact::model()->findAll('contact_label_id=?',$cl->id);
+		return $contacts;
+	}
+
 	public function getScrub_nurses()
 	{
-		return Contact::model()->findAllByParentClass('OphTrOperationnote_Personnel_scrub_nurses');
+		return $this->findByLabel('Scrub nurses');
 	}
 
 	public function getFloor_nurses()
 	{
-		return Contact::model()->findAllByParentClass('OphTrOperationnote_Personnel_floor_nurses');
+		return $this->findByLabel('Floor nurses');
 	}
 
 	public function getAccompanying_nurses()
 	{
-		return Contact::model()->findAllByParentClass('OphTrOperationnote_Personnel_accompanying_nurses');
+		return $this->findByLabel('Personnel accompanying nurses');
 	}
 
 	public function getOperating_department_practitioners()
 	{
-		return Contact::model()->findAllByParentClass('OphTrOperationnote_Personnel_operating_department_practitioners');
+		return $this->findByLabel('Personnel op-department practitioners');
 	}
 }

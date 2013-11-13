@@ -18,39 +18,41 @@
  */
 ?>
 
-<?php if ($element->getSetting('fife')) {?>
-	<h4><?php echo $element->elementType->name ?></h4>
-
-	<div class="colsX clearfix">
-		<div class="colStack">
-			<h4><?php echo CHtml::encode($element->getAttributeLabel('spo2'))?></h4>
-			<div class="eventHighlight">
-				<h4><?php echo CHtml::encode($element->spo2)?>%</h4>
+<?php if (Yii::app()->params['fife']) {?>
+<section class="element">
+	<div class="element-data">
+		<div class="row data-row">
+			<div class="large-2 column">
+				<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('spo2'))?></h4>
+				<div class="large-2 column">
+				<div class="data-value"><?php echo CHtml::encode($element->spo2)?></div>
 			</div>
 		</div>
-		<div class="colStack">
-			<h4><?php echo CHtml::encode($element->getAttributeLabel('oxygen'))?></h4>
-			<div class="eventHighlight">
-				<h4><?php echo CHtml::encode($element->oxygen)?>%</h4>
+		<div class="row data-row">
+			<div class="large-2 column">
+				<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('oxygen'))?></h4>
+				<div class="data-value"><?php echo CHtml::encode($element->oxygen)?></div>
 			</div>
 		</div>
-		<div class="colStack">
-			<h4><?php echo CHtml::encode($element->getAttributeLabel('pulse'))?></h4>
-			<div class="eventHighlight">
-				<h4><?php echo CHtml::encode($element->pulse)?></h4>
+		<div class="row data-row">
+			<div class="large-2 column">
+				<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('pulse'))?></h4>
+				<div class="data-value"><?php echo CHtml::encode($element->pulse)?></div>
 			</div>
 		</div>
-		<div class="colStack">
-			<h4><?php echo CHtml::encode($element->getAttributeLabel('intraocular_solution_id'))?></h4>
-			<div class="eventHighlight">
-				<h4><?php echo $element->intraocular_solution ? $element->intraocular_solution->name : 'Not specified'?></h4>
+		<div class="row data-row">
+			<div class="large-2 column">
+				<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('intraocular_solution_id'))?></h4>
+				<div class="data-value"><?php echo $element->intraocular_solution ? $element->intraocular_solution->name : 'Not specified'?></div>
 			</div>
 		</div>
-		<div class="colStack">
-			<h4><?php echo CHtml::encode($element->getAttributeLabel('skin_preparation_id'))?></h4>
-			<div class="eventHighlight">
-				<h4><?php echo ($element->skin_preparation ? $element->skin_preparation->name : 'Not specified') ?></h4>
+		<div class="row data-row">
+			<div class="large-2 column">
+				<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('skin_preparation_id'))?></h4>
+				<div class="data-value"><?php echo ($element->skin_preparation ? $element->skin_preparation->name : 'Not specified') ?>/div>
+				</div>
 			</div>
 		</div>
 	</div>
+</section>
 <?php }?>

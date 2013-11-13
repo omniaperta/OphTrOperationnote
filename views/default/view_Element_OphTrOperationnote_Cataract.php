@@ -72,7 +72,7 @@
 						<div class="data-value"><?php echo CHtml::encode($element->predicted_refraction)?></div>
 					</div>
 				</div>
-				<?php if ($element->getSetting('fife')) {?>
+				<?php if (Yii::app()->params['fife']) {?>
 					<div class="row data-row">
 						<div class="large-4 column">
 							<div class="data-label"><?php echo CHtml::encode($element->getAttributeLabel('intraocular_solution_id'))?>:</div>

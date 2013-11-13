@@ -61,7 +61,7 @@
 					<?php echo $element->anaesthetic_delivery->name?>
 				</div>
 			</div>
-			<?php if ($element->getSetting('fife')) {?>
+			<?php if (Yii::app()->params['fife']) {?>
 				<div class="large-3 column">
 					<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('anaesthetic_witness_id'))?></h4>
 					<div class="data-value<?php if (!$element->witness) {?> none<?php }?>">

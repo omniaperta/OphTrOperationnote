@@ -18,7 +18,7 @@
  */
 ?>
 
-<?php if ($element->getSetting('fife')) {?>
+<?php if (Yii::app()->params['fife']) {?>
 	<section class="element <?php echo $element->elementType->class_name?>"
 		data-element-type-id="<?php echo $element->elementType->id ?>"
 		data-element-type-class="<?php echo $element->elementType->class_name ?>"

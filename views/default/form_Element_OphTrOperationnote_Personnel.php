@@ -18,7 +18,7 @@
  */
 ?>
 
-<?php if ($element->getSetting('fife')) {?>
+<?php if (Yii::app()->params['fife']) {?>
 	<section class="element <?php echo $element->elementType->class_name?>"
 		data-element-type-id="<?php echo $element->elementType->id ?>"
 		data-element-type-class="<?php echo $element->elementType->class_name ?>"
@@ -46,7 +46,9 @@
 					array('empty'=>'- Please select -'),
 					array('empty'=>'- Please select -'),
 					array('empty'=>'- Please select -'),
-				)
+				),
+				null,
+				array('label'=>2)
 			)?>
 			<?php echo $form->dropDownList($element, 'operating_department_practitioner_id', CHtml::listData($element->operating_department_practitioners, 'id', 'FullName'), array('empty'=>'- Please select -'), $element->operating_department_practitioner_id)?>
 		</div>
