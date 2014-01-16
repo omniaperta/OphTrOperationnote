@@ -19,8 +19,6 @@
 ?>
 <?php $this->beginContent('//patient/event_container'); ?>
 
-	<h2 class="event-title"><?php echo $this->event_type->name ?></h2>
-
 	<div id="delete_event">
 		<h3>Delete event</h3>
 		<div class="alert-box alert with-icon">
@@ -38,7 +36,7 @@
 			<button type="submit" class="secondary" id="et_canceldelete" name="et_canceldelete">
 				Cancel
 			</button>
-			<img class="loader" src="<?php echo Yii::app()->createUrl('img/ajax-loader.gif')?>" alt="loading..." style="display: none;" />
+			<img class="loader" src="<?php echo Yii::app()->assetManager->createUrl('img/ajax-loader.gif')?>" alt="loading..." style="display: none;" />
 		<?php echo CHtml::endForm(); ?>
 	</div>
 

@@ -34,7 +34,7 @@ function callbackAddProcedure(procedure_id) {
 					if ($('.procedureItem').length == 0) {
 						$('#procedureList').hide();
 					}
-					new OpenEyes.Dialog.Alert({
+					new OpenEyes.UI.Dialog.Alert({
 						content: "You must select either the right or the left eye to add this procedure."
 					}).open();
 				} else {
@@ -43,10 +43,10 @@ function callbackAddProcedure(procedure_id) {
 						m[1] = m[1].replace(/ .*$/,'');
 
 						if (m[1] == 'Element_OphTrOperationnote_GenericProcedure' || $('.'+m[1]).length <1) {
-							$('.Element_OphTrOperationnote_Anaesthetic').before(html);
-							$('.'+m[1]).attr('style','display: none;');
-							$('.'+m[1]).removeClass('hidden');
-							$('.'+m[1]).slideToggle('fast');
+							$('.Element_OphTrOperationnote_ProcedureList .sub-elements').append(html);
+							$('.'+m[1]+':last').attr('style','display: none;');
+                            $('.'+m[1]+':last').removeClass('hidden');
+							$('.'+m[1]+':last').slideToggle('fast');
 						}
 					}
 				}
@@ -167,11 +167,11 @@ $(document).ready(function() {
 						if (result != 'yes') {
 							$('#Element_OphTrOperationnote_ProcedureList_eye_id_'+last_Element_OphTrOperationnote_ProcedureList_eye_id).attr('checked','checked');
 							if (parseInt(result.split("\n").length) == 1) {
-								new OpenEyes.Dialog.Alert({
+								new OpenEyes.UI.Dialog.Alert({
 								  content: "The following procedure requires a specific eye selection and cannot be entered for both eyes at once:\n\n"+result
 								}).open();
 							} else {
-								new OpenEyes.Dialog.Alert({
+								new OpenEyes.UI.Dialog.Alert({
 								  content: "The following procedures require a specific eye selection and cannot be entered for both eyes at once:\n\n"+result
 								}).open();
 							}
@@ -256,7 +256,7 @@ function callbackVerifyAddProcedure(proc_name,durations,callback) {
 			if (result == 'yes') {
 				callback(true);
 			} else {
-				new OpenEyes.Dialog.Alert({
+				new OpenEyes.UI.Dialog.Alert({
 				  content: "You must select either the right or the left eye before adding this procedure."
 				}).open();
 				callback(false);

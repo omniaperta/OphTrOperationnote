@@ -18,17 +18,18 @@
  */
 
 /**
- * This is the model class for table "element_procedurelist".
+ * This is the model class for table "et_ophtroperationnote_genericprocedure".
  *
  * The followings are the available columns in table 'element_operation':
  * @property string $id
  * @property integer $event_id
- * @property integer $surgeon_id
- * @property integer $assistant_id
- * @property integer $anaesthetic_type
+ * @property integer $proc_id
+ * @property string $comments
+ * @property integer $element_index
  *
  * The followings are the available model relations:
  * @property Event $event
+ * @property Procedure $procedure
  */
 class Element_OphTrOperationnote_GenericProcedure extends BaseEventTypeElement
 {
@@ -60,7 +61,7 @@ class Element_OphTrOperationnote_GenericProcedure extends BaseEventTypeElement
 		// will receive user inputs.
 		return array(
 			array('event_id, proc_id, comments, element_index', 'safe'),
-			array('proc_id, comments, element_index', 'required'),
+			array('proc_id, element_index', 'required'),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
 			array('id, event_id, element_index, proc_id, comments', 'safe', 'on' => 'search'),
@@ -90,9 +91,7 @@ class Element_OphTrOperationnote_GenericProcedure extends BaseEventTypeElement
 	{
 		return array(
 			'id' => 'ID',
-			'gas_type_id' => 'Type',
-			'gas_percentage_id' => 'Percentage',
-			'gas_volume_id' => 'Volume (PR)'
+			'proc_id' => 'Procedure',
 		);
 	}
 
@@ -109,9 +108,7 @@ class Element_OphTrOperationnote_GenericProcedure extends BaseEventTypeElement
 
 		$criteria->compare('id', $this->id, true);
 		$criteria->compare('event_id', $this->event_id, true);
-		$criteria->compare('gas_type_id', $this->gas_type_id);
-		$criteria->compare('percentage', $this->percentage);
-		$criteria->compare('volume', $this->volume);
+
 
 		return new CActiveDataProvider(get_class($this), array(
 				'criteria' => $criteria,
@@ -119,9 +116,17 @@ class Element_OphTrOperationnote_GenericProcedure extends BaseEventTypeElement
 	}
 
 	/**
-	 * Set default values for forms on create
+	 * Name is defined by the procedure assigned to this element
+	 *
+	 * @return string
 	 */
-	public function setDefaultOptions()
+	public function getElementTypeName()
 	{
+		if ($this->procedure) {
+			return $this->procedure->term;
+		}
+		else {
+			return 'No Procedure';
+		}
 	}
 }

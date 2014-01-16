@@ -41,13 +41,17 @@
  * @property OphTrOperationnote_IncisionType $incision_type
  * @property OphTrOperationnote_IncisionSite $incision_site
  * @property OphTrOperationnote_IOLPosition $iol_position
- * @property OphTrOperationnote_CataractComplication[] $complications
- * @property OphTrOperationnote_CataractOperativeDevice[] $operative_devices
+ * @property OphTrOperationnote_CataractComplication[] $complication_assignments
+ * @property OphTrOperationnote_CataractComplications[] $complicationItems
+ * @property OphTrOperationnote_CataractOperativeDevice[] $operative_device_assigments
+ * @property OperativeDevice[] $operative_devices
  * @property OphTrOperationnote_IOLType $iol_type
  */
 class Element_OphTrOperationnote_Cataract extends BaseEventTypeElement
 {
 	public $service;
+
+	public $predicted_refraction = null;
 
 	/**
 	 * Returns the static model of the specified AR class.
@@ -75,7 +79,7 @@ class Element_OphTrOperationnote_Cataract extends BaseEventTypeElement
 		// will receive user inputs.
 		return array(
 			array('event_id, incision_site_id, length, meridian, incision_type_id, iol_position_id, iol_type_id, iol_power, eyedraw, report, complication_notes, eyedraw2, report2, predicted_refraction', 'safe'),
-			array('incision_site_id, length, meridian, incision_type_id, iol_position_id, eyedraw, report, eyedraw2', 'required'),
+			array('incision_site_id, length, meridian, incision_type_id, predicted_refraction, iol_position_id, eyedraw, report, eyedraw2', 'required'),
 			array('length', 'numerical', 'integerOnly' => false, 'numberPattern' => '/^[0-9](\.[0-9])?$/', 'message' => 'Length must be 0 - 9.9 in increments of 0.1'),
 			array('meridian', 'numerical', 'integerOnly' => false, 'numberPattern' => '/^[0-9]{1,3}(\.[0-9])?$/', 'min' => 000, 'max' => 360, 'message' => 'Meridian must be 000.5 - 360.0 degrees'),
 			array('predicted_refraction', 'numerical', 'integerOnly' => false, 'numberPattern' => '/^\-?[0-9]{1,2}(\.[0-9]{1,2})?$/', 'min' => -30, 'max' => 30, 'message' => 'Predicted refraction must be between -30.00 and 30.00'),
@@ -99,9 +103,12 @@ class Element_OphTrOperationnote_Cataract extends BaseEventTypeElement
 			'iol_position' => array(self::BELONGS_TO, 'OphTrOperationnote_IOLPosition', 'iol_position_id'),
 			'user' => array(self::BELONGS_TO, 'User', 'created_user_id'),
 			'usermodified' => array(self::BELONGS_TO, 'User', 'last_modified_user_id'),
-			'complications' => array(self::HAS_MANY, 'OphTrOperationnote_CataractComplication', 'cataract_id'),
-			'complicationItems' => array(self::MANY_MANY, 'OphTrOperationnote_CataractComplications', 'et_ophtroperationnote_cataract_complication(cataract_id, complication_id)'),
-			'operative_devices' => array(self::HAS_MANY, 'OphTrOperationnote_CataractOperativeDevice', 'cataract_id'),
+			'complication_assignments' => array(self::HAS_MANY, 'OphTrOperationnote_CataractComplication', 'cataract_id'),
+			'complications' => array(self::HAS_MANY, 'OphTrOperationnote_CataractComplications', 'complication_id',
+				'through' => 'complication_assignments'),
+			'operative_device_assignments' => array(self::HAS_MANY, 'OphTrOperationnote_CataractOperativeDevice', 'cataract_id'),
+			'operative_devices' => array(self::HAS_MANY, 'OperativeDevice', 'operative_device_id',
+				'through' => 'operative_device_assignments'),
 			'iol_type' => array(self::BELONGS_TO, 'OphTrOperationnote_IOLType', 'iol_type_id'),
 		);
 	}
@@ -151,7 +158,7 @@ class Element_OphTrOperationnote_Cataract extends BaseEventTypeElement
 	 */
 	public function setDefaultOptions()
 	{
-		if ($this->getSelectedEye()->id == 1) {
+		if (Yii::app()->controller->selectedEyeForEyedraw->id == 1) {
 			$this->meridian = 0;
 		}
 	}
@@ -167,144 +174,86 @@ class Element_OphTrOperationnote_Cataract extends BaseEventTypeElement
 		return parent::beforeDelete();
 	}
 
-	protected function beforeSave()
+	/**
+	 * Update the complications on the element
+	 *
+	 * @param $complication_ids
+	 * @throws Exception
+	 */
+	public function updateComplications($complication_ids)
 	{
-		return parent::beforeSave();
+		$curr_by_id = array();
+
+		foreach ($this->complication_assignments as $ca) {
+			$curr_by_id[$ca->complication_id] = $ca;
+		}
+
+		foreach ($complication_ids as $c_id) {
+			if (!isset($curr_by_id[$c_id])) {
+				$ca = new OphTrOperationnote_CataractComplication();
+				$ca->cataract_id = $this->id;
+				$ca->complication_id = $c_id;
+
+				if (!$ca->save()) {
+					throw new Exception('Unable to save complication assignment: '.print_r($ca->getErrors(),true));
+				}
+			}
+			else {
+				unset($curr_by_id[$c_id]);
+			}
+		}
+
+		foreach ($curr_by_id as $ca) {
+			if (!$ca->delete()) {
+				throw new Exception('Unable to delete complication assignment: '.print_r($ca->getErrors(), true));
+			}
+		}
 	}
 
-	protected function afterSave()
+	/**
+	 * Update the operative devices on the element
+	 *
+	 * @param $operative_device_ids
+	 * @throws Exception
+	 */
+	public function updateOperativeDevices($operative_device_ids)
 	{
-		$existing_complication_ids = array();
+		$curr_by_id = array();
 
-		foreach (OphTrOperationnote_CataractComplication::model()->findAll('cataract_id = :cataractId', array(':cataractId' => $this->id)) as $cc) {
-			$existing_complication_ids[] = $cc->complication_id;
+		foreach ($this->operative_device_assignments as $oda) {
+			$curr_by_id[$oda->operative_device_id] = $oda;
 		}
 
-		if (isset($_POST['OphTrOperationnote_CataractComplications'])) {
-			foreach ($_POST['OphTrOperationnote_CataractComplications'] as $id) {
-				if (!in_array($id,$existing_complication_ids)) {
-					$complication = new OphTrOperationnote_CataractComplication;
-					$complication->cataract_id = $this->id;
-					$complication->complication_id = $id;
+		foreach ($operative_device_ids as $od_id) {
+			if (!isset($curr_by_id[$od_id])) {
+				$oda = new OphTrOperationnote_CataractOperativeDevice();
+				$oda->cataract_id = $this->id;
+				$oda->operative_device_id = $od_id;
 
-					if (!$complication->save()) {
-						throw new Exception('Unable to save cataract complication: '.print_r($complication->getErrors(),true));
-					}
+				if (!$oda->save()) {
+					throw new Exception('Unable to save complication assignment: '.print_r($oda->getErrors(),true));
 				}
+			}
+			else {
+				unset($curr_by_id[$od_id]);
 			}
 		}
 
-		foreach ($existing_complication_ids as $id) {
-			if (!isset($_POST['OphTrOperationnote_CataractComplications']) || !in_array($id,$_POST['OphTrOperationnote_CataractComplications'])) {
-				$cc = OphTrOperationnote_CataractComplication::model()->find('cataract_id = :cataractId and complication_id = :complicationId',array(':cataractId' => $this->id, ':complicationId' => $id));
-				if (!$cc->delete()) {
-					throw new Exception('Unable to delete cataract complication: '.print_r($cc->getErrors(),true));
-				}
+		foreach ($curr_by_id as $oda) {
+			if (!$oda->delete()) {
+				throw new Exception('Unable to delete complication assignment: '.print_r($oda->getErrors(), true));
 			}
 		}
-
-		$existing_device_ids = array();
-
-		foreach (OphTrOperationnote_CataractOperativeDevice::model()->findAll('cataract_id = :cataractId', array(':cataractId' => $this->id)) as $cod) {
-			$existing_device_ids[] = $cod->operative_device_id;
-		}
-
-		if (isset($_POST['OphTrOperationnote_CataractOperativeDevices'])) {
-			foreach ($_POST['OphTrOperationnote_CataractOperativeDevices'] as $id) {
-				if (!in_array($id,$existing_device_ids)) {
-					$operative_device = new OphTrOperationnote_CataractOperativeDevice;
-					$operative_device->cataract_id = $this->id;
-					$operative_device->operative_device_id = $id;
-
-					if (!$operative_device->save()) {
-						throw new Exception('Unable to save cataract operative device: '.print_r($operative_device->getErrors(),true));
-					}
-				}
-			}
-		}
-
-		foreach ($existing_device_ids as $id) {
-			if (!isset($_POST['OphTrOperationnote_CataractOperativeDevices']) || !in_array($id,$_POST['OphTrOperationnote_CataractOperativeDevices'])) {
-				$cod = OphTrOperationnote_CataractOperativeDevice::model()->find('cataract_id = :cataractId and operative_device_id = :operativeDeviceId', array(':cataractId' => $this->id, ':operativeDeviceId' => $id));
-				if (!$cod->delete()) {
-					throw new Exception('Unable to delete operative device: '.print_r($cod->getErrors(),true));
-				}
-			}
-		}
-
-		return parent::afterSave();
 	}
 
-	public function getSelectedEye()
-	{
-		$eye = new Eye;
-
-		if (Yii::app()->getController()->getAction()->id == 'create') {
-			// Get the procedure list and eye from the most recent booking for the episode of the current user's subspecialty
-			if (!$patient = Patient::model()->findByPk(@$_GET['patient_id'])) {
-				throw new SystemException('Patient not found: '.@$_GET['patient_id']);
-			}
-
-			if ($episode = $patient->getEpisodeForCurrentSubspecialty()) {
-				if ($api = Yii::app()->moduleAPI->get('OphTrOperationbooking')) {
-					if ($booking = $api->getMostRecentBookingForEpisode($patient, $episode)) {
-						$eye = $booking->operation->eye;
-					}
-				}
-			}
-		}
-
-		if (isset($_GET['eye'])) {
-			$eye = Eye::model()->findByPk($_GET['eye']);
-		}
-
-		if ($eye->name == 'Both') {
-			$eye = Eye::model()->find('name=?',array('Right'));
-		}
-
-		return $eye;
-	}
-
+	/**
+	 * The eye of the procedure is stored in the parent procedure list element
+	 *
+	 * @return Eye
+	 */
 	public function getEye()
 	{
 		return Element_OphTrOperationnote_ProcedureList::model()->find('event_id=?',array($this->event_id))->eye;
-	}
-
-	public function getOperative_device_list()
-	{
-		return $this->getDevicesBySiteAndSubspecialty();
-	}
-
-	public function getOperative_device_defaults()
-	{
-		$ids = array();
-		foreach ($this->getDevicesBySiteAndSubspecialty(true) as $id => $item) {
-			$ids[] = $id;
-		}
-		return $ids;
-	}
-
-	public function getDevicesBySiteAndSubspecialty($default=false)
-	{
-		$criteria = new CDbCriteria;
-		$criteria->addCondition('subspecialty_id = :subspecialtyId and site_id = :siteId');
-		$criteria->params[':subspecialtyId'] = Firm::model()->findByPk(Yii::app()->session['selected_firm_id'])->serviceSubspecialtyAssignment->subspecialty_id;
-		$criteria->params[':siteId'] = Yii::app()->session['selected_site_id'];
-
-		if ($default) {
-			$criteria->addCondition('siteSubspecialtyAssignments.default = :one');
-			$criteria->params[':one'] = 1;
-		}
-
-		$criteria->order = 'name asc';
-
-		return CHtml::listData(OperativeDevice::model()
-			->with(array(
-				'siteSubspecialtyAssignments' => array(
-					'joinType' => 'JOIN',
-				),
-			))
-			->findAll($criteria),'id','name');
 	}
 
 	public function getOphTrOperationnote_IOLTypes_NHS()
@@ -327,6 +276,11 @@ class Element_OphTrOperationnote_Cataract extends BaseEventTypeElement
 		return OphTrOperationnote_IOLType::model()->findAll($criteria);
 	}
 
+	/**
+	 * Validate IOL data if IOL is part of the element
+	 *
+	 * @return bool
+	 */
 	public function beforeValidate()
 	{
 		$iol_position = OphTrOperationnote_IOLPosition::model()->findByPk($this->iol_position_id);
@@ -345,20 +299,13 @@ class Element_OphTrOperationnote_Cataract extends BaseEventTypeElement
 		return parent::beforeValidate();
 	}
 
+	/**
+	 * Check the eye draw for any IOL elements. If there is one, IOL fields should not be hidden
+	 *
+	 * @return bool
+	 */
 	public function getIol_hidden()
 	{
-		if (!empty($_POST)) {
-			$eyedraw = json_decode($_POST['Element_OphTrOperationnote_Cataract']['eyedraw']);
-
-			foreach ($eyedraw as $object) {
-				if (in_array($object->subclass,Yii::app()->params['eyedraw_iol_classes'])) {
-					return false;
-				}
-			}
-
-			return true;
-		}
-
 		if ($eyedraw = @json_decode($this->eyedraw)) {
 			if (is_array($eyedraw)) {
 				foreach ($eyedraw as $object) {

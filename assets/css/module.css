@@ -1,4 +1,3 @@
-/** Phasing */
 /**
  * OpenEyes
  *
@@ -16,85 +15,90 @@
  * @copyright Copyright (c) 2011-2013, OpenEyes Foundation
  * @license http://www.gnu.org/licenses/gpl-3.0.html The GNU General Public License V3.0
  */
-/* line 2, ../sass/components/_event.scss */
-.event.ophtroperationnote {
+/* line 17, ../sass/components/_event.scss */
+.event {
   border-color: #fd6892;
 }
-/* line 4, ../sass/components/_event.scss */
-.event.ophtroperationnote .event-content {
-  background-image: url('../img/watermark.png?1383822786');
+/* line 19, ../sass/components/_event.scss */
+.event .event-content {
+  background-image: url('../img/watermark.png?1387445464');
 }
-/* line 7, ../sass/components/_event.scss */
-.event.ophtroperationnote .event-title {
+/* line 22, ../sass/components/_event.scss */
+.event .event-title {
   background-image: url('../img/medium.png?1383822786');
 }
 
-/* line 1, ../sass/components/_eyedraw.scss */
+/* line 28, ../sass/components/_event.scss */
+.view .sub-element-header {
+  margin-bottom: 0.5em;
+}
+/* line 32, ../sass/components/_event.scss */
+.view .data-value.highlight {
+  margin-left: 0.5em;
+}
+
+/* line 17, ../sass/components/_eyedraw.scss */
 #ed_canvas_edit_Cataract {
   background-color: #fff;
   border: 1px solid #000;
   margin-top: 1em;
 }
 
-/* line 7, ../sass/components/_eyedraw.scss */
+/* line 23, ../sass/components/_eyedraw.scss */
 #ed_canvas_edit_Position {
   background-color: #DAE6F1;
   border: 0;
   margin-left: 80px;
 }
 
-/* line 13, ../sass/components/_eyedraw.scss */
+/* line 29, ../sass/components/_eyedraw.scss */
 #ed_canvas_edit_Buckle {
   background-color: #fff;
   border: 1px solid #000;
 }
 
-/* line 21, ../sass/components/_eyedraw.scss */
+/* line 37, ../sass/components/_eyedraw.scss */
 .Element_OphTrOperationnote_Vitrectomy .ed_toolbar,
 .Element_OphTrOperationnote_Buckle .ed_toolbar,
 .Element_OphTrOperationnote_Cataract .ed_toolbar {
   margin: 0;
 }
 
-/* line 92, ../../../../../sass/new/openeyes/_mixins.scss */
+/* line 115, ../../../../assets/sass/openeyes/_mixins.scss */
 .row.cataract .column.fixed {
   width: 322px;
 }
 
-@media only screen and (min-width: 768px) {
-  /* line 102, ../../../../../sass/new/openeyes/_mixins.scss */
-  .row.cataract .column.fluid {
-    width: -moz-calc(100% - 322px);
-    width: -o-calc(100% - 322px);
-    width: -webkit-calc(100% - 322px);
-    width: calc(100% - 322px);
-  }
+/* line 125, ../../../../assets/sass/openeyes/_mixins.scss */
+.row.cataract .column.fluid {
+  width: -moz-calc(100% - 322px);
+  width: -o-calc(100% - 322px);
+  width: -webkit-calc(100% - 322px);
+  width: calc(100% - 322px);
 }
-/* line 92, ../../../../../sass/new/openeyes/_mixins.scss */
+
+/* line 115, ../../../../assets/sass/openeyes/_mixins.scss */
 .row.buckle .column.fixed {
   width: 322px;
 }
 
-@media only screen and (min-width: 768px) {
-  /* line 102, ../../../../../sass/new/openeyes/_mixins.scss */
-  .row.buckle .column.fluid {
-    width: -moz-calc(100% - 322px);
-    width: -o-calc(100% - 322px);
-    width: -webkit-calc(100% - 322px);
-    width: calc(100% - 322px);
-  }
+/* line 125, ../../../../assets/sass/openeyes/_mixins.scss */
+.row.buckle .column.fluid {
+  width: -moz-calc(100% - 322px);
+  width: -o-calc(100% - 322px);
+  width: -webkit-calc(100% - 322px);
+  width: calc(100% - 322px);
 }
-/* line 92, ../../../../../sass/new/openeyes/_mixins.scss */
+
+/* line 115, ../../../../assets/sass/openeyes/_mixins.scss */
 .row.vitrectomy .column.fixed {
   width: 322px;
 }
 
-@media only screen and (min-width: 768px) {
-  /* line 102, ../../../../../sass/new/openeyes/_mixins.scss */
-  .row.vitrectomy .column.fluid {
-    width: -moz-calc(100% - 322px);
-    width: -o-calc(100% - 322px);
-    width: -webkit-calc(100% - 322px);
-    width: calc(100% - 322px);
-  }
+/* line 125, ../../../../assets/sass/openeyes/_mixins.scss */
+.row.vitrectomy .column.fluid {
+  width: -moz-calc(100% - 322px);
+  width: -o-calc(100% - 322px);
+  width: -webkit-calc(100% - 322px);
+  width: calc(100% - 322px);
 }

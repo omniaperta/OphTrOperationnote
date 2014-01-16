@@ -1,4 +1,3 @@
-<?php /* DEPRECATED */ ?>
 <?php
 /**
  * OpenEyes
@@ -20,6 +19,6 @@
 ?>
 <?php $this->renderPartial(
 		'form_' . get_class($element),
-		array('element' => $element, 'data' => $data, 'form' => $form),
+		array('element' => $element, 'data' => $data, 'form' => $form, 'child' => $child),
 		false, false
 )?>

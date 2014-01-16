@@ -20,7 +20,7 @@
 <div class="page">
 	<div class="header">
 		<div class="title middle">
-			<img src="<?php echo Yii::app()->createUrl('img/_print/letterhead_seal.jpg')?>" alt="letterhead_seal" class="seal" width="100" height="83"/>
+			<img src="<?php echo Yii::app()->assetManager->createUrl('img/_print/letterhead_seal.jpg')?>" alt="letterhead_seal" class="seal" width="100" height="83"/>
 			<h1>Operation Note</h1>
 		</div>
 		<div class="headerInfo">
@@ -91,7 +91,7 @@
 
 		<h2>Operation Details</h2>
 		<div class="operationDetails details">
-			<?php $this->renderPartial('print_OperationDetails') ?>
+			<?php $this->renderAllProcedureElements($this->action->id); ?>
 		</div>
 
 		<h2>Anaesthetic Details</h2>

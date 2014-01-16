@@ -19,10 +19,9 @@
 ?>
 <?php
 	$this->beginContent('//patient/event_container');
-	$assetpath = Yii::app()->getAssetManager()->publish(Yii::getPathOfAlias('application.modules.OphTrOperationbooking.assets')).'/';
+	$assetAliasPath = 'application.modules.OphTrOperationbooking.assets';
 	$this->moduleNameCssClass.=' edit';
 ?>
-	<h2 class="event-title"><?php echo $this->event_type->name ?></h2>
 
 	<div class="row">
 		<div class="large-12 column">
@@ -64,7 +63,7 @@
 												<input type="radio" value="booking<?php echo $booking->operation->event_id?>" name="SelectBooking" />
 											</span>
 											<span class="large-1 column">
-												<img src="<?php echo Yii::app()->createUrl($assetpath.'img/small.png')?>" alt="op" width="19" height="19" />
+												<img src="<?php echo Yii::app()->assetManasger->createUrl('img/small.png', $assetAliasPath)?>" alt="op" style="height:15px" />
 											</span>
 											<span class="large-3 column">
 												<?php echo $booking->operation->booking->session->NHSDate('date')?>
