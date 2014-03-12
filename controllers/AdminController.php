@@ -21,7 +21,11 @@ class AdminController extends ModuleAdminController
 {
 	public function actionViewPostOpDrugs()
 	{
+		$transaction = Yii::app()->db->beginTransaction('List','Post-op drugs');
+
 		Audit::add('admin','list',null,null,array('module'=>'OphTrOperationnote','model'=>'OphTrOperationnote_PostopDrug'));
+
+		$transaction->commit();
 
 		$this->render('postopdrugs');
 	}
@@ -31,15 +35,23 @@ class AdminController extends ModuleAdminController
 		$drug = new OphTrOperationnote_PostopDrug;
 
 		if (!empty($_POST)) {
+			$transaction = Yii::app()->db->beginTransaction('Create','Post-op drug');
+
 			$drug->attributes = $_POST['OphTrOperationnote_PostopDrug'];
 
 			if (!$drug->validate()) {
+				$transaction->rollback();
 				$errors = $drug->getErrors();
 			} else {
 				if (!$drug->save()) {
+					$transaction->rollback();
+
 					throw new Exception("Unable to save drug: ".print_r($drug->getErrors(),true));
 				}
 				Audit::add('admin-OphTrOperationnote_PostopDrug','add',$drug->id);
+
+				$transaction->commit();
+
 				$this->redirect('/OphTrOperationnote/admin/viewPostOpDrugs');
 			}
 		}
@@ -57,22 +69,28 @@ class AdminController extends ModuleAdminController
 		}
 
 		if (!empty($_POST)) {
+			$transaction = Yii::app()->db->beginTransaction('Update','Post-op drug');
+
 			$drug->attributes = $_POST['OphTrOperationnote_PostopDrug'];
 
-			if (!$drug->validate()) {
-				$errors = $drug->getErrors();
-			} else {
-				if (!$drug->save()) {
-					throw new Exception("Unable to save drug: ".print_r($drug->getErrors(),true));
-				}
+			if (!$drug->save()) {
+				$transaction->rollback();
 
+				throw new Exception("Unable to save drug: ".print_r($drug->getErrors(),true));
+			} else {
 				Audit::add('admin-OphTrOperationnote_PostopDrug','edit',$id);
+
+				$transaction->commit();
 
 				$this->redirect('/OphTrOperationnote/admin/viewPostOpDrugs');
 			}
-		} else {
-			Audit::add('admin-OphTrOperationnote_PostopDrug','view',$id);
 		}
+
+		$transaction = Yii::app()->db->beginTransaction('View','Post-op drug');
+
+		Audit::add('admin-OphTrOperationnote_PostopDrug','view',$id);
+
+		$transaction->commit();
 
     $this->render('/admin/editpostopdrug',array(
       'drug' => $drug,
@@ -83,27 +101,43 @@ class AdminController extends ModuleAdminController
 	public function actionDeletePostOpDrugs()
 	{
 		$result = 1;
-		foreach (OphTrOperationnote_PostopDrug::model()->findAllByPk(@$_POST['drugs']) as $drug) {
-			if (!$drug->delete()) {
-				$result = 0;
-			} else {
-				Audit::add('admin','delete',$drug->id,null,array('module'=>'OphTrOperationnote','model'=>'OphTrOperationnote_PostopDrug'));
+
+		if (!empty($_POST['drugs'])) {
+			$transaction = Yii::app()->db->beginTransaction('Delete','Post-op drugs');
+
+			foreach (OphTrOperationnote_PostopDrug::model()->findAllByPk(@$_POST['drugs']) as $drug) {
+				if (!$drug->delete()) {
+					$transaction->rollback();
+
+					throw new Exception("Unable to delete post-op drug: ".print_r($drug->getErrors(),true));
+				} else {
+					Audit::add('admin','delete',$drug->id,null,array('module'=>'OphTrOperationnote','model'=>'OphTrOperationnote_PostopDrug'));
+				}
 			}
+
+			$transaction->commit();
 		}
+
 		echo $result;
 	}
 
 	public function actionSortPostOpDrugs()
 	{
 		if (!empty($_POST['order'])) {
+			$transaction = Yii::app()->db->beginTransaction('Sort','Post-op drugs');
+
 			foreach ($_POST['order'] as $i => $id) {
 				if ($drug = OphTrOperationnote_PostopDrug::model()->findByPk($id)) {
 					$drug->display_order = $i+1;
 					if (!$drug->save()) {
+						$transaction->rollback();
+
 						throw new Exception("Unable to save drug: ".print_r($drug->getErrors(),true));
 					}
 				}
 			}
+
+			$transaction->commit();
 		}
 	}
 }
