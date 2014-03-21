@@ -74,12 +74,7 @@ class DefaultController extends BaseEventTypeController
 	 */
 	protected function getEventElements()
 	{
-		if ($this->event) {
-			return $this->event->getElements();
-			//TODO: check for missing elements for procedures
-
-		}
-		else {
+		if (!$this->event || $this->event->isNewRecord) {
 			$elements = $this->event_type->getDefaultElements();
 			if ($procedures = $this->getBookingProcedures()) {
 				// need to add procedure elements for the booking operation
@@ -106,6 +101,9 @@ class DefaultController extends BaseEventTypeController
 				}
 			}
 			return $elements;
+		}
+		else {
+			return $this->event->getElements();
 		}
 	}
 
@@ -539,7 +537,7 @@ class DefaultController extends BaseEventTypeController
 
 		if (!empty($_POST['Element_OphTrOperationnote_ProcedureList']['eye_id'])) {
 			$eye = Eye::model()->findByPk($_POST['Element_OphTrOperationnote_ProcedureList']['eye_id']);
-		} else if ($this->event) {
+		} else if ($this->event && !$this->event->isNewRecord) {
 			$eye = Element_OphTrOperationnote_ProcedureList::model()->find('event_id=?',array($this->event->id))->eye;
 		} else if (!empty($_GET['eye'])) {
 			$eye = Eye::model()->findByPk($_GET['eye']);
