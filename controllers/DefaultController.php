@@ -110,6 +110,16 @@ class DefaultController extends BaseEventTypeController
 	}
 
 	/**
+	 * Render HTML print layout
+	 * @see BaseEventTypeController::printHtml
+	 */
+	protected function printHTML($id, $elements, $template='print')
+	{
+		YII::app()->assetManager->registerCssFile('css/printcontent.css');
+		return parent::printHTML($id, $elements, $template);
+	}
+
+	/**
 	 * For new notes for a specific operation, initialise procedure list with relevant procedures
 	 *
 	 * @param Element_OphTrOperationnote_ProcedureList $element
@@ -716,16 +726,8 @@ class DefaultController extends BaseEventTypeController
 	public function getOperativeDeviceList($element)
 	{
 		$curr_list = CHtml::listData($element->operative_devices, 'id', 'name');
-
 		$devices = $this->getOperativeDevicesBySiteAndSubspecialty(false,array_keys($curr_list));
-		$list = CHtml::listData($devices,'id','name');
-
-		if ($missing = array_diff($curr_list, $list)) {
-			foreach ($missing as $id => $name) {
-				$list[$id] =  $name;
-			}
-		}
-		return $list;
+		return CHtml::listData($devices,'id','name');
 	}
 
 	/**
@@ -764,7 +766,7 @@ class DefaultController extends BaseEventTypeController
 		$criteria->order = 'name asc';
 
 		return OperativeDevice::model()
-			->notDeletedOrPk($include_ids)
+			->activeOrPk($include_ids)
 			->with(array(
 					'siteSubspecialtyAssignments' => array(
 						'joinType' => 'JOIN',
@@ -787,14 +789,7 @@ class DefaultController extends BaseEventTypeController
 		}
 
 		$drugs = $this->getPostOpDrugsBySiteAndSubspecialty(false,$drug_ids);
-		$list = CHtml::listData($drugs,'id','name');
-		$curr_list = CHtml::listData($element->drugs, 'id', 'name');
-		if ($missing = array_diff($curr_list, $list)) {
-			foreach ($missing as $id => $name) {
-				$list[$id] =  $name;
-			}
-		}
-		return $list;
+		return CHtml::listData($drugs,'id','name');
 	}
 
 	/**
