@@ -30,7 +30,7 @@
 
 	<div class="element-fields">
 	<?php echo $form->hiddenInput($element, 'booking_event_id')?>
-	<?php echo $form->radioButtons($element, 'eye_id', 'eye', ($element->eye() ? $element->eye()->id : null), null, null, null ,null,null,array('label'=>2,'field'=>10))?>
+	<?php echo $form->radioButtons($element, 'eye_id', 'eye', ($element->eye() ? $element->eye()->id : null), false, false, false, false, array(), array('label'=>2,'field'=>10))?>
 	<?php
 	$form->widget('application.widgets.ProcedureSelection',array(
 		'element' => $element,
@@ -38,6 +38,11 @@
 		'newRecord' => true,
 		'last' => true,
 		'hidden' => ($this->action->id == 'create' && $element->eye == null && !@$_POST['Element_OphTrOperationnote_ProcedureList']['eye_id']),
+		'layoutColumns' => array(
+			'label' => 2,
+			'field' => 4,
+			'procedures' => 6,
+		),
 	));
 	?>
 	</div>
