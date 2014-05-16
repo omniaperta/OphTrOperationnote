@@ -74,7 +74,7 @@ class DefaultController extends BaseEventTypeController
 	 */
 	protected function getEventElements()
 	{
-		if ($this->event) {
+		if ($this->event && !$this->event->isNewRecord) {
 			return $this->event->getElements();
 			//TODO: check for missing elements for procedures
 
@@ -84,8 +84,6 @@ class DefaultController extends BaseEventTypeController
 			if ($procedures = $this->getBookingProcedures()) {
 				// need to add procedure elements for the booking operation
 				$extra_elements = array();
-
-
 				foreach ($procedures as $proc) {
 					$procedure_elements = $this->getProcedureSpecificElements($proc->id);
 					foreach ($procedure_elements as $element) {
@@ -107,16 +105,6 @@ class DefaultController extends BaseEventTypeController
 			}
 			return $elements;
 		}
-	}
-
-	/**
-	 * Render HTML print layout
-	 * @see BaseEventTypeController::printHtml
-	 */
-	protected function printHTML($id, $elements, $template='print')
-	{
-		YII::app()->assetManager->registerCssFile('css/printcontent.css');
-		return parent::printHTML($id, $elements, $template);
 	}
 
 	/**
@@ -353,25 +341,14 @@ class DefaultController extends BaseEventTypeController
 			}
 
 			$element->setDefaultOptions();
-
-			$this->renderPartial(
-				'create' . '_' . $element->create_view,
-				array('element' => $element, 'data' => array(), 'form' => $form, 'ondemand' => true),
-				false, true
-			);
+			$this->renderElement($element, 'create', $form, array(), array('ondemand' => true), false, true);
 		}
 
 		if (count($procedureSpecificElements) == 0) {
 			$element = new Element_OphTrOperationnote_GenericProcedure;
 			$element->proc_id = $proc->id;
-
 			$element->setDefaultOptions();
-
-			$this->renderPartial(
-				'create' . '_' . $element->create_view,
-				array('element' => $element, 'data' => array(), 'form' => $form, 'ondemand' => true),
-				false, true
-			);
+			$this->renderElement($element, 'create', $form, array(), array('ondemand' => true), false, true);
 		}
 	}
 
@@ -693,6 +670,30 @@ class DefaultController extends BaseEventTypeController
 	}
 
 	/**
+	 * Set the complications for the Element_OphTrOperationote_Trabectome element
+	 * @param $element
+	 * @param $data
+	 * @param $index
+	 */
+	protected function setComplexAttributes_Element_OphTrOperationnote_Trabectome($element, $data, $index)
+	{
+		$model_name = CHtml::modelName($element);
+		$complications = array();
+		if (@$data[$model_name]['complications']) {
+			foreach ($data[$model_name]['complications'] as $id) {
+				$complications[] = OphTrOperationnote_Trabectome_Complication::model()->findByPk($id);
+			}
+		}
+		$element->complications = $complications;
+	}
+
+	protected function saveComplexAttributes_Element_OphTrOperationnote_Trabectome($element, $data, $index)
+	{
+		$model_name = CHtml::modelName($element);
+		$element->updateComplications(isset($data[$model_name]['complications']) ? $data[$model_name]['complications'] : array() );
+	}
+
+	/**
 	 * Return the anaesthetic agent list
 	 *
 	 * @param Element_OphTrOperationnote_Anaesthetic $element
@@ -727,6 +728,7 @@ class DefaultController extends BaseEventTypeController
 		$criteria->order = 'name';
 
 		return AnaestheticAgent::model()
+			->active()
 			->with(array(
 					$relation => array(
 						'joinType' => 'JOIN',
@@ -743,15 +745,9 @@ class DefaultController extends BaseEventTypeController
 	 */
 	public function getOperativeDeviceList($element)
 	{
-		$devices = $this->getOperativeDevicesBySiteAndSubspecialty();
-		$list = CHtml::listData($devices,'id','name');
 		$curr_list = CHtml::listData($element->operative_devices, 'id', 'name');
-		if ($missing = array_diff($curr_list, $list)) {
-			foreach ($missing as $id => $name) {
-				$list[$id] =  $name;
-			}
-		}
-		return $list;
+		$devices = $this->getOperativeDevicesBySiteAndSubspecialty(false,array_keys($curr_list));
+		return CHtml::listData($devices,'id','name');
 	}
 
 	/**
@@ -775,7 +771,7 @@ class DefaultController extends BaseEventTypeController
 	 * @param bool $default
 	 * @return OperativeDevice[]
 	 */
-	protected function getOperativeDevicesBySiteAndSubspecialty($default = false)
+	protected function getOperativeDevicesBySiteAndSubspecialty($default = false, $include_ids = null)
 	{
 		$criteria = new CDbCriteria;
 		$criteria->addCondition('subspecialty_id = :subspecialtyId and site_id = :siteId');
@@ -790,6 +786,7 @@ class DefaultController extends BaseEventTypeController
 		$criteria->order = 'name asc';
 
 		return OperativeDevice::model()
+			->activeOrPk($include_ids)
 			->with(array(
 					'siteSubspecialtyAssignments' => array(
 						'joinType' => 'JOIN',
@@ -806,15 +803,13 @@ class DefaultController extends BaseEventTypeController
 	 */
 	public function getPostOpDrugList($element)
 	{
-		$drugs = $this->getPostOpDrugsBySiteAndSubspecialty();
-		$list = CHtml::listData($drugs,'id','name');
-		$curr_list = CHtml::listData($element->drugs, 'id', 'name');
-		if ($missing = array_diff($curr_list, $list)) {
-			foreach ($missing as $id => $name) {
-				$list[$id] =  $name;
-			}
+		$drug_ids = array();
+		foreach ($element->drugs as $drug) {
+			$drug_ids[] = $drug->id;
 		}
-		return $list;
+
+		$drugs = $this->getPostOpDrugsBySiteAndSubspecialty(false,$drug_ids);
+		return CHtml::listData($drugs,'id','name');
 	}
 
 	/**
@@ -823,7 +818,7 @@ class DefaultController extends BaseEventTypeController
 	 * @param bool $default
 	 * @return OphTrOperationnote_PostopDrug[]
 	 */
-	protected function getPostOpDrugsBySiteAndSubspecialty($default=false)
+	protected function getPostOpDrugsBySiteAndSubspecialty($default=false, $include_ids=null)
 	{
 		$criteria = new CDbCriteria;
 		$criteria->addCondition('subspecialty_id = :subspecialtyId and site_id = :siteId');
@@ -843,6 +838,7 @@ class DefaultController extends BaseEventTypeController
 						'joinType' => 'JOIN',
 					),
 				))
+			->activeOrPk($include_ids)
 			->findAll($criteria);
 	}
 
