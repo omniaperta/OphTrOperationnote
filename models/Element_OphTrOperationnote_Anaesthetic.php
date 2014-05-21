@@ -47,6 +47,7 @@ class Element_OphTrOperationnote_Anaesthetic extends Element_OpNote
 	public $service;
 	public $surgeonlist;
 	public $witness_enabled = false;
+	public $auto_update_relations = true;
 
 	/**
 	 * Returns the static model of the specified AR class.
@@ -73,7 +74,7 @@ class Element_OphTrOperationnote_Anaesthetic extends Element_OpNote
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('event_id, anaesthetist_id, anaesthetic_type_id, anaesthetic_delivery_id, anaesthetic_comment, anaesthetic_witness_id', 'safe'),
+			array('event_id, anaesthetist_id, anaesthetic_type_id, anaesthetic_delivery_id, anaesthetic_comment, anaesthetic_witness_id, anaesthetic_agents, anaesthetic_complications', 'safe'),
 			array('anaesthetic_type_id, anaesthetist_id, anaesthetic_delivery_id', 'required'),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
@@ -177,76 +178,6 @@ class Element_OphTrOperationnote_Anaesthetic extends Element_OpNote
 		return parent::beforeDelete();
 	}
 
-	/**
-	 * Update the Anaesthetic Agents associated with the element
-	 *
-	 * @param $agent_ids
-	 * @throws Exception
-	 */
-	public function updateAnaestheticAgents($agent_ids)
-	{
-		$curr_by_id = array();
-		foreach ($this->anaesthetic_agent_assignments as $aa) {
-			$curr_by_id[$aa->anaesthetic_agent_id] = $aa;
-		}
-
-		foreach ($agent_ids as $aa_id) {
-			if (!isset($curr_by_id[$aa_id])) {
-				$aa = new OphTrOperationnote_OperationAnaestheticAgent();
-				$aa->et_ophtroperationnote_anaesthetic_id = $this->id;
-				$aa->anaesthetic_agent_id = $aa_id;
-
-				if (!$aa->save()) {
-					throw new Exception('Unable to save anaesthetic agent assignment: '.print_r($aa->getErrors(),true));
-				}
-			}
-			else {
-				unset($curr_by_id[$aa_id]);
-			}
-		}
-		foreach ($curr_by_id as $aa) {
-			if (!$aa->delete()) {
-				throw new Exception('Unable to delete anaesthetic agent assignment: '.print_r($aa->getErrors(), true));
-			}
-		}
-	}
-
-	/**
-	 * Update the complications assigned to this element
-	 *
-	 * @param integer[] $complication_ids
-	 * @throws Exception
-	 */
-	public function updateComplications($complication_ids)
-	{
-		$curr_by_id = array();
-
-		foreach ($this->anaesthetic_complication_assignments as $ca) {
-			$curr_by_id[$ca->anaesthetic_complication_id] = $ca;
-		}
-
-		foreach ($complication_ids as $c_id) {
-			if (!isset($curr_by_id[$c_id])) {
-				$ca = new OphTrOperationnote_AnaestheticComplication();
-				$ca->et_ophtroperationnote_anaesthetic_id = $this->id;
-				$ca->anaesthetic_complication_id = $c_id;
-
-				if (!$ca->save()) {
-					throw new Exception('Unable to save complication assignment: '.print_r($ca->getErrors(),true));
-				}
-			}
-			else {
-				unset($curr_by_id[$c_id]);
-			}
-		}
-
-		foreach ($curr_by_id as $ca) {
-			if (!$ca->delete()) {
-				throw new Exception('Unable to delete complication assignment: '.print_r($ca->getErrors(), true));
-			}
-		}
-	}
-
 	// TODO: This should use the standard surgeons method
 	public function getSurgeons()
 	{
@@ -288,7 +219,7 @@ class Element_OphTrOperationnote_Anaesthetic extends Element_OpNote
 		$complication_values = array();
 
 		foreach ($this->anaesthetic_complication_assignments as $complication_assignment) {
-			$complication_values[] = $complication_assignment->anaesthetic_complication_id;
+			$complication_values[] = $complication_assignment->id;
 		}
 
 		return $complication_values = array();
