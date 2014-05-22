@@ -52,6 +52,7 @@ class Element_OphTrOperationnote_Cataract extends Element_OnDemand
 	public $service;
 
 	public $predicted_refraction = null;
+	public $auto_update_relations = true;
 
 	/**
 	 * Returns the static model of the specified AR class.
@@ -78,7 +79,7 @@ class Element_OphTrOperationnote_Cataract extends Element_OnDemand
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('event_id, incision_site_id, length, meridian, incision_type_id, iol_position_id, iol_type_id, iol_power, eyedraw, report, complication_notes, eyedraw2, report2, predicted_refraction', 'safe'),
+			array('event_id, incision_site_id, length, meridian, incision_type_id, iol_position_id, iol_type_id, iol_power, eyedraw, report, complication_notes, eyedraw2, report2, predicted_refraction, complications, operative_devices', 'safe'),
 			array('incision_site_id, length, meridian, incision_type_id, predicted_refraction, iol_position_id, eyedraw, report, eyedraw2', 'required'),
 			array('length', 'numerical', 'integerOnly' => false, 'numberPattern' => '/^[0-9](\.[0-9])?$/', 'message' => 'Length must be 0 - 9.9 in increments of 0.1'),
 			array('meridian', 'numerical', 'integerOnly' => false, 'numberPattern' => '/^[0-9]{1,3}(\.[0-9])?$/', 'min' => 000, 'max' => 360, 'message' => 'Meridian must be 000.5 - 360.0 degrees'),
@@ -172,78 +173,6 @@ class Element_OphTrOperationnote_Cataract extends Element_OnDemand
 		OphTrOperationnote_CataractComplication::model()->deleteAllByAttributes(array('cataract_id' => $this->id));
 		OphTrOperationnote_CataractOperativeDevice::model()->deleteAllByAttributes(array('cataract_id' => $this->id));
 		return parent::beforeDelete();
-	}
-
-	/**
-	 * Update the complications on the element
-	 *
-	 * @param $complication_ids
-	 * @throws Exception
-	 */
-	public function updateComplications($complication_ids)
-	{
-		$curr_by_id = array();
-
-		foreach ($this->complication_assignments as $ca) {
-			$curr_by_id[$ca->complication_id] = $ca;
-		}
-
-		foreach ($complication_ids as $c_id) {
-			if (!isset($curr_by_id[$c_id])) {
-				$ca = new OphTrOperationnote_CataractComplication();
-				$ca->cataract_id = $this->id;
-				$ca->complication_id = $c_id;
-
-				if (!$ca->save()) {
-					throw new Exception('Unable to save complication assignment: '.print_r($ca->getErrors(),true));
-				}
-			}
-			else {
-				unset($curr_by_id[$c_id]);
-			}
-		}
-
-		foreach ($curr_by_id as $ca) {
-			if (!$ca->delete()) {
-				throw new Exception('Unable to delete complication assignment: '.print_r($ca->getErrors(), true));
-			}
-		}
-	}
-
-	/**
-	 * Update the operative devices on the element
-	 *
-	 * @param $operative_device_ids
-	 * @throws Exception
-	 */
-	public function updateOperativeDevices($operative_device_ids)
-	{
-		$curr_by_id = array();
-
-		foreach ($this->operative_device_assignments as $oda) {
-			$curr_by_id[$oda->operative_device_id] = $oda;
-		}
-
-		foreach ($operative_device_ids as $od_id) {
-			if (!isset($curr_by_id[$od_id])) {
-				$oda = new OphTrOperationnote_CataractOperativeDevice();
-				$oda->cataract_id = $this->id;
-				$oda->operative_device_id = $od_id;
-
-				if (!$oda->save()) {
-					throw new Exception('Unable to save complication assignment: '.print_r($oda->getErrors(),true));
-				}
-			}
-			else {
-				unset($curr_by_id[$od_id]);
-			}
-		}
-
-		foreach ($curr_by_id as $oda) {
-			if (!$oda->delete()) {
-				throw new Exception('Unable to delete complication assignment: '.print_r($oda->getErrors(), true));
-			}
-		}
 	}
 
 	/**

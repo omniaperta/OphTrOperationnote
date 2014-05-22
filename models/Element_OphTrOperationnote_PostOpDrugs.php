@@ -30,6 +30,8 @@
  */
 class Element_OphTrOperationnote_PostOpDrugs extends Element_OpNote
 {
+	public $auto_update_relations = true;
+
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @return Element_OphTrOperationnote_PostOpDrugs the static model class
@@ -55,7 +57,7 @@ class Element_OphTrOperationnote_PostOpDrugs extends Element_OpNote
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('event_id', 'safe'),
+			array('drugs', 'safe'),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
 		);
@@ -116,34 +118,4 @@ class Element_OphTrOperationnote_PostOpDrugs extends Element_OpNote
 		OphTrOperationnote_OperationDrug::model()->deleteAllByAttributes(array('ophtroperationnote_postop_drugs_id' => $this->id));
 		return parent::beforeDelete();
 	}
-
-	public function updateDrugs($drug_ids)
-	{
-		$curr_by_id = array();
-		foreach (OphTrOperationnote_OperationDrug::model()->findAll('ophtroperationnote_postop_drugs_id = :drugsId', array(':drugsId' => $this->id)) as $od) {
-			$curr_by_id[$od->drug_id] = $od;
-		}
-
-		foreach ($drug_ids as $d_id) {
-			if (!isset($curr_by_id[$d_id])) {
-				$da = new OphTrOperationnote_OperationDrug();
-				$da->ophtroperationnote_postop_drugs_id = $this->id;
-				$da->drug_id = $d_id;
-				if (!$da->save()) {
-					throw new Exception('Unable to save drug assignment: '.print_r($da->getErrors(),true));
-				}
-			}
-			else {
-				unset($curr_by_id[$d_id]);
-			}
-		}
-
-		foreach ($curr_by_id as $curr) {
-			if (!$curr->delete()) {
-				throw new Exception('Unable to delete drug assignment: '.print_r($curr->getErrors(),true));
-			}
-		}
-
-	}
-
 }
