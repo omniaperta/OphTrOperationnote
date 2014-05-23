@@ -443,16 +443,18 @@ class DefaultController extends BaseEventTypeController
 
 			// generate correctly ordered list of elements based on procedure order
 			$elements = array();
-			foreach ($parent_element->procedures as $proc) {
-				if (isset($by_proc_id[$proc->id])) {
-					$elements[] = $by_proc_id[$proc->id];
-				}
-				else {
-					$procedure_elements = $this->getProcedureSpecificElements($proc->id);
-					foreach ($procedure_elements as $proc_el) {
-						if (isset($by_cls[$proc_el->element_type->class_name])) {
-							if ($el = array_shift($by_cls[$proc_el->element_type->class_name])) {
-								$elements[] = $el;
+			if (is_array($parent_element->procedures)) {
+				foreach ($parent_element->procedures as $proc) {
+					if (isset($by_proc_id[$proc->id])) {
+						$elements[] = $by_proc_id[$proc->id];
+					}
+					else {
+						$procedure_elements = $this->getProcedureSpecificElements($proc->id);
+						foreach ($procedure_elements as $proc_el) {
+							if (isset($by_cls[$proc_el->element_type->class_name])) {
+								if ($el = array_shift($by_cls[$proc_el->element_type->class_name])) {
+									$elements[] = $el;
+								}
 							}
 						}
 					}
@@ -561,32 +563,6 @@ class DefaultController extends BaseEventTypeController
 	}
 
 	/**
-	 * @param Element_OphTrOperationnote_ProcedureList $element
-	 * @param $data
-	 * @param $index
-	 */
-	protected function setComplexAttributes_Element_OphTrOperationnote_ProcedureList($element, $data, $index)
-	{
-		$procs = array();
-		if (isset($data['Procedures_procs'])) {
-			foreach ($data['Procedures_procs'] as $proc_id) {
-				$procs[] = Procedure::model()->findByPk($proc_id);
-			}
-		}
-		$element->procedures = $procs;
-	}
-
-	/**
-	 * @param Element_OphTrOperationnote_ProcedureList $element
-	 * @param array $data
-	 * @param integer $index
-	 */
-	protected function saveComplexAttributes_Element_OphTrOperationnote_ProcedureList($element, $data, $index)
-	{
-		$element->updateProcedures(isset($data['Procedures_procs']) ? $data['Procedures_procs'] : array());
-	}
-
-	/**
 	 * Return the anaesthetic agent list
 	 *
 	 * @param Element_OphTrOperationnote_Anaesthetic $element
@@ -596,7 +572,7 @@ class DefaultController extends BaseEventTypeController
 	{
 		$agents = $this->getAnaestheticAgentsBySiteAndSubspecialty();
 		$list = CHtml::listData($agents,'id','name');
-		$curr_list = CHtml::listData($element->anaesthetic_agents, 'id', 'name');
+		$curr_list = CHtml::listData($element->anaesthetic_agents ? $element->anaesthetic_agents : array(), 'id', 'name');
 		if ($missing = array_diff($curr_list, $list)) {
 			foreach ($missing as $id => $name) {
 				$list[$id] =  $name;
@@ -697,8 +673,10 @@ class DefaultController extends BaseEventTypeController
 	public function getPostOpDrugList($element)
 	{
 		$drug_ids = array();
-		foreach ($element->drugs as $drug) {
-			$drug_ids[] = $drug->id;
+		if (is_array($element->drugs)) {
+			foreach ($element->drugs as $drug) {
+				$drug_ids[] = $drug->id;
+			}
 		}
 
 		$drugs = $this->getPostOpDrugsBySiteAndSubspecialty(false,$drug_ids);
