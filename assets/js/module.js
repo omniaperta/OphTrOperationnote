@@ -170,8 +170,8 @@ $(document).ready(function() {
 							}
 							return false;
 						} else {
-							if ($('#typeProcedure').is(':hidden')) {
-								$('#typeProcedure').slideToggle('fast');
+							if ($('.procedure-selection').is(':hidden')) {
+								$('.procedure-selection').slideToggle('fast');
 							}
 
 							changeEye();
@@ -182,8 +182,8 @@ $(document).ready(function() {
 					}
 				});
 			} else {
-				if ($('#typeProcedure').is(':hidden')) {
-					$('#typeProcedure').slideToggle('fast');
+				if ($('.procedure-selection').is(':hidden')) {
+					$('.procedure-selection').slideToggle('fast');
 				}
 
 				changeEye();
@@ -195,8 +195,8 @@ $(document).ready(function() {
 
 			return false;
 		} else {
-			if ($('#typeProcedure').is(':hidden')) {
-				$('#typeProcedure').slideToggle('fast');
+			if ($('.procedure-selection').is(':hidden')) {
+				$('.procedure-selection').slideToggle('fast');
 			}
 
 			changeEye();
