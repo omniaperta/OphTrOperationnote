@@ -33,7 +33,7 @@
  */
 class Element_OphTrOperationnote_ProcedureList extends Element_OpNote
 {
-	public $service;
+	public $auto_update_relations = true;
 
 	/**
 	 * Returns the static model of the specified AR class.
@@ -60,7 +60,7 @@ class Element_OphTrOperationnote_ProcedureList extends Element_OpNote
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('event_id, eye_id, booking_event_id', 'safe'),
+			array('event_id, eye_id, booking_event_id, procedures', 'safe'),
 			array('eye_id, procedures', 'required'),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
@@ -82,8 +82,8 @@ class Element_OphTrOperationnote_ProcedureList extends Element_OpNote
 			'user' => array(self::BELONGS_TO, 'User', 'created_user_id'),
 			'usermodified' => array(self::BELONGS_TO, 'User', 'last_modified_user_id'),
 			'eye' => array(self::BELONGS_TO, 'Eye', 'eye_id'),
-			'procedures' => array(self::MANY_MANY, 'Procedure', 'ophtroperationnote_procedurelist_procedure_assignment(procedurelist_id, proc_id)', 'order' => 'display_order ASC'),
-			'procedure_assignments' => array(self::HAS_MANY, 'OphTrOperationnote_ProcedureListProcedureAssignment', 'procedurelist_id', 'order' => 'display_order ASC'),
+			'procedures' => array(self::HAS_MANY, 'Procedure', 'proc_id', 'through' => 'procedure_assignment'),
+			'procedure_assignment' => array(self::HAS_MANY, 'OphTrOperationnote_ProcedureListProcedureAssignment', 'procedurelist_id', 'order' => 'display_order ASC'),
 			'bookingEvent' => array(self::BELONGS_TO, 'Event', 'booking_event_id'),
 		);
 	}
@@ -118,49 +118,6 @@ class Element_OphTrOperationnote_ProcedureList extends Element_OpNote
 		return new CActiveDataProvider(get_class($this), array(
 			'criteria' => $criteria,
 		));
-	}
-
-	/**
-	 * Update the procedures for this element with the given ids
-	 *
-	 * @param $procedure_ids
-	 * @throws Exception
-	 */
-	public function updateProcedures($procedure_ids) {
-		$current_procedures = array();
-		foreach ($this->procedure_assignments as $pa) {
-			$current_procedures[$pa->proc_id] = $pa;
-		}
-
-		foreach ($procedure_ids as $i => $proc_id) {
-			$display_order = $i+1;
-			if (isset($current_procedures[$proc_id])) {
-				$procedure_assignment = $current_procedures[$proc_id];
-				if ($procedure_assignment->display_order != $display_order) {
-					$procedure_assignment->display_order = $display_order;
-					if (!$procedure_assignment->save()) {
-						throw new Exception('Unable to save procedure assignment');
-					}
-				}
-				unset($current_procedures[$proc_id]);
-			}
-			else {
-				$procedure_assignment = new OphTrOperationnote_ProcedureListProcedureAssignment;
-				$procedure_assignment->procedurelist_id = $this->id;
-				$procedure_assignment->proc_id = $proc_id;
-				$procedure_assignment->display_order = $display_order;
-				if (!$procedure_assignment->save()) {
-					throw new Exception('Unable to save procedure assignment');
-				}
-			}
-		}
-
-		// delete remaining current procedures
-		foreach ($current_procedures as $pa) {
-			if (!$pa->delete()) {
-				throw new Exception('Unable to delete procedure assignment: '.print_r($pa->getErrors(),true));
-			}
-		}
 	}
 
 	/**

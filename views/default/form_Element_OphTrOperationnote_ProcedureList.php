@@ -33,10 +33,11 @@
 		<?php
 		$form->widget('application.widgets.ProcedureSelection',array(
 			'element' => $element,
-			'selected_procedures' => $element->procedures,
+			'field' => 'procedures',
 			'newRecord' => true,
 			'last' => true,
 			'hidden' => ($this->action->id == 'create' && $element->eye == null && !@$_POST['Element_OphTrOperationnote_ProcedureList']['eye_id']),
+			'callback' => true,
 		));
 		?>
 	</div>
