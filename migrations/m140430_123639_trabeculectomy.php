@@ -4,40 +4,40 @@ class m140430_123639_trabeculectomy extends OEMigration
 {
 	public function up()
 	{
-		$this->createOETable('ophtroperationnote_trabeculectomy_conjunctival_flap_type', array('id' => 'pk', 'name' => 'string'), true);
+		$this->createOETable('ophtroperationnote_trabeculectomy_conjunctival_flap_type', array('id' => 'pk', 'name' => 'string'));
 
 		$this->insert('ophtroperationnote_trabeculectomy_conjunctival_flap_type', array('name' => 'Fornix-based'));
 		$this->insert('ophtroperationnote_trabeculectomy_conjunctival_flap_type', array('name' => 'Limbus-based'));
 
-		$this->createOETable('ophtroperationnote_trabeculectomy_site', array('id' => 'pk', 'name' => 'string'), true);
+		$this->createOETable('ophtroperationnote_trabeculectomy_site', array('id' => 'pk', 'name' => 'string'));
 
 		$this->insert('ophtroperationnote_trabeculectomy_site', array('name' => 'Superior'));
 		$this->insert('ophtroperationnote_trabeculectomy_site', array('name' => 'Superonasal'));
 		$this->insert('ophtroperationnote_trabeculectomy_site', array('name' => 'Superotemporal'));
 
-		$this->createOETable('ophtroperationnote_trabeculectomy_size', array('id' => 'pk', 'name' => 'string'), true);
+		$this->createOETable('ophtroperationnote_trabeculectomy_size', array('id' => 'pk', 'name' => 'string'));
 
 		$this->insert('ophtroperationnote_trabeculectomy_site', array('name' => '4x3'));
 		$this->insert('ophtroperationnote_trabeculectomy_site', array('name' => '5x2'));
 
-		$this->createOETable('ophtroperationnote_trabeculectomy_sclerostomy_type', array('id' => 'pk', 'name' => 'string'), true);
+		$this->createOETable('ophtroperationnote_trabeculectomy_sclerostomy_type', array('id' => 'pk', 'name' => 'string'));
 
 		$this->insert('ophtroperationnote_trabeculectomy_sclerostomy_type', array('name' => 'Punch'));
 		$this->insert('ophtroperationnote_trabeculectomy_sclerostomy_type', array('name' => 'Block'));
 		$this->insert('ophtroperationnote_trabeculectomy_sclerostomy_type', array('name' => 'Ex-Press shunt'));
 
-		$this->createOETable('ophtroperationnote_trabeculectomy_viscoelastic_type', array('id' => 'pk', 'name' => 'string'), true);
+		$this->createOETable('ophtroperationnote_trabeculectomy_viscoelastic_type', array('id' => 'pk', 'name' => 'string'));
 
 		$this->insert('ophtroperationnote_trabeculectomy_viscoelastic_type', array('name' => 'HPMC'));
 		$this->insert('ophtroperationnote_trabeculectomy_viscoelastic_type', array('name' => 'Healon'));
 		$this->insert('ophtroperationnote_trabeculectomy_viscoelastic_type', array('name' => 'Provisc'));
 
-		$this->createOETable('ophtroperationnote_trabeculectomy_viscoelastic_flow', array('id' => 'pk', 'name' => 'string'), true);
+		$this->createOETable('ophtroperationnote_trabeculectomy_viscoelastic_flow', array('id' => 'pk', 'name' => 'string'));
 
 		$this->insert('ophtroperationnote_trabeculectomy_viscoelastic_flow', array('name' => 'Slow'));
 		$this->insert('ophtroperationnote_trabeculectomy_viscoelastic_flow', array('name' => 'With pressure'));
 
-		$this->createOETable('ophtroperationnote_trabeculectomy_difficulty', array('id' => 'pk', 'name' => 'string'), true);
+		$this->createOETable('ophtroperationnote_trabeculectomy_difficulty', array('id' => 'pk', 'name' => 'string'));
 
 		$this->insert('ophtroperationnote_trabeculectomy_difficulty', array('name' => 'Big pupil'));
 		$this->insert('ophtroperationnote_trabeculectomy_difficulty', array('name' => 'Ciliary Body bleeding'));
@@ -59,7 +59,7 @@ class m140430_123639_trabeculectomy extends OEMigration
 		$this->insert('ophtroperationnote_trabeculectomy_difficulty', array('name' => 'Uncontrolled eye movement'));
 		$this->insert('ophtroperationnote_trabeculectomy_difficulty', array('name' => 'Uncooperative patient'));
 
-		$this->createOETable('ophtroperationnote_trabeculectomy_complication', array('id' => 'pk', 'name' => 'string'), true);
+		$this->createOETable('ophtroperationnote_trabeculectomy_complication', array('id' => 'pk', 'name' => 'string'));
 
 		$this->insert('ophtroperationnote_trabeculectomy_complication', array('name' => 'Conjunctival tear'));
 		$this->insert('ophtroperationnote_trabeculectomy_complication', array('name' => 'Haemorrhage'));
@@ -92,8 +92,7 @@ class m140430_123639_trabeculectomy extends OEMigration
 				'constraint et_ophtroperationnote_trabeculectomy_sctid_fk foreign key (sclerostomy_type_id) references ophtroperationnote_trabeculectomy_sclerostomy_type (id)',
 				'constraint et_ophtroperationnote_trabeculectomy_vetid_fk foreign key (viscoelastic_type_id) references ophtroperationnote_trabeculectomy_viscoelastic_type (id)',
 				'constraint et_ophtroperationnote_trabeculectomy_vefid_fl foreign key (viscoelastic_flow_id) references ophtroperationnote_trabeculectomy_viscoelastic_flow (id)',
-			),
-			true
+			)
 		);
 
 		$this->createOETable(
@@ -104,8 +103,7 @@ class m140430_123639_trabeculectomy extends OEMigration
 				'difficulty_id' => 'integer not null',
 				'constraint ophtroperationnote_trabeculectomy_difficulties_element_id_fk foreign key (element_id) references et_ophtroperationnote_trabeculectomy (id)',
 				'constraint ophtroperationnote_trabeculectomy_difficulties_difficulty_id_fk foreign key (difficulty_id) references ophtroperationnote_trabeculectomy_difficulty (id)',
-			),
-			true
+			)
 		);
 
 		$this->createOETable(
@@ -116,8 +114,7 @@ class m140430_123639_trabeculectomy extends OEMigration
 				'complication_id' => 'integer not null',
 				'constraint ophtroperationnote_trabeculectomy_complications_element_id_fk foreign key (element_id) references et_ophtroperationnote_trabeculectomy (id)',
 				'constraint ophtroperationnote_trabeculectomy_complications_difficulty_id_fk foreign key (complication_id) references ophtroperationnote_trabeculectomy_complication (id)',
-			),
-			true
+			)
 		);
 
 		$this->createElementType('OphTrOperationnote', 'Trabeculectomy', array('display_order' => 20, 'parent_name' => 'ProcedureList'));
@@ -128,29 +125,18 @@ class m140430_123639_trabeculectomy extends OEMigration
 		$this->delete('element_type', 'class_name = ?', array('Element_OphTrOperationnote_Trabeculectomy'));
 
 		$this->dropTable('ophtroperationnote_trabeculectomy_difficulties');
-		$this->dropTable('ophtroperationnote_trabeculectomy_difficulties_version');
 		$this->dropTable('ophtroperationnote_trabeculectomy_complications');
-		$this->dropTable('ophtroperationnote_trabeculectomy_complications_version');
 
 		$this->dropTable('et_ophtroperationnote_trabeculectomy');
-		$this->dropTable('et_ophtroperationnote_trabeculectomy_version');
 
 		$this->dropTable('ophtroperationnote_trabeculectomy_conjunctival_flap_type');
-		$this->dropTable('ophtroperationnote_trabeculectomy_conjunctival_flap_type_version');
 		$this->dropTable('ophtroperationnote_trabeculectomy_site');
-		$this->dropTable('ophtroperationnote_trabeculectomy_site_version');
 		$this->dropTable('ophtroperationnote_trabeculectomy_size');
-		$this->dropTable('ophtroperationnote_trabeculectomy_size_version');
 		$this->dropTable('ophtroperationnote_trabeculectomy_sclerostomy_type');
-		$this->dropTable('ophtroperationnote_trabeculectomy_sclerostomy_type_version');
 		$this->dropTable('ophtroperationnote_trabeculectomy_viscoelastic_type');
-		$this->dropTable('ophtroperationnote_trabeculectomy_viscoelastic_type_version');
 		$this->dropTable('ophtroperationnote_trabeculectomy_viscoelastic_flow');
-		$this->dropTable('ophtroperationnote_trabeculectomy_viscoelastic_flow_version');
 
 		$this->dropTable('ophtroperationnote_trabeculectomy_difficulty');
-		$this->dropTable('ophtroperationnote_trabeculectomy_difficulty_version');
 		$this->dropTable('ophtroperationnote_trabeculectomy_complication');
-		$this->dropTable('ophtroperationnote_trabeculectomy_complication_version');
 	}
 }
