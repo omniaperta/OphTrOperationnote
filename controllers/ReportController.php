@@ -251,7 +251,7 @@ class ReportController extends BaseController
 					$diagnoses[] = (($ep->eye) ? $ep->eye->adjective . " " : "") . $ep->diagnosis->term;
 				}
 			}
-			foreach ($patient->getOphthalmicDiagnoses() as $sd) {
+			foreach ($patient->ophthalmicDiagnoses as $sd) {
 				$diagnoses[] = $sd->eye->adjective . " " . $sd->disorder->term;
 			}
 			$record['patient_diagnoses'] = implode(', ', $diagnoses);
