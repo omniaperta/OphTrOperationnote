@@ -15,6 +15,8 @@
 
 class Element_OphTrOperationnote_Trabeculectomy extends Element_OnDemand
 {
+	public $auto_update_relations = true;
+
 	public function tableName()
 	{
 		return 'et_ophtroperationnote_trabeculectomy';
@@ -23,7 +25,7 @@ class Element_OphTrOperationnote_Trabeculectomy extends Element_OnDemand
 	public function rules()
 	{
 		return array(
-			array('eyedraw, conjunctival_flap_type_id, stay_suture, site_id, size_id, sclerostomy_type_id, viscoelastic_type_id, viscoelastic_removed, viscoelastic_flow_id, report, difficulty_other, complication_other', 'safe'),
+			array('eyedraw, conjunctival_flap_type_id, stay_suture, site_id, size_id, sclerostomy_type_id, viscoelastic_type_id, viscoelastic_removed, viscoelastic_flow_id, report, difficulty_other, complication_other, difficulties, complications', 'safe'),
 		);
 	}
 
