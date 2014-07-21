@@ -44,18 +44,6 @@
 				</div>
 			</div>
 			<div class="large-3 column">
-				<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('complications'))?></h4>
-				<div class="data-value">
-					<?php if (!$element->anaesthetic_complications) {?>
-						None
-					<?php } else {?>
-						<?php foreach ($element->anaesthetic_complications as $complication) {?>
-							<?php echo $complication->name?><br/>
-						<?php }?>
-					<?php }?>
-				</div>
-			</div>
-			<div class="large-3 column">
 				<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('anaesthetic_delivery_id'))?></h4>
 				<div class="data-value">
 					<?php echo $element->anaesthetic_delivery->name?>

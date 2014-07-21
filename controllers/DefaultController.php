@@ -23,6 +23,8 @@ class DefaultController extends BaseEventTypeController
 		'loadElementByProcedure' => self::ACTION_TYPE_FORM,
 		'getElementsToDelete' => self::ACTION_TYPE_FORM,
 		'verifyProcedure' => self::ACTION_TYPE_FORM,
+		'newComplicationRow' => self::ACTION_TYPE_FORM,
+		'getComplications' => self::ACTION_TYPE_FORM,
 	);
 
 	/* @var Element_OphTrOperationbooking_Operation operation that this note is for when creating */
@@ -732,5 +734,19 @@ class DefaultController extends BaseEventTypeController
 		}
 
 		return null;
+	}
+
+	public function actionNewComplicationRow()
+	{
+		$this->renderPartial('_complication',array('complication' => new OphTrOperationnote_Complication));
+	}
+
+	public function actionGetComplications()
+	{
+		if (!$complication_type = OphTrOperationnote_Complication_Type::model()->findByPk(@$_GET['type_id'])) {
+			throw new Exception("Complication type not found: ".@$_GET['type_id']);
+		}
+
+		$this->renderPartial('_complication_options',array('complication_type' => $complication_type));
 	}
 }

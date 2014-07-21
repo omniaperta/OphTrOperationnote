@@ -268,6 +268,50 @@ $(document).ready(function() {
 		var drawing_name = $('#Element_OphTrOperationnote_Trabectome_eyedraw').prev('canvas').attr('id').replace(/canvas/,'drawing');
 		reportEyedraw(element,  ED.getInstance(drawing_name), 'description');
 	});
+
+	$('[data-element-type-class="Element_OphTrOperationnote_Complications"]').undelegate('.addComplication','click').delegate('.addComplication','click',function(e) {
+		e.preventDefault();
+
+		$.ajax({
+			'type': 'GET',
+			'url': baseUrl+'/OphTrOperationnote/default/newComplicationRow',
+			'success': function(html) {
+				$('.complications tbody').append(html);
+			}
+		});
+	});
+
+	$('[data-element-type-class="Element_OphTrOperationnote_Complications"]').undelegate('.removeComplication','click').delegate('.removeComplication','click',function(e) {
+		e.preventDefault();
+
+		var ul = $(this).closest('ul');
+
+		$(this).closest('li').remove();
+
+		if (ul.children('li').length == 0) {
+			ul.closest('tr').hide();
+		}
+	});
+
+	$('[data-element-type-class="Element_OphTrOperationnote_Complications"]').undelegate('select[name="complication_type[]"]','change').delegate('select[name="complication_type[]"]','change',function(e) {
+		e.preventDefault();
+
+		var target = $(this).parent().next('td').children('select');
+
+		if ($(this).val() == '') {
+			target.html('');
+		} else {
+			var type_id = $(this).val();
+
+			$.ajax({
+				'type': 'GET',
+				'url': baseUrl+'/OphTrOperationnote/default/getComplications?type_id=' + type_id,
+				'success': function(html) {
+					target.html(html);
+				}
+			});
+		}
+	});
 });
 
 function reportEyedraw(element, eyedraw, fieldName)

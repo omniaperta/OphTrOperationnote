@@ -1,0 +1,35 @@
+id,type_id,name,display_order
+1,1,Eyelid haemorrage/bruising,10
+2,1,Conjunctivital chemosis,20
+3,1,Retro bulbar / peribulbar haemorrage,30
+4,1,Globe/optic nerve penetration,40
+5,1,Inadequate akinesia,50
+6,1,Patient pain - Mild,60
+7,1,Patient pain - Moderate,70
+8,1,Patient pain - Severe,80
+9,1,Systemic problems,90
+10,1,Operation cancelled due to complication,100
+11,2,Anterior Capsular tear,10
+12,2,Choroidal haem,20
+13,2,Corneal odema,30
+14,2,Decentered IOL,40
+15,2,Dropped nucleus,50
+16,2,Hyphaema,60
+17,2,IOL exchange,70
+18,2,IOL into vitreous,80
+19,2,Iris prolapse,90
+20,2,Iris trauma,100
+21,2,Op cancelled,110
+22,2,Other IOL problem,120
+23,2,PC rupture,130
+24,2,Vitreous loss,140
+25,2,Wound burn,150
+26,2,Zonular dialysis,160
+27,2,Zonular rupture,170
+28,3,Conjunctival tear,10
+29,3,Haemorrhage,20
+30,3,Endothelial damage,30
+31,3,Iris damage,40
+32,3,Lens damage,50
+33,3,Vitreous loss,60
+34,3,Other,70

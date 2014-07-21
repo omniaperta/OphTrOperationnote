@@ -166,19 +166,6 @@
 					<?php }?>
 				</div>
 			</div>
-			<div class="large-3 column left">
-				<h3 class="data-title">Cataract complications</h3>
-				<div class="data-value highlight">
-					<?php if (!$element->complications && !$element->complication_notes) {?>
-						None
-					<?php } else {?>
-							<?php foreach ($element->complications as $complication) {?>
-								<?php echo $complication->name?><br/>
-							<?php }?>
-							<?php echo CHtml::encode($element->complication_notes)?>
-					<?php }?>
-				</div>
-			</div>
 		</div>
 	</div>
 </section>
