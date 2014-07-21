@@ -182,8 +182,8 @@ $(document).ready(function() {
 					}
 				});
 			} else {
-				if ($('.procedure-selection').is(':hidden')) {
-					$('.procedure-selection').slideToggle('fast');
+				if ($('.procedure-selection').children('div').is(':hidden')) {
+					$('.procedure-selection').children('div').slideToggle('fast');
 				}
 
 				changeEye();
@@ -195,8 +195,8 @@ $(document).ready(function() {
 
 			return false;
 		} else {
-			if ($('.procedure-selection').is(':hidden')) {
-				$('.procedure-selection').slideToggle('fast');
+			if ($('.procedure-selection').children('div').is(':hidden')) {
+				$('.procedure-selection').children('div').slideToggle('fast');
 			}
 
 			changeEye();
