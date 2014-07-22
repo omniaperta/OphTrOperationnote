@@ -26,10 +26,15 @@ id,type_id,name,display_order
 25,2,Wound burn,150
 26,2,Zonular dialysis,160
 27,2,Zonular rupture,170
-28,3,Conjunctival tear,10
-29,3,Haemorrhage,20
-30,3,Endothelial damage,30
-31,3,Iris damage,40
-32,3,Lens damage,50
-33,3,Vitreous loss,60
-34,3,Other,70
+28,3,Haemorrhage,10
+29,3,Endothelial damage,20
+30,3,Iris damage,30
+31,3,Lens damage,40
+32,3,Other,50
+33,4,Conjunctival tear,10
+34,4,Haemorrhage,20
+35,4,Endothelial damage,30
+36,4,Iris damage,40
+37,4,Lens damage,50
+38,4,Vitreous loss,60
+39,4,Other,70

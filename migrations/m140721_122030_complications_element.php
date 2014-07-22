@@ -150,6 +150,23 @@ class m140721_122030_complications_element extends OEMigration
 		
 					$this->insert("ophtroperationnote_complication_assignment",array(
 						"element_id" => $element_id,
+						"complication_id" => $complications[4][$ac['name']],
+						"other" => $ac['name'] == 'Other' ? $tra['complication_other'] : '',
+					));
+				}
+			}
+
+			if ($tra = $this->dbConnection->createCommand()->select("*")->from("et_ophtroperationnote_trabectome")->where("event_id = :event_id",array(":event_id" => $event['id']))->queryRow()) {
+				foreach ($this->dbConnection->createCommand()
+					->select("ophtroperationnote_trabectome_complication.name")
+					->from("ophtroperationnote_trabectome_comp_ass")
+					->join("ophtroperationnote_trabectome_complication","ophtroperationnote_trabectome_complication.id = ophtroperationnote_trabectome_comp_ass.complication_id")
+					->where("element_id = {$tra['id']}")
+					->order("ophtroperationnote_trabectome_comp_ass.id asc")
+					->queryAll() as $ac) {
+
+					$this->insert("ophtroperationnote_complication_assignment",array(
+						"element_id" => $element_id,
 						"complication_id" => $complications[3][$ac['name']],
 						"other" => $ac['name'] == 'Other' ? $tra['complication_other'] : '',
 					));
@@ -169,19 +186,99 @@ class m140721_122030_complications_element extends OEMigration
 		$this->dropTable('ophtroperationnote_trabeculectomy_complications');
 		$this->dropTable('ophtroperationnote_trabeculectomy_complication_version');
 		$this->dropTable('ophtroperationnote_trabeculectomy_complication');
+		$this->dropTable('ophtroperationnote_trabectome_comp_ass_version');
+		$this->dropTable('ophtroperationnote_trabectome_comp_ass');
+		$this->dropTable('ophtroperationnote_trabectome_complication_version');
+		$this->dropTable('ophtroperationnote_trabectome_complication');
 
 		$this->dropColumn('et_ophtroperationnote_cataract','complication_notes');
 		$this->dropColumn('et_ophtroperationnote_cataract_version','complication_notes');
 		$this->dropColumn('et_ophtroperationnote_trabeculectomy','complication_other');
 		$this->dropColumn('et_ophtroperationnote_trabeculectomy_version','complication_other');
+		$this->dropColumn('et_ophtroperationnote_trabectome','complication_other');
+		$this->dropColumn('et_ophtroperationnote_trabectome_version','complication_other');
 	}
 
 	public function down()
 	{
+		$this->addColumn('et_ophtroperationnote_trabectome_version','complication_other','text');
+		$this->addColumn('et_ophtroperationnote_trabectome','complication_other','text');
 		$this->addColumn('et_ophtroperationnote_trabeculectomy','complication_other','varchar(255) NULL');
 		$this->addColumn('et_ophtroperationnote_trabeculectomy_version','complication_other','varchar(255) NULL');
 		$this->addColumn('et_ophtroperationnote_cataract','complication_notes','varchar(4096) NULL');
 		$this->addColumn('et_ophtroperationnote_cataract_version','complication_notes','varchar(4096) NULL');
+
+		$this->execute("CREATE TABLE `ophtroperationnote_trabectome_complication` (
+	`id` int(11) NOT NULL AUTO_INCREMENT,
+	`name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+	`active` tinyint(1) NOT NULL DEFAULT '1',
+	`other` tinyint(1) NOT NULL DEFAULT '0',
+	`display_order` int(11) NOT NULL,
+	`last_modified_user_id` int(10) unsigned NOT NULL DEFAULT '1',
+	`last_modified_date` datetime NOT NULL DEFAULT '1901-01-01 00:00:00',
+	`created_user_id` int(10) unsigned NOT NULL DEFAULT '1',
+	`created_date` datetime NOT NULL DEFAULT '1901-01-01 00:00:00',
+	PRIMARY KEY (`id`),
+	KEY `ophtroperationnote_trabectome_complication_lmui_fk` (`last_modified_user_id`),
+	KEY `ophtroperationnote_trabectome_complication_cui_fk` (`created_user_id`),
+	CONSTRAINT `ophtroperationnote_trabectome_complication_lmui_fk` FOREIGN KEY (`last_modified_user_id`) REFERENCES `user` (`id`),
+	CONSTRAINT `ophtroperationnote_trabectome_complication_cui_fk` FOREIGN KEY (`created_user_id`) REFERENCES `user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
+
+		$this->versionExistingTable('ophtroperationnote_trabectome_complication');
+
+		$this->execute("CREATE TABLE `ophtroperationnote_trabectome_complication_version` (
+	`id` int(11) NOT NULL,
+	`name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+	`active` tinyint(1) NOT NULL DEFAULT '1',
+	`other` tinyint(1) NOT NULL DEFAULT '0',
+	`display_order` int(11) NOT NULL,
+	`last_modified_user_id` int(10) unsigned NOT NULL DEFAULT '1',
+	`last_modified_date` datetime NOT NULL DEFAULT '1901-01-01 00:00:00',
+	`created_user_id` int(10) unsigned NOT NULL DEFAULT '1',
+	`created_date` datetime NOT NULL DEFAULT '1901-01-01 00:00:00',
+	`version_date` datetime NOT NULL,
+	`version_id` int(11) NOT NULL AUTO_INCREMENT,
+	PRIMARY KEY (`version_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
+
+		$this->versionExistingTable('ophtroperationnote_trabectome_complication_version');
+
+		$this->execute("CREATE TABLE `ophtroperationnote_trabectome_comp_ass` (
+	`id` int(11) NOT NULL AUTO_INCREMENT,
+	`element_id` int(11) NOT NULL,
+	`complication_id` int(11) NOT NULL,
+	`last_modified_user_id` int(10) unsigned NOT NULL DEFAULT '1',
+	`last_modified_date` datetime NOT NULL DEFAULT '1901-01-01 00:00:00',
+	`created_user_id` int(10) unsigned NOT NULL DEFAULT '1',
+	`created_date` datetime NOT NULL DEFAULT '1901-01-01 00:00:00',
+	PRIMARY KEY (`id`),
+	KEY `ophtroperationnote_trabectome_comp_ass_lmui_fk` (`last_modified_user_id`),
+	KEY `ophtroperationnote_trabectome_comp_ass_cui_fk` (`created_user_id`),
+	KEY `ophtroperationnote_trabectome_comp_ass_elui_fk` (`element_id`),
+	KEY `ophtroperationnote_trabectome_comp_ass_cmpui_fk` (`complication_id`),
+	CONSTRAINT `ophtroperationnote_trabectome_comp_ass_cmpui_fk` FOREIGN KEY (`complication_id`) REFERENCES `ophtroperationnote_trabectome_complication` (`id`),
+	CONSTRAINT `ophtroperationnote_trabectome_comp_ass_cui_fk` FOREIGN KEY (`created_user_id`) REFERENCES `user` (`id`),
+	CONSTRAINT `ophtroperationnote_trabectome_comp_ass_elui_fk` FOREIGN KEY (`element_id`) REFERENCES `et_ophtroperationnote_trabectome` (`id`),
+	CONSTRAINT `ophtroperationnote_trabectome_comp_ass_lmui_fk` FOREIGN KEY (`last_modified_user_id`) REFERENCES `user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
+
+		$this->versionExistingTable('ophtroperationnote_trabectome_complication_version');
+
+		$this->execute("CREATE TABLE `ophtroperationnote_trabectome_comp_ass_version` (
+	`id` int(11) NOT NULL,
+	`element_id` int(11) NOT NULL,
+	`complication_id` int(11) NOT NULL,
+	`last_modified_user_id` int(10) unsigned NOT NULL DEFAULT '1',
+	`last_modified_date` datetime NOT NULL DEFAULT '1901-01-01 00:00:00',
+	`created_user_id` int(10) unsigned NOT NULL DEFAULT '1',
+	`created_date` datetime NOT NULL DEFAULT '1901-01-01 00:00:00',
+	`version_date` datetime NOT NULL,
+	`version_id` int(11) NOT NULL AUTO_INCREMENT,
+	PRIMARY KEY (`version_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
+
+		$this->versionExistingTable('ophtroperationnote_trabectome_comp_ass_version');
 
 		$this->execute("CREATE TABLE `ophtroperationnote_trabeculectomy_complication` (
 	`id` int(11) NOT NULL AUTO_INCREMENT,
@@ -320,6 +417,13 @@ class m140721_122030_complications_element extends OEMigration
 			$tra_complications[$complication] = $i+1;
 		}
 
+		$tra2_complications = array();
+		foreach (array('Haemorrhage','Endothelial damage','Iris damage','Lens damage','Other') as $complication) {
+			$this->insert('ophtroperationnote_trabectome_complication',array('id'=>$i+1,'name'=>$complication,'display_order'=>(($i+1)*10),'active'=>1));
+
+			$tra2_complications[$complication] = $i+1;
+		}
+
 		$et = $this->dbConnection->createCommand()->select("id")->from("event_type")->where("class_name = :class_name",array(":class_name" => "OphTrOperationnote"))->queryRow();
 
 		foreach ($this->dbConnection->createCommand()->select("*")->from("event")->where("event_type_id = :event_type_id",array(":event_type_id" => $et['id']))->queryAll() as $event) {
@@ -356,13 +460,29 @@ class m140721_122030_complications_element extends OEMigration
 					->select("ophtroperationnote_complication.name, ophtroperationnote_complication_assignment.other")
 					->from("ophtroperationnote_complication_assignment")
 					->join("ophtroperationnote_complication","ophtroperationnote_complication_assignment.complication_id = ophtroperationnote_complication.id")
-					->where("type_id = 3 and element_id = {$element['id']}")
+					->where("type_id = 4 and element_id = {$element['id']}")
 					->queryAll() as $c) {
 
 					$this->insert('ophtroperationnote_trabeculectomy_complications',array('element_id' => $tra['id'], 'complication_id' => $tra_complications[$c['name']]));
 
 					if ($c['other']) {
 						$this->update('et_ophtroperationnote_trabeculectomy',array('complication_other' => $c['other']),"id = {$tra['id']}");
+					}
+				}
+			}
+
+			if ($tra = $this->dbConnection->createCommand()->select("*")->from("et_ophtroperationnote_trabectome")->where("event_id = :event_id",array(":event_id" => $event['id']))->queryRow()) {
+				foreach ($this->dbConnection->createCommand()
+					->select("ophtroperationnote_complication.name, ophtroperationnote_complication_assignment.other")
+					->from("ophtroperationnote_complication_assignment")
+					->join("ophtroperationnote_complication","ophtroperationnote_complication_assignment.complication_id = ophtroperationnote_complication.id")
+					->where("type_id = 3 and element_id = {$element['id']}")
+					->queryAll() as $c) {
+
+					$this->insert('ophtroperationnote_trabectome_comp_ass',array('element_id' => $tra['id'], 'complication_id' => $tra2_complications[$c['name']]));
+
+					if ($c['other']) {
+						$this->update('et_ophtroperationnote_trabectome',array('complication_other' => $c['other']),"id = {$tra['id']}");
 					}
 				}
 			}
