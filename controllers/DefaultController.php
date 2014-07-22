@@ -764,6 +764,7 @@ class DefaultController extends BaseEventTypeController
 	{
 		$element = new Element_OphTrOperationnote_Complications;
 		$element->has_cataract = @$_GET['has_cataract'];
+		$element->has_trabectome = @$_GET['has_trabectome'];
 		$element->has_trabeculectomy = @$_GET['has_trabeculectomy'];
 
 		foreach ($element->getComplicationTypesByOpenElements() as $type) {
@@ -776,6 +777,7 @@ class DefaultController extends BaseEventTypeController
 		$elements = parent::getElements();
 
 		$has_cataract = false;
+		$has_trabectome = false;
 		$has_trabeculectomy = false;
 
 		foreach ($elements as $i => $element) {
@@ -788,12 +790,15 @@ class DefaultController extends BaseEventTypeController
 		foreach ($this->getChildElements(ElementType::model()->find('class_name=?',array('Element_OphTrOperationnote_ProcedureList'))) as $element) {
 			if (CHtml::modelName($element) == 'Element_OphTrOperationnote_Cataract') {
 				$has_cataract = true;
+			} else if (CHtml::modelName($element) == 'Element_OphTrOperationnote_Trabectome') {
+				$has_trabectome = true;
 			} else if (CHtml::modelName($element) == 'Element_OphTrOperationnote_Trabeculectomy') {
 				$has_trabeculectomy = true;
 			}
 		}
 
 		$elements[$complications_i]->has_cataract = $has_cataract;
+		$elements[$complications_i]->has_trabectome = $has_trabectome;
 		$elements[$complications_i]->has_trabeculectomy = $has_trabeculectomy;
 
 		return $elements;

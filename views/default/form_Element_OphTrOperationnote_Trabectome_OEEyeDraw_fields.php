@@ -26,6 +26,7 @@
 		<button class="ed_clear secondary small">Clear</button>
 	</div>
 </div>
+<span class="error">Complications for trabectome operations are now in the <a class="showComplicationsElement">complications element</a></span>
 <script type="text/javascript">
 	$(document).ready(function() {
 		$(this).delegate('.trabectome .MultiSelectList', 'MultiSelectChanged', function() {

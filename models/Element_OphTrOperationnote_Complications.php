@@ -32,6 +32,7 @@
 class Element_OphTrOperationnote_Complications extends Element_OpNote
 {
 	public $has_cataract = false;
+	public $has_trabectome = false;
 	public $has_trabeculectomy = false;
 
 	/**

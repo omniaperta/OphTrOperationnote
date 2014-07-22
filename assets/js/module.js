@@ -60,10 +60,15 @@ function callbackAddProcedure(procedure_id) {
 function updateComplicationTypes()
 {
 	var has_cataract = 0;
+	var has_trabectome = 0;
 	var has_trabeculectomy = 0;
 
 	if ($('.Element_OphTrOperationnote_Cataract').length >0) {
 		has_cataract = 1;
+	}
+
+	if ($('.Element_OphTrOperationnote_Trabectome').length >0) {
+		has_trabectome = 1;
 	}
 
 	if ($('.Element_OphTrOperationnote_Trabeculectomy').length >0) {
@@ -72,7 +77,7 @@ function updateComplicationTypes()
 
 	$.ajax({
 		'type': 'GET',
-		'url': baseUrl+'/OphTrOperationnote/default/getComplicationTypes?has_cataract=' + has_cataract + '&has_trabeculectomy=' + has_trabeculectomy,
+		'url': baseUrl+'/OphTrOperationnote/default/getComplicationTypes?has_cataract=' + has_cataract + '&has_trabectome=' + has_trabectome + '&has_trabeculectomy=' + has_trabeculectomy,
 		'success': function(html) {
 			$('#complication_type').html(html);
 		}
@@ -81,6 +86,11 @@ function updateComplicationTypes()
 	if (!has_cataract) {
 		$('tr[data-type="Cataract"]').hide();
 		$('ul.Cataract_complications').html('');
+	}
+
+	if (!has_trabectome) {
+		$('tr[data-type="Trabectome"]').hide();
+		$('ul.Trabectome_complications').html('');
 	}
 
 	if (!has_trabeculectomy) {
@@ -376,7 +386,7 @@ $(document).ready(function() {
 
 			$('#complication_type_' + $('[data-element-type-class="Element_OphTrOperationnote_Complications"] select[name="complication_type"]').val()).show();
 
-			$('input.other_complication').focus();
+			$('tr[data-type="' + type_name + '"] input.other_complication').focus();
 
 			$(this).children('option:selected').remove();
 		}
