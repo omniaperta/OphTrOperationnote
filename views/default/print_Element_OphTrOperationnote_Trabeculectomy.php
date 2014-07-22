@@ -150,27 +150,6 @@
 					</div>
 				</div>
 			</div>
-
-			<div class="data-row">
-				<h4>Complications</h4>
-				<div class="details">
-					<?php if (!$element->complications) {?>
-						<div class="data-value">None</div>
-					<?php } else {?>
-						<ul>
-						<?php foreach ($element->complications as $complication) {?>
-							<li>
-								<?php if ($complication->name == 'Other') {?>
-									<?php echo $element->complication_other?>
-								<?php }else{?>
-									<?php echo $complication->name?>
-								<?php }?>
-							</li>
-						<?php }?>
-						</ul>
-					<?php }?>
-				</div>
-			</div>
 		</div>
 		<div class="large-6 column">
 			<div class="data-row">

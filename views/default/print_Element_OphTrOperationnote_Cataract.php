@@ -100,22 +100,6 @@
 					</div>
 				</div>
 			</div>
-
-			<div class="data-row">
-				<h4>Per Operative Complications</h4>
-				<div class="details">
-					<?php if (!$element->complications && !$element->complication_notes) {?>
-						<div class="data-value">None</div>
-					<?php } else {?>
-						<ul>
-						<?php foreach ($element->complications as $complication) {?>
-							<li><?php echo $complication->name?></li>
-						<?php }?>
-						</ul>
-						<?php echo CHtml::encode($element->complication_notes)?>
-					<?php }?>
-				</div>
-			</div>
 		</div>
 		<div class="large-6 column">
 			<div class="data-row">
