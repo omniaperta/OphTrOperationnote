@@ -127,8 +127,8 @@ class m140721_122030_complications_element extends OEMigration
 						->select("ophtroperationnote_anaesthetic_anaesthetic_complications.name, ophtroperationnote_anaesthetic_anaesthetic_complication_version.*")
 						->from("ophtroperationnote_anaesthetic_anaesthetic_complication_version")
 						->join("ophtroperationnote_anaesthetic_anaesthetic_complications","ophtroperationnote_anaesthetic_anaesthetic_complications.id = ophtroperationnote_anaesthetic_anaesthetic_complication_version.anaesthetic_complication_id")
-						->where("id = {$ac['id']}")
-						->order("ophtroperationnote_anaesthetic_anaesthetic_complication_version.id asc")
+						->where("ophtroperationnote_anaesthetic_anaesthetic_complication_version.id = {$ac['id']}")
+						->order("version_id asc")
 						->queryAll() as $acv) {
 
 						$this->insert("ophtroperationnote_complication_assignment_version",array(
@@ -140,7 +140,6 @@ class m140721_122030_complications_element extends OEMigration
 							"last_modified_user_id" => $acv['last_modified_user_id'],
 							"last_modified_date" => $acv['last_modified_date'],
 							"version_date" => $acv['version_date'],
-							"version_id" => $acv['version_id'],
 						));
 					}
 				}
@@ -148,7 +147,7 @@ class m140721_122030_complications_element extends OEMigration
 
 			if ($cat = $this->dbConnection->createCommand()->select("*")->from("et_ophtroperationnote_cataract")->where("event_id = :event_id",array(":event_id" => $event['id']))->queryRow()) {
 				foreach ($this->dbConnection->createCommand()
-					->select("ophtroperationnote_cataract_complications.name")
+					->select("ophtroperationnote_cataract_complications.name, ophtroperationnote_cataract_complication.*")
 					->from("ophtroperationnote_cataract_complication")
 					->join("ophtroperationnote_cataract_complications","ophtroperationnote_cataract_complications.id = ophtroperationnote_cataract_complication.complication_id")
 					->where("cataract_id = {$cat['id']}")
@@ -158,6 +157,10 @@ class m140721_122030_complications_element extends OEMigration
 					$this->insert("ophtroperationnote_complication_assignment",array(
 						"element_id" => $element_id,
 						"complication_id" => $complications[2][$ac['name']],
+						"created_user_id" => $ac['created_user_id'],
+						"created_date" => $ac['created_date'],
+						"last_modified_user_id" => $ac['last_modified_user_id'],
+						"last_modified_date" => $ac['last_modified_date'],
 					));
 
 					$id = $this->dbConnection->createCommand()->select("max(id)")->from("ophtroperationnote_complication_assignment")->queryScalar();
@@ -166,20 +169,19 @@ class m140721_122030_complications_element extends OEMigration
 						->select("ophtroperationnote_cataract_complications.name, ophtroperationnote_cataract_complication_version.*")
 						->from("ophtroperationnote_cataract_complication_version")
 						->join("ophtroperationnote_cataract_complications","ophtroperationnote_cataract_complications.id = ophtroperationnote_cataract_complication_version.complication_id")
-						->where("id = {$ac['id']}")
-						->order("ophtroperationnote_cataract_complication_version.id asc")
+						->where("ophtroperationnote_cataract_complication_version.id = {$ac['id']}")
+						->order("ophtroperationnote_cataract_complication_version.version_id asc")
 						->queryAll() as $acv) {
 
 						$this->insert("ophtroperationnote_complication_assignment_version",array(
 							"id" => $id,
 							"element_id" => $element_id,
-							"complication_id" => $complications[1][$acv['name']],
+							"complication_id" => $complications[2][$acv['name']],
 							"created_user_id" => $acv['created_user_id'],
 							"created_date" => $acv['created_date'],
 							"last_modified_user_id" => $acv['last_modified_user_id'],
 							"last_modified_date" => $acv['last_modified_date'],
 							"version_date" => $acv['version_date'],
-							"version_id" => $acv['version_id'],
 						));
 					}
 				}
@@ -191,7 +193,7 @@ class m140721_122030_complications_element extends OEMigration
 
 			if ($tra = $this->dbConnection->createCommand()->select("*")->from("et_ophtroperationnote_trabeculectomy")->where("event_id = :event_id",array(":event_id" => $event['id']))->queryRow()) {
 				foreach ($this->dbConnection->createCommand()
-					->select("ophtroperationnote_trabeculectomy_complication.name")
+					->select("ophtroperationnote_trabeculectomy_complication.name, ophtroperationnote_trabeculectomy_complications.*")
 					->from("ophtroperationnote_trabeculectomy_complications")
 					->join("ophtroperationnote_trabeculectomy_complication","ophtroperationnote_trabeculectomy_complication.id = ophtroperationnote_trabeculectomy_complications.complication_id")
 					->where("element_id = {$tra['id']}")
@@ -202,28 +204,31 @@ class m140721_122030_complications_element extends OEMigration
 						"element_id" => $element_id,
 						"complication_id" => $complications[4][$ac['name']],
 						"other" => $ac['name'] == 'Other' ? $tra['complication_other'] : '',
+						"created_user_id" => $ac['created_user_id'],
+						"created_date" => $ac['created_date'],
+						"last_modified_user_id" => $ac['last_modified_user_id'],
+						"last_modified_date" => $ac['last_modified_date'],
 					));
 
 					$id = $this->dbConnection->createCommand()->select("max(id)")->from("ophtroperationnote_complication_assignment")->queryScalar();
 
 					foreach ($this->dbConnection->createCommand()
-						->select("ophtroperationnote_trabeculectomy_complications.name, ophtroperationnote_trabeculectomy_complication_version.*")
-						->from("ophtroperationnote_trabeculectomy_complication_version")
-						->join("ophtroperationnote_trabeculectomy_complications","ophtroperationnote_trabeculectomy_complications.id = ophtroperationnote_trabeculectomy_complication_version.complication_id")
-						->where("id = {$ac['id']}")
-						->order("ophtroperationnote_trabeculectomy_complication_version.id asc")
+						->select("ophtroperationnote_trabeculectomy_complication.name, ophtroperationnote_trabeculectomy_complications_version.*")
+						->from("ophtroperationnote_trabeculectomy_complications_version")
+						->join("ophtroperationnote_trabeculectomy_complication","ophtroperationnote_trabeculectomy_complication.id = ophtroperationnote_trabeculectomy_complications_version.complication_id")
+						->where("ophtroperationnote_trabeculectomy_complications_version.id = {$ac['id']}")
+						->order("ophtroperationnote_trabeculectomy_complications_version.version_id asc")
 						->queryAll() as $acv) {
 					
 						$this->insert("ophtroperationnote_complication_assignment_version",array(
 							"id" => $id,
 							"element_id" => $element_id,
-							"complication_id" => $complications[1][$acv['name']],
+							"complication_id" => $complications[4][$acv['name']],
 							"created_user_id" => $acv['created_user_id'],
 							"created_date" => $acv['created_date'],
 							"last_modified_user_id" => $acv['last_modified_user_id'],
 							"last_modified_date" => $acv['last_modified_date'],
 							"version_date" => $acv['version_date'],
-							"version_id" => $acv['version_id'],
 						));
 					}
 				}
@@ -231,7 +236,7 @@ class m140721_122030_complications_element extends OEMigration
 
 			if ($tra = $this->dbConnection->createCommand()->select("*")->from("et_ophtroperationnote_trabectome")->where("event_id = :event_id",array(":event_id" => $event['id']))->queryRow()) {
 				foreach ($this->dbConnection->createCommand()
-					->select("ophtroperationnote_trabectome_complication.name")
+					->select("ophtroperationnote_trabectome_complication.name, ophtroperationnote_trabectome_comp_ass.*")
 					->from("ophtroperationnote_trabectome_comp_ass")
 					->join("ophtroperationnote_trabectome_complication","ophtroperationnote_trabectome_complication.id = ophtroperationnote_trabectome_comp_ass.complication_id")
 					->where("element_id = {$tra['id']}")
@@ -242,6 +247,10 @@ class m140721_122030_complications_element extends OEMigration
 						"element_id" => $element_id,
 						"complication_id" => $complications[3][$ac['name']],
 						"other" => $ac['name'] == 'Other' ? $tra['complication_other'] : '',
+						"created_user_id" => $ac['created_user_id'],
+						"created_date" => $ac['created_date'],
+						"last_modified_user_id" => $ac['last_modified_user_id'],
+						"last_modified_date" => $ac['last_modified_date'],
 					));
 
 					$id = $this->dbConnection->createCommand()->select("max(id)")->from("ophtroperationnote_complication_assignment")->queryScalar();
@@ -250,20 +259,19 @@ class m140721_122030_complications_element extends OEMigration
 						->select("ophtroperationnote_trabectome_complication.name, ophtroperationnote_trabectome_comp_ass_version.*")
 						->from("ophtroperationnote_trabectome_comp_ass_version")
 						->join("ophtroperationnote_trabectome_complication","ophtroperationnote_trabectome_complication.id = ophtroperationnote_trabectome_comp_ass_version.complication_id")
-						->where("id = {$ac['id']}")
-						->order("ophtroperationnote_trabectome_comp_ass_version.id asc")
+						->where("ophtroperationnote_trabectome_comp_ass_version.id = {$ac['id']}")
+						->order("ophtroperationnote_trabectome_comp_ass_version.version_id asc")
 						->queryAll() as $acv) {
 
 						$this->insert("ophtroperationnote_complication_assignment_version",array(
 							"id" => $id,
 							"element_id" => $element_id,
-							"complication_id" => $complications[1][$acv['name']],
+							"complication_id" => $complications[3][$acv['name']],
 							"created_user_id" => $acv['created_user_id'],
 							"created_date" => $acv['created_date'],
 							"last_modified_user_id" => $acv['last_modified_user_id'],
 							"last_modified_date" => $acv['last_modified_date'],
 							"version_date" => $acv['version_date'],
-							"version_id" => $acv['version_id'],
 						));
 					}
 				}
@@ -323,23 +331,6 @@ class m140721_122030_complications_element extends OEMigration
 
 		$this->versionExistingTable('ophtroperationnote_trabectome_complication');
 
-		$this->execute("CREATE TABLE `ophtroperationnote_trabectome_complication_version` (
-	`id` int(11) NOT NULL,
-	`name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-	`active` tinyint(1) NOT NULL DEFAULT '1',
-	`other` tinyint(1) NOT NULL DEFAULT '0',
-	`display_order` int(11) NOT NULL,
-	`last_modified_user_id` int(10) unsigned NOT NULL DEFAULT '1',
-	`last_modified_date` datetime NOT NULL DEFAULT '1901-01-01 00:00:00',
-	`created_user_id` int(10) unsigned NOT NULL DEFAULT '1',
-	`created_date` datetime NOT NULL DEFAULT '1901-01-01 00:00:00',
-	`version_date` datetime NOT NULL,
-	`version_id` int(11) NOT NULL AUTO_INCREMENT,
-	PRIMARY KEY (`version_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
-
-		$this->versionExistingTable('ophtroperationnote_trabectome_complication_version');
-
 		$this->execute("CREATE TABLE `ophtroperationnote_trabectome_comp_ass` (
 	`id` int(11) NOT NULL AUTO_INCREMENT,
 	`element_id` int(11) NOT NULL,
@@ -359,22 +350,7 @@ class m140721_122030_complications_element extends OEMigration
 	CONSTRAINT `ophtroperationnote_trabectome_comp_ass_lmui_fk` FOREIGN KEY (`last_modified_user_id`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
 
-		$this->versionExistingTable('ophtroperationnote_trabectome_complication_version');
-
-		$this->execute("CREATE TABLE `ophtroperationnote_trabectome_comp_ass_version` (
-	`id` int(11) NOT NULL,
-	`element_id` int(11) NOT NULL,
-	`complication_id` int(11) NOT NULL,
-	`last_modified_user_id` int(10) unsigned NOT NULL DEFAULT '1',
-	`last_modified_date` datetime NOT NULL DEFAULT '1901-01-01 00:00:00',
-	`created_user_id` int(10) unsigned NOT NULL DEFAULT '1',
-	`created_date` datetime NOT NULL DEFAULT '1901-01-01 00:00:00',
-	`version_date` datetime NOT NULL,
-	`version_id` int(11) NOT NULL AUTO_INCREMENT,
-	PRIMARY KEY (`version_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
-
-		$this->versionExistingTable('ophtroperationnote_trabectome_comp_ass_version');
+		$this->versionExistingTable('ophtroperationnote_trabectome_comp_ass');
 
 		$this->execute("CREATE TABLE `ophtroperationnote_trabeculectomy_complication` (
 	`id` int(11) NOT NULL AUTO_INCREMENT,
@@ -514,7 +490,7 @@ class m140721_122030_complications_element extends OEMigration
 		}
 
 		$tra2_complications = array();
-		foreach (array('Haemorrhage','Endothelial damage','Iris damage','Lens damage','Other') as $complication) {
+		foreach (array('Haemorrhage','Endothelial damage','Iris damage','Lens damage','Other') as $i => $complication) {
 			$this->insert('ophtroperationnote_trabectome_complication',array('id'=>$i+1,'name'=>$complication,'display_order'=>(($i+1)*10),'active'=>1));
 
 			$tra2_complications[$complication] = $i+1;
@@ -527,25 +503,69 @@ class m140721_122030_complications_element extends OEMigration
 
 			if ($an = $this->dbConnection->createCommand()->select("*")->from("et_ophtroperationnote_anaesthetic")->where("event_id = :event_id",array(":event_id" => $event['id']))->queryRow()) {
 				foreach ($this->dbConnection->createCommand()
-					->select("ophtroperationnote_complication.name")
+					->select("ophtroperationnote_complication.name, ophtroperationnote_complication_assignment.*")
 					->from("ophtroperationnote_complication_assignment")
 					->join("ophtroperationnote_complication","ophtroperationnote_complication_assignment.complication_id = ophtroperationnote_complication.id")
 					->where("type_id = 1 and element_id = {$element['id']}")
 					->queryAll() as $c) {
 
 					$this->insert('ophtroperationnote_anaesthetic_anaesthetic_complication',array('et_ophtroperationnote_anaesthetic_id' => $an['id'], 'anaesthetic_complication_id' => $ana_complications[$c['name']]));
+
+					$id = $this->dbConnection->createCommand()->select("max(id)")->from("ophtroperationnote_anaesthetic_anaesthetic_complication")->queryScalar();
+
+					foreach ($this->dbConnection->createCommand()
+						->select("ophtroperationnote_complication.name, ophtroperationnote_complication_assignment_version.*")
+						->from("ophtroperationnote_complication_assignment_version")
+						->join("ophtroperationnote_complication","ophtroperationnote_complication.id = ophtroperationnote_complication_assignment_version.complication_id")
+						->where("ophtroperationnote_complication_assignment_version.id = {$c['id']}")
+						->order("version_id asc")
+						->queryAll() as $acv) {
+
+						$this->insert("ophtroperationnote_anaesthetic_anaesthetic_complication_version",array(
+							"id" => $id,
+							"et_ophtroperationnote_anaesthetic_id" => $an['id'],
+							"anaesthetic_complication_id" => $ana_complications[$acv['name']],
+							"created_user_id" => $acv['created_user_id'],
+							"created_date" => $acv['created_date'],
+							"last_modified_user_id" => $acv['last_modified_user_id'],
+							"last_modified_date" => $acv['last_modified_date'],
+							"version_date" => $acv['version_date'],
+						));
+					}
 				}
 			}
 
 			if ($cat = $this->dbConnection->createCommand()->select("*")->from("et_ophtroperationnote_cataract")->where("event_id = :event_id",array(":event_id" => $event['id']))->queryRow()) {
 				foreach ($this->dbConnection->createCommand()
-					->select("ophtroperationnote_complication.name")
+					->select("ophtroperationnote_complication.name, ophtroperationnote_complication_assignment.*")
 					->from("ophtroperationnote_complication_assignment")
 					->join("ophtroperationnote_complication","ophtroperationnote_complication_assignment.complication_id = ophtroperationnote_complication.id")
 					->where("type_id = 2 and element_id = {$element['id']}")
 					->queryAll() as $c) {
 
 					$this->insert('ophtroperationnote_cataract_complication',array('cataract_id' => $cat['id'], 'complication_id' => $cat_complications[$c['name']]));
+
+					$id = $this->dbConnection->createCommand()->select("max(id)")->from("ophtroperationnote_cataract_complication")->queryScalar();
+
+					foreach ($this->dbConnection->createCommand()
+						->select("ophtroperationnote_complication.name, ophtroperationnote_complication_assignment_version.*")
+						->from("ophtroperationnote_complication_assignment_version")
+						->join("ophtroperationnote_complication","ophtroperationnote_complication.id = ophtroperationnote_complication_assignment_version.complication_id")
+						->where("ophtroperationnote_complication_assignment_version.id = {$c['id']}")
+						->order("version_id asc")
+						->queryAll() as $acv) {
+
+						$this->insert("ophtroperationnote_cataract_complication_version",array(
+							"id" => $id,
+							"cataract_id" => $cat['id'],
+							"complication_id" => $cat_complications[$acv['name']],
+							"created_user_id" => $acv['created_user_id'],
+							"created_date" => $acv['created_date'],
+							"last_modified_user_id" => $acv['last_modified_user_id'],
+							"last_modified_date" => $acv['last_modified_date'],
+							"version_date" => $acv['version_date'],
+						));
+					}
 				}
 
 				$this->update('et_ophtroperationnote_cataract',array('complication_notes' => $element['comments']),"id = {$cat['id']}");
@@ -553,7 +573,7 @@ class m140721_122030_complications_element extends OEMigration
 
 			if ($tra = $this->dbConnection->createCommand()->select("*")->from("et_ophtroperationnote_trabeculectomy")->where("event_id = :event_id",array(":event_id" => $event['id']))->queryRow()) {
 				foreach ($this->dbConnection->createCommand()
-					->select("ophtroperationnote_complication.name, ophtroperationnote_complication_assignment.other")
+					->select("ophtroperationnote_complication.name, ophtroperationnote_complication_assignment.*")
 					->from("ophtroperationnote_complication_assignment")
 					->join("ophtroperationnote_complication","ophtroperationnote_complication_assignment.complication_id = ophtroperationnote_complication.id")
 					->where("type_id = 4 and element_id = {$element['id']}")
@@ -564,12 +584,34 @@ class m140721_122030_complications_element extends OEMigration
 					if ($c['other']) {
 						$this->update('et_ophtroperationnote_trabeculectomy',array('complication_other' => $c['other']),"id = {$tra['id']}");
 					}
+
+					$id = $this->dbConnection->createCommand()->select("max(id)")->from("ophtroperationnote_trabeculectomy_complications")->queryScalar();
+
+					foreach ($this->dbConnection->createCommand()
+						->select("ophtroperationnote_complication.name, ophtroperationnote_complication_assignment_version.*")
+						->from("ophtroperationnote_complication_assignment_version")
+						->join("ophtroperationnote_complication","ophtroperationnote_complication.id = ophtroperationnote_complication_assignment_version.complication_id")
+						->where("ophtroperationnote_complication_assignment_version.id = {$c['id']}")
+						->order("version_id asc")
+						->queryAll() as $acv) {
+
+						$this->insert("ophtroperationnote_trabeculectomy_complications_version",array(
+							"id" => $id,
+							"element_id" => $tra['id'],
+							"complication_id" => $tra_complications[$acv['name']],
+							"created_user_id" => $acv['created_user_id'],
+							"created_date" => $acv['created_date'],
+							"last_modified_user_id" => $acv['last_modified_user_id'],
+							"last_modified_date" => $acv['last_modified_date'],
+							"version_date" => $acv['version_date'],
+						));
+					}
 				}
 			}
 
 			if ($tra = $this->dbConnection->createCommand()->select("*")->from("et_ophtroperationnote_trabectome")->where("event_id = :event_id",array(":event_id" => $event['id']))->queryRow()) {
 				foreach ($this->dbConnection->createCommand()
-					->select("ophtroperationnote_complication.name, ophtroperationnote_complication_assignment.other")
+					->select("ophtroperationnote_complication.name, ophtroperationnote_complication_assignment.*")
 					->from("ophtroperationnote_complication_assignment")
 					->join("ophtroperationnote_complication","ophtroperationnote_complication_assignment.complication_id = ophtroperationnote_complication.id")
 					->where("type_id = 3 and element_id = {$element['id']}")
@@ -579,6 +621,28 @@ class m140721_122030_complications_element extends OEMigration
 
 					if ($c['other']) {
 						$this->update('et_ophtroperationnote_trabectome',array('complication_other' => $c['other']),"id = {$tra['id']}");
+					}
+
+					$id = $this->dbConnection->createCommand()->select("max(id)")->from("ophtroperationnote_trabectome_comp_ass")->queryScalar();
+			
+					foreach ($this->dbConnection->createCommand()
+						->select("ophtroperationnote_complication.name, ophtroperationnote_complication_assignment_version.*")
+						->from("ophtroperationnote_complication_assignment_version")
+						->join("ophtroperationnote_complication","ophtroperationnote_complication.id = ophtroperationnote_complication_assignment_version.complication_id")
+						->where("ophtroperationnote_complication_assignment_version.id = {$c['id']}")
+						->order("version_id asc")
+						->queryAll() as $acv) {
+					
+						$this->insert("ophtroperationnote_trabectome_comp_ass_version",array(
+							"id" => $id,
+							"element_id" => $tra['id'],
+							"complication_id" => $tra2_complications[$acv['name']],
+							"created_user_id" => $acv['created_user_id'],
+							"created_date" => $acv['created_date'],
+							"last_modified_user_id" => $acv['last_modified_user_id'],
+							"last_modified_date" => $acv['last_modified_date'],
+							"version_date" => $acv['version_date'],
+						));
 					}
 				}
 			}
