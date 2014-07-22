@@ -295,14 +295,14 @@ $(document).ready(function() {
 	$('#btn-trabeculectomy-report').die('click').live('click',function(e) {
 		e.preventDefault();
 		var element = $(this).closest('.element');
-		reportEyedraw(element,  ED.getInstance('ed_drawing_edit_Trabeculectomy'), 'report');
+		reportEyedraw(element,	ED.getInstance('ed_drawing_edit_Trabeculectomy'), 'report');
 	});
 
 	$('#btn-trabectome-report').die('click').live('click',function(e) {
 		e.preventDefault();
 		var element = $(this).closest('.element');
 		var drawing_name = $('#Element_OphTrOperationnote_Trabectome_eyedraw').prev('canvas').attr('id').replace(/canvas/,'drawing');
-		reportEyedraw(element,  ED.getInstance(drawing_name), 'description');
+		reportEyedraw(element,	ED.getInstance(drawing_name), 'description');
 	});
 
 	$('[data-element-type-class="Element_OphTrOperationnote_Complications"]').undelegate('.addComplication','click').delegate('.addComplication','click',function(e) {
@@ -380,6 +380,24 @@ $(document).ready(function() {
 
 			$(this).children('option:selected').remove();
 		}
+	});
+
+	$('body').undelegate('.showComplicationsElement','click').delegate('.showComplicationsElement','click',function(e) {
+		e.preventDefault();
+
+		var element = $('section.Element_OphTrOperationnote_Complications');
+
+		setTimeout(function() {
+			var offTop = element.offset().top - 90;
+			var speed = (Math.abs($(window).scrollTop() - offTop)) * 1.5;
+			$('body').animate({
+				scrollTop : offTop
+			}, speed, null, function() {
+				$('.element-title', element).effect('pulsate', {
+					times : 2
+				}, 600);
+			});
+		}, 100);
 	});
 });
 
