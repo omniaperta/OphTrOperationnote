@@ -49,11 +49,6 @@ class OphTrOperationnote_Complication_Assignment extends BaseActiveRecordVersion
 		return 'ophtroperationnote_complication_assignment';
 	}
 
-	public function defaultScope()
-	{
-		return array('order' => $this->getTableAlias(true, false) . '.display_order');
-	}
-
 	/**
 	 * @return array validation rules for model attributes.
 	 */

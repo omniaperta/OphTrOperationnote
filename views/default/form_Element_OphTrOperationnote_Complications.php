@@ -33,24 +33,33 @@ $layoutColumns = array(
 			<table class="complications">
 				<thead>
 					<tr>
-						<th class="type">Type</th>
-						<th class="name">Complications</th>
+						<th>Type</th>
+						<th>Complications</th>
 					</tr>
 				</thead>
 				<tbody>
-					<?php foreach (OphTrOperationnote_Complication_Type::model()->findAll(array('order' => 'display_order')) as $type) {?>
-						<tr id="complication_type_<?php echo $type->id?>" <?php if (empty($element->{strtolower($type->name)."_complications"})) {?> style="display: none"<?php }?>>
+					<?php foreach (OphTrOperationnote_Complication_Type::model()->findAll(array('order' => 'display_order asc')) as $type) {?>
+						<tr id="complication_type_<?php echo $type->id?>" data-type="<?php echo $type->name?>" <?php if (!$element->hasComplicationsOfType($type)) {?> style="display: none"<?php }?>>
 							<td><?php echo $type->name?></td>
 							<td>
 								<div class="multi-select multi-select-list">
-									<ul class="MultiSelectList multi-select-selections">
-										<?php foreach ($element->{strtolower($type->name)."_complications"} as $complication) {?>
-											<li>
-												<span class="text"><?php echo $complication->name?></span>
-												<a class="removeComplication remove-one">Remove</a>
-												<input type="hidden" name="<?php echo CHtml::modelName($element)?>[complications]" value="<?php echo $complication->id?>" />
-											</li>
-										<?php }?>
+									<ul class="MultiSelectList multi-select-selections <?php echo $type->name?>_complications">
+										<?php if (!empty($element->complication_assignments)) {
+											foreach ($element->complication_assignments as $i => $assignment) {
+												if ($assignment->complication->type->id == $type->id) {?>
+													<li>
+														<span class="text"><?php echo $assignment->complication->name?></span>
+														<a class="removeComplication remove-one">Remove</a>
+														<input type="hidden" name="<?php echo CHtml::modelName($element)?>[complications][]" value="<?php echo $assignment->complication_id?>" />
+														<?php if ($assignment->complication->name == 'Other') {?>
+															<input class="other_complication" type="text" name="<?php echo CHtml::modelName($element)?>[other][]" value="<?php echo $assignment->other?>" />
+														<?php }else{?>
+															<input type="hidden" name="<?php echo CHtml::modelName($element)?>[other][]" value="" />
+														<?php }?>
+													</li>
+												<?php }
+											}
+										}?>
 									</ul>
 								</div>
 							</td>
@@ -60,10 +69,10 @@ $layoutColumns = array(
 				<tfoot>
 					<tr>
 						<td>
-							<?php echo CHtml::dropDownList('complication_type','',CHtml::listData(OphTrOperationnote_Complication_Type::model()->findAll(array('order' => 'display_order')),'id','name'))?>
+							<?php echo CHtml::dropDownList('complication_type','',CHtml::listData($element->getComplicationTypesByOpenElements(),'id','name'),array('class' => 'complication_type'))?>
 						</td>
 						<td>
-							<?php echo CHtml::dropDownList('complication','',$element->getComplicationsNotSelectedByType(1),array('empty' => '- Select -'))?>
+							<?php echo CHtml::dropDownList('complication','',CHtml::listData($element->getComplicationsNotSelectedByType(1),'id','name'),array('empty' => '- Select -', 'class' => 'complication_list'))?>
 						</td>
 					</tr>
 				</tfoot>

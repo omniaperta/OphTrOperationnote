@@ -25,6 +25,7 @@ class DefaultController extends BaseEventTypeController
 		'verifyProcedure' => self::ACTION_TYPE_FORM,
 		'newComplicationRow' => self::ACTION_TYPE_FORM,
 		'getComplications' => self::ACTION_TYPE_FORM,
+		'getComplicationTypes' => self::ACTION_TYPE_FORM,
 	);
 
 	/* @var Element_OphTrOperationbooking_Operation operation that this note is for when creating */
@@ -578,7 +579,7 @@ class DefaultController extends BaseEventTypeController
 		$curr_list = CHtml::listData($element->anaesthetic_agents ? $element->anaesthetic_agents : array(), 'id', 'name');
 		if ($missing = array_diff($curr_list, $list)) {
 			foreach ($missing as $id => $name) {
-				$list[$id] =  $name;
+				$list[$id] =	$name;
 			}
 		}
 		return $list;
@@ -617,7 +618,7 @@ class DefaultController extends BaseEventTypeController
 	 */
 	public function getOperativeDeviceList($element)
 	{
-		$curr_list = CHtml::listData($element->operative_devices, 'id', 'name');
+		$curr_list = $element->operative_devices ? CHtml::listData($element->operative_devices, 'id', 'name') : array();
 		$devices = $this->getOperativeDevicesBySiteAndSubspecialty(false,array_keys($curr_list));
 		return CHtml::listData($devices,'id','name');
 	}
@@ -747,6 +748,102 @@ class DefaultController extends BaseEventTypeController
 			throw new Exception("Complication type not found: ".@$_GET['type_id']);
 		}
 
-		$this->renderPartial('_complication_options',array('complication_type' => $complication_type));
+		$criteria = new CDbCriteria;
+		$criteria->addCondition('type_id = :type_id');
+		$criteria->params[':type_id'] = $complication_type->id;
+		$criteria->order = 'display_order asc';
+
+		if (!empty($_GET['selected_ids'])) {
+			$criteria->addNotInCondition('id',$_GET['selected_ids']);
+		}
+
+		$this->renderPartial('_complication_options',array('complications' => OphTrOperationnote_Complication::model()->findAll($criteria)));
+	}
+
+	public function actionGetComplicationTypes()
+	{
+		$element = new Element_OphTrOperationnote_Complications;
+		$element->has_cataract = @$_GET['has_cataract'];
+		$element->has_trabeculectomy = @$_GET['has_trabeculectomy'];
+
+		foreach ($element->getComplicationTypesByOpenElements() as $type) {
+			echo '<option value="'.$type->id.'">'.$type->name.'</option>';
+		}
+	}
+
+	public function getElements()
+	{
+		$elements = parent::getElements();
+
+		$has_cataract = false;
+		$has_trabeculectomy = false;
+
+		foreach ($elements as $i => $element) {
+			if (CHtml::modelName($element) == 'Element_OphTrOperationnote_Complications') {
+				$complications_i = $i;
+				break;
+			}
+		}
+
+		foreach ($this->getChildElements(ElementType::model()->find('class_name=?',array('Element_OphTrOperationnote_ProcedureList'))) as $element) {
+			if (CHtml::modelName($element) == 'Element_OphTrOperationnote_Cataract') {
+				$has_cataract = true;
+			} else if (CHtml::modelName($element) == 'Element_OphTrOperationnote_Trabeculectomy') {
+				$has_trabeculectomy = true;
+			}
+		}
+
+		$elements[$complications_i]->has_cataract = $has_cataract;
+		$elements[$complications_i]->has_trabeculectomy = $has_trabeculectomy;
+
+		return $elements;
+	}
+
+	public function setComplexAttributes_Element_OphTrOperationnote_Complications($element, $data, $index)
+	{
+		$complication_assignments = array();
+
+		if (!empty($data['Element_OphTrOperationnote_Complications']['complications'])) {
+			foreach ($data['Element_OphTrOperationnote_Complications']['complications'] as $i => $complication_id) {
+				$assignment = new OphTrOperationnote_Complication_Assignment;
+				$assignment->complication_id = $complication_id;
+				$assignment->other = $data['Element_OphTrOperationnote_Complications']['other'][$i];
+
+				$complication_assignments[] = $assignment;
+			}
+		}
+
+		$element->complication_assignments = $complication_assignments;
+	}
+
+	public function saveComplexAttributes_Element_OphTrOperationnote_Complications($element, $data, $index)
+	{
+		$complication_ids = array();
+
+		foreach ($element->complication_assignments as $assignment) {
+			if (!$_assignment = OphTrOperationnote_Complication_Assignment::model()->find('element_id=? and complication_id=?',array($element->id,$assignment->complication_id))) {
+				$_assignment = new OphTrOperationnote_Complication_Assignment;
+				$_assignment->element_id = $element->id;
+				$_assignment->complication_id = $assignment->complication_id;
+			}
+
+			$_assignment->other = $assignment->other;
+
+			if (!$_assignment->save()) {
+				throw new Exception("Unable to save complication assignment: ".print_r($_assignment->errors,true));
+			}
+
+			$complication_ids[] = $_assignment->complication_id;
+		}
+
+		$criteria = new CDbCriteria;
+		$criteria->addCondition('element_id = :element_id');
+		$criteria->params[':element_id'] = $element->id;
+
+		if (!empty($complication_ids)) {
+			$criteria->addNotInCondition('complication_id',$complication_ids);
+		}
+
+		OphTrOperationnote_Complication_Assignment::model()->deleteAll($criteria);
 	}
 }

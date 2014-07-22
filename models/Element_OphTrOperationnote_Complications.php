@@ -31,7 +31,8 @@
  */
 class Element_OphTrOperationnote_Complications extends Element_OpNote
 {
-	public $auto_update_relations = true;
+	public $has_cataract = false;
+	public $has_trabeculectomy = false;
 
 	/**
 	 * Returns the static model of the specified AR class.
@@ -58,7 +59,7 @@ class Element_OphTrOperationnote_Complications extends Element_OpNote
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('event_id, comments, complications', 'safe'),
+			array('event_id, comments', 'safe'),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
 			array('id, event_id, comments', 'safe', 'on' => 'search'),
@@ -95,6 +96,9 @@ class Element_OphTrOperationnote_Complications extends Element_OpNote
 			'id' => 'ID',
 			'event_id' => 'Event',
 			'comments' => 'Comments',
+			'anaesthetic_complications' => 'Anaesthetic complications',
+			'cataract_complications' => 'Cataract complications',
+			'trabeculectomy_complications' => 'Trabeculectomy complications',
 		);
 	}
 
@@ -140,5 +144,32 @@ class Element_OphTrOperationnote_Complications extends Element_OpNote
 		}
 
 		return OphTrOperationnote_Complication::model()->findAll($criteria);
+	}
+
+	public function getComplicationTypesByOpenElements()
+	{
+		$criteria = new CDbCriteria;
+		$criteria->order = 'display_order asc';
+
+		if (!$this->has_cataract) {
+			$criteria->addCondition("name != 'Cataract'");
+		}
+
+		if (!$this->has_trabeculectomy) {
+			$criteria->addCondition("name != 'Trabeculectomy'");
+		}
+
+		return OphTrOperationnote_Complication_Type::model()->findAll($criteria);
+	}
+
+	public function hasComplicationsOfType($type)
+	{
+		foreach ($this->complication_assignments as $assignment) {
+			if ($assignment->complication->type_id == $type->id) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

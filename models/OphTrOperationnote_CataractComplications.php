@@ -45,11 +45,6 @@ class OphTrOperationnote_CataractComplications extends BaseActiveRecordVersioned
 		return 'ophtroperationnote_cataract_complications';
 	}
 
-	public function defaultScope()
-	{
-		return array('order' => $this->getTableAlias(true, false) . '.display_order');
-	}
-
 	/**
 	 * @return array validation rules for model attributes.
 	 */

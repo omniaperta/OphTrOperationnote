@@ -46,3 +46,18 @@
 		}
 	}
 }
+
+.complications {
+	.complication_type {
+		width: 10em;
+	}
+	.complication_list {
+		width: 25em;
+	}
+}
+
+.other_complication {
+	width: 19em !important;
+	display: inline-block !important;
+	margin-left: 1em !important;
+}

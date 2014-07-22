@@ -48,11 +48,45 @@ function callbackAddProcedure(procedure_id) {
 														$('.'+m[1]+':last').removeClass('hidden');
 							$('.'+m[1]+':last').slideToggle('fast');
 						}
+
+						updateComplicationTypes();
 					}
 				}
 			}
 		}
 	});
+}
+
+function updateComplicationTypes()
+{
+	var has_cataract = 0;
+	var has_trabeculectomy = 0;
+
+	if ($('.Element_OphTrOperationnote_Cataract').length >0) {
+		has_cataract = 1;
+	}
+
+	if ($('.Element_OphTrOperationnote_Trabeculectomy').length >0) {
+		has_trabeculectomy = 1;
+	}
+
+	$.ajax({
+		'type': 'GET',
+		'url': baseUrl+'/OphTrOperationnote/default/getComplicationTypes?has_cataract=' + has_cataract + '&has_trabeculectomy=' + has_trabeculectomy,
+		'success': function(html) {
+			$('#complication_type').html(html);
+		}
+	});
+
+	if (!has_cataract) {
+		$('tr[data-type="Cataract"]').hide();
+		$('ul.Cataract_complications').html('');
+	}
+
+	if (!has_trabeculectomy) {
+		$('tr[data-type="Trabeculectomy"]').hide();
+		$('ul.Trabeculectomy_complications').html('');
+	}
 }
 
 /*
@@ -89,6 +123,8 @@ function callbackRemoveProcedure(procedure_id) {
 			$.each(data, function(key, val) {
 				$('.'+val).slideToggle('fast',function() {
 					$('.'+val).remove();
+
+					updateComplicationTypes();
 				});
 			});
 		}
@@ -288,12 +324,14 @@ $(document).ready(function() {
 
 		$(this).closest('li').remove();
 
+		$('[data-element-type-class="Element_OphTrOperationnote_Complications"] select[name="complication_type"]').change();
+
 		if (ul.children('li').length == 0) {
 			ul.closest('tr').hide();
 		}
 	});
 
-	$('[data-element-type-class="Element_OphTrOperationnote_Complications"]').undelegate('select[name="complication_type[]"]','change').delegate('select[name="complication_type[]"]','change',function(e) {
+	$('[data-element-type-class="Element_OphTrOperationnote_Complications"]').undelegate('select[name="complication_type"]','change').delegate('select[name="complication_type"]','change',function(e) {
 		e.preventDefault();
 
 		var target = $(this).parent().next('td').children('select');
@@ -303,13 +341,44 @@ $(document).ready(function() {
 		} else {
 			var type_id = $(this).val();
 
+			var selected_ids = {};
+			selected_ids['selected_ids'] = [];
+
+			$('#complication_type_' + type_id + ' input[type="hidden"]').map(function() {
+				selected_ids['selected_ids'].push($(this).val());
+			});
+
 			$.ajax({
 				'type': 'GET',
-				'url': baseUrl+'/OphTrOperationnote/default/getComplications?type_id=' + type_id,
+				'url': baseUrl+'/OphTrOperationnote/default/getComplications?type_id=' + type_id + '&' + $.param(selected_ids),
 				'success': function(html) {
 					target.html(html);
 				}
 			});
+		}
+	});
+
+	$('[data-element-type-class="Element_OphTrOperationnote_Complications"]').undelegate('select[name="complication"]','change').delegate('select[name="complication"]','change',function(e) {
+		e.preventDefault();
+
+		if ($(this).val() != '') {
+			var type_name = $('[data-element-type-class="Element_OphTrOperationnote_Complications"] select[name="complication_type"] option:selected').text();
+
+			var html = '<li><span class="text">' + $(this).children('option:selected').text() + '</span><a class="removeComplication remove-one">Remove</a><input type="hidden" name="Element_OphTrOperationnote_Complications[complications][]" value="' + $(this).val() + '" />';
+
+			if ($(this).children('option:selected').text() == 'Other') {
+				html += '<input class="other_complication" type="text" name="Element_OphTrOperationnote_Complications[other][]" value="" /></li>';
+			} else {
+				html += '<input type="hidden" name="Element_OphTrOperationnote_Complications[other][]" value="" /></li>';
+			}
+
+			$('[data-element-type-class="Element_OphTrOperationnote_Complications"] ul.' + type_name + '_complications').append(html);
+
+			$('#complication_type_' + $('[data-element-type-class="Element_OphTrOperationnote_Complications"] select[name="complication_type"]').val()).show();
+
+			$('input.other_complication').focus();
+
+			$(this).children('option:selected').remove();
 		}
 	});
 });

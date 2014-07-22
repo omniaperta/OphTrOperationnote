@@ -17,6 +17,7 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.html The GNU General Public License V3.0
  */
 ?>
-<?php foreach (OphTrOperationnote_Complication::model()->findAll(array('condition' => 'type_id=?', 'params' => array($complication_type->id), 'order' => 'display_order')) as $complication) {?>
+<option value="">- Select -</option>
+<?php foreach ($complications as $complication) {?>
 	<option value="<?php echo $complication->id?>"><?php echo $complication->name?></option>
 <?php }?>

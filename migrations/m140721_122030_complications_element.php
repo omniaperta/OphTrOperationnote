@@ -6,7 +6,7 @@ class m140721_122030_complications_element extends OEMigration
 	{
 		$et = $this->dbConnection->createCommand()->select("id")->from("event_type")->where("class_name = :class_name",array(":class_name" => "OphTrOperationnote"))->queryRow();
 
-		$this->insert('element_type',array('name' => 'Complications', 'class_name' => 'Element_OphTrOperationnote_Complications', 'event_type_id' => $et['id'], 'display_order' => 35, 'default' => 1));
+		$this->insert('element_type',array('name' => 'Complications', 'class_name' => 'Element_OphTrOperationnote_Complications', 'event_type_id' => $et['id'], 'display_order' => 35, 'default' => 1, 'required' => 1));
 
 		$this->createTable('et_ophtroperationnote_complications', array(
 				'id' => 'int(10) unsigned NOT NULL AUTO_INCREMENT',
@@ -78,6 +78,11 @@ class m140721_122030_complications_element extends OEMigration
 				'CONSTRAINT `ophtroperationnote_complication_assn_ele_fk` FOREIGN KEY (`element_id`) REFERENCES `et_ophtroperationnote_complications` (`id`)',
 				'CONSTRAINT `ophtroperationnote_complication_assn_com_fk` FOREIGN KEY (`complication_id`) REFERENCES `ophtroperationnote_complication` (`id`)',
 			), 'ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci');
+
+		$this->versionExistingTable('et_ophtroperationnote_complications');
+		$this->versionExistingTable('ophtroperationnote_complication_type');
+		$this->versionExistingTable('ophtroperationnote_complication');
+		$this->versionExistingTable('ophtroperationnote_complication_assignment');
 
 		$this->initialiseData(dirname(__FILE__));
 
@@ -152,21 +157,31 @@ class m140721_122030_complications_element extends OEMigration
 			}
 		}
 
+		$this->dropTable('ophtroperationnote_anaesthetic_anaesthetic_complication_version');
 		$this->dropTable('ophtroperationnote_anaesthetic_anaesthetic_complication');
+		$this->dropTable('ophtroperationnote_anaesthetic_anaesthetic_complications_version');
 		$this->dropTable('ophtroperationnote_anaesthetic_anaesthetic_complications');
+		$this->dropTable('ophtroperationnote_cataract_complication_version');
 		$this->dropTable('ophtroperationnote_cataract_complication');
+		$this->dropTable('ophtroperationnote_cataract_complications_version');
 		$this->dropTable('ophtroperationnote_cataract_complications');
+		$this->dropTable('ophtroperationnote_trabeculectomy_complications_version');
 		$this->dropTable('ophtroperationnote_trabeculectomy_complications');
+		$this->dropTable('ophtroperationnote_trabeculectomy_complication_version');
 		$this->dropTable('ophtroperationnote_trabeculectomy_complication');
 
 		$this->dropColumn('et_ophtroperationnote_cataract','complication_notes');
+		$this->dropColumn('et_ophtroperationnote_cataract_version','complication_notes');
 		$this->dropColumn('et_ophtroperationnote_trabeculectomy','complication_other');
+		$this->dropColumn('et_ophtroperationnote_trabeculectomy_version','complication_other');
 	}
 
 	public function down()
 	{
 		$this->addColumn('et_ophtroperationnote_trabeculectomy','complication_other','varchar(255) NULL');
+		$this->addColumn('et_ophtroperationnote_trabeculectomy_version','complication_other','varchar(255) NULL');
 		$this->addColumn('et_ophtroperationnote_cataract','complication_notes','varchar(4096) NULL');
+		$this->addColumn('et_ophtroperationnote_cataract_version','complication_notes','varchar(4096) NULL');
 
 		$this->execute("CREATE TABLE `ophtroperationnote_trabeculectomy_complication` (
 	`id` int(11) NOT NULL AUTO_INCREMENT,
@@ -182,6 +197,8 @@ class m140721_122030_complications_element extends OEMigration
 	CONSTRAINT `ophtroperationnote_trabeculectomy_complication_cui_fk` FOREIGN KEY (`created_user_id`) REFERENCES `user` (`id`),
 	CONSTRAINT `ophtroperationnote_trabeculectomy_complication_lmui_fk` FOREIGN KEY (`last_modified_user_id`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
+
+		$this->versionExistingTable('ophtroperationnote_trabeculectomy_complication');
 
 		$this->execute("CREATE TABLE `ophtroperationnote_trabeculectomy_complications` (
 	`id` int(11) NOT NULL AUTO_INCREMENT,
@@ -202,6 +219,8 @@ class m140721_122030_complications_element extends OEMigration
 	CONSTRAINT `ophtroperationnote_trabeculectomy_complications_cui_fk` FOREIGN KEY (`created_user_id`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
 
+		$this->versionExistingTable('ophtroperationnote_trabeculectomy_complications');
+
 		$this->execute("CREATE TABLE `ophtroperationnote_cataract_complications` (
 	`id` int(10) unsigned NOT NULL AUTO_INCREMENT,
 	`name` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
@@ -217,6 +236,8 @@ class m140721_122030_complications_element extends OEMigration
 	CONSTRAINT `ophtroperationnote_cc_created_user_id_fk` FOREIGN KEY (`created_user_id`) REFERENCES `user` (`id`),
 	CONSTRAINT `ophtroperationnote_cc_last_modified_user_id_fk` FOREIGN KEY (`last_modified_user_id`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
+
+		$this->versionExistingTable('ophtroperationnote_cataract_complications');
 
 		$this->execute("CREATE TABLE `ophtroperationnote_cataract_complication` (
 	`id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -237,6 +258,8 @@ class m140721_122030_complications_element extends OEMigration
 	CONSTRAINT `ophtroperationnote_cc2_last_modified_user_id_fk` FOREIGN KEY (`last_modified_user_id`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
 
+		$this->versionExistingTable('ophtroperationnote_cataract_complication');
+
 		$this->execute("CREATE TABLE `ophtroperationnote_anaesthetic_anaesthetic_complications` (
 	`id` int(10) unsigned NOT NULL AUTO_INCREMENT,
 	`name` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
@@ -252,6 +275,8 @@ class m140721_122030_complications_element extends OEMigration
 	CONSTRAINT `ophtroperationnote_anaesthetic_ac_created_user_id_fk` FOREIGN KEY (`created_user_id`) REFERENCES `user` (`id`),
 	CONSTRAINT `ophtroperationnote_anaesthetic_ac_last_modified_user_id_fk` FOREIGN KEY (`last_modified_user_id`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
+
+		$this->versionExistingTable('ophtroperationnote_anaesthetic_anaesthetic_complications');
 
 		$this->execute("CREATE TABLE `ophtroperationnote_anaesthetic_anaesthetic_complication` (
 	`id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -271,6 +296,8 @@ class m140721_122030_complications_element extends OEMigration
 	CONSTRAINT `ophtroperationnote_pac_created_user_id_fk` FOREIGN KEY (`created_user_id`) REFERENCES `user` (`id`),
 	CONSTRAINT `ophtroperationnote_pac_last_modified_user_id_fk` FOREIGN KEY (`last_modified_user_id`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
+
+		$this->versionExistingTable('ophtroperationnote_anaesthetic_anaesthetic_complication');
 
 		$ana_complications = array();
 		foreach (array('Eyelid haemorrage/bruising','Conjunctivital chemosis','Retro bulbar / peribulbar haemorrage','Globe/optic nerve penetration','Inadequate akinesia','Patient pain - Mild','Patient pain - Moderate','Patient pain - Severe','Systemic problems','Operation cancelled due to complication') as $i => $complication) {
@@ -341,9 +368,13 @@ class m140721_122030_complications_element extends OEMigration
 			}
 		}
 
+		$this->dropTable('ophtroperationnote_complication_assignment_version');
 		$this->dropTable('ophtroperationnote_complication_assignment');
+		$this->dropTable('ophtroperationnote_complication_version');
 		$this->dropTable('ophtroperationnote_complication');
+		$this->dropTable('ophtroperationnote_complication_type_version');
 		$this->dropTable('ophtroperationnote_complication_type');
+		$this->dropTable('et_ophtroperationnote_complications_version');
 		$this->dropTable('et_ophtroperationnote_complications');
 
 		$this->delete('element_type', "class_name = 'Element_OphTrOperationnote_Complications'");

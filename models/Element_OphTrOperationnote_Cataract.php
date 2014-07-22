@@ -79,7 +79,7 @@ class Element_OphTrOperationnote_Cataract extends Element_OnDemand
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('event_id, incision_site_id, length, meridian, incision_type_id, iol_position_id, iol_type_id, iol_power, eyedraw, report, complication_notes, eyedraw2, report2, predicted_refraction, complications, operative_devices', 'safe'),
+			array('event_id, incision_site_id, length, meridian, incision_type_id, iol_position_id, iol_type_id, iol_power, eyedraw, report, complication_notes, eyedraw2, report2, predicted_refraction, operative_devices', 'safe'),
 			array('incision_site_id, length, meridian, incision_type_id, predicted_refraction, iol_position_id, eyedraw, report, eyedraw2', 'required'),
 			array('length', 'numerical', 'integerOnly' => false, 'numberPattern' => '/^[0-9](\.[0-9])?$/', 'message' => 'Length must be 0 - 9.9 in increments of 0.1'),
 			array('meridian', 'numerical', 'integerOnly' => false, 'numberPattern' => '/^[0-9]{1,3}(\.[0-9])?$/', 'min' => 000, 'max' => 360, 'message' => 'Meridian must be 000.5 - 360.0 degrees'),
@@ -104,9 +104,6 @@ class Element_OphTrOperationnote_Cataract extends Element_OnDemand
 			'iol_position' => array(self::BELONGS_TO, 'OphTrOperationnote_IOLPosition', 'iol_position_id'),
 			'user' => array(self::BELONGS_TO, 'User', 'created_user_id'),
 			'usermodified' => array(self::BELONGS_TO, 'User', 'last_modified_user_id'),
-			'complication_assignments' => array(self::HAS_MANY, 'OphTrOperationnote_CataractComplication', 'cataract_id'),
-			'complications' => array(self::HAS_MANY, 'OphTrOperationnote_CataractComplications', 'complication_id',
-				'through' => 'complication_assignments'),
 			'operative_device_assignments' => array(self::HAS_MANY, 'OphTrOperationnote_CataractOperativeDevice', 'cataract_id'),
 			'operative_devices' => array(self::HAS_MANY, 'OperativeDevice', 'operative_device_id',
 				'through' => 'operative_device_assignments'),
@@ -129,7 +126,6 @@ class Element_OphTrOperationnote_Cataract extends Element_OnDemand
 			'length' => 'Length',
 			'meridian' => 'Meridian',
 			'report' => 'Details',
-			'complication_notes' => 'Complication notes',
 			'report2' => 'Details',
 			'predicted_refraction' => 'Predicted refraction',
 		);
@@ -227,19 +223,5 @@ class Element_OphTrOperationnote_Cataract extends Element_OnDemand
 		}
 
 		return false;
-	}
-
-	/**
-	 * Get ids of cataract complications associated with the element
-	 */
-	public function getCataractComplicationValues()
-	{
-		$complication_values = array();
-
-		foreach ($this->complication_assignments as $complication_assignment) {
-			$complication_values[] = $complication_assignment->complication_id;
-		}
-
-		return $complication_values;
 	}
 }

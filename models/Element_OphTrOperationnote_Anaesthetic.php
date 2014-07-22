@@ -74,7 +74,7 @@ class Element_OphTrOperationnote_Anaesthetic extends Element_OpNote
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('event_id, anaesthetist_id, anaesthetic_type_id, anaesthetic_delivery_id, anaesthetic_comment, anaesthetic_witness_id, anaesthetic_agents, anaesthetic_complications', 'safe'),
+			array('event_id, anaesthetist_id, anaesthetic_type_id, anaesthetic_delivery_id, anaesthetic_comment, anaesthetic_witness_id, anaesthetic_agents', 'safe'),
 			array('anaesthetic_type_id, anaesthetist_id, anaesthetic_delivery_id', 'required'),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
@@ -101,9 +101,6 @@ class Element_OphTrOperationnote_Anaesthetic extends Element_OpNote
 			'anaesthetic_agent_assignments' => array(self::HAS_MANY, 'OphTrOperationnote_OperationAnaestheticAgent', 'et_ophtroperationnote_anaesthetic_id'),
 			'anaesthetic_agents' => array(self::HAS_MANY, 'AnaestheticAgent', 'anaesthetic_agent_id',
 				'through' => 'anaesthetic_agent_assignments'),
-			'anaesthetic_complication_assignments' => array(self::HAS_MANY, 'OphTrOperationnote_AnaestheticComplication', 'et_ophtroperationnote_anaesthetic_id'),
-			'anaesthetic_complications' => array(self::HAS_MANY, 'OphTrOperationnote_AnaestheticComplications', 'anaesthetic_complication_id',
-				'through' => 'anaesthetic_complication_assignments'),
 			'witness' => array(self::BELONGS_TO, 'User', 'anaesthetic_witness_id'),
 		);
 	}
@@ -209,19 +206,5 @@ class Element_OphTrOperationnote_Anaesthetic extends Element_OpNote
 		}
 
 		return parent::beforeValidate();
-	}
-
-	/**
-	 * Get ids of anaesthetic complications in use by the element
-	 */
-	public function getAnaestheticComplicationValues()
-	{
-		$complication_values = array();
-
-		foreach ($this->anaesthetic_complication_assignments as $complication_assignment) {
-			$complication_values[] = $complication_assignment->id;
-		}
-
-		return $complication_values = array();
 	}
 }
