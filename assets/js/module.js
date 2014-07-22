@@ -676,6 +676,7 @@ function changeEye() {
 	var drawingEdit1 = window.ED ? ED.getInstance('ed_drawing_edit_Position') : undefined;
 	var drawingEdit2 = window.ED ? ED.getInstance('ed_drawing_edit_Cataract') : undefined;
 	var drawingEdit3 = window.ED ? ED.getInstance('ed_drawing_edit_Trabeculectomy') : undefined;
+	var drawingEdit4 = window.ED ? ED.getInstance('ed_drawing_edit_Injection') : undefined;
 
 	if (typeof(drawingEdit1) != 'undefined') {
 		if (drawingEdit1.eye == ED.eye.Right) drawingEdit1.eye = ED.eye.Left;
@@ -697,6 +698,13 @@ function changeEye() {
 
 		rotateTrabeculectomy();
 	}
+
+	if (typeof(drawingEdit4) != 'undefined') {
+		if (drawingEdit4.eye == ED.eye.Right) drawingEdit4.eye = ED.eye.Left;
+		else drawingEdit4.eye = ED.eye.Right;
+
+		rotateInjection();
+	}
 }
 
 function rotateTrabeculectomy()
@@ -717,7 +725,139 @@ function rotateTrabeculectomy()
 	}
 }
 
+function rotateInjection()
+{
+	var _drawing = ED.getInstance('ed_drawing_edit_Injection');
+
+	if (_drawing.isNew) {
+		var injectionSite = _drawing.firstDoodleOfClass('InjectionSite');
+
+		if (_drawing.eye == ED.eye.Right) {
+			injectionSite.setParameterWithAnimation('rotation',315 * (Math.PI/180));
+		} else {
+			injectionSite.setParameterWithAnimation('rotation',45 * (Math.PI/180));
+		}
+	}
+}
+
 function OphTrOperationnote_do_print() {
 	printIFrameUrl(OE_print_url, null);
 	enableButtons();
 }
+
+function OphTrOperationnote_antSegListener(_drawing) {
+	var self = this;
+
+	self.drawing = _drawing;
+	self._default_distance = null;
+
+	var side = 'right';
+	if (self.drawing.eye) {
+		side = 'left';
+	}
+	self.side = side;
+	self._injectionDoodles = {};
+	self._unsynced = new Array();
+	// state flag to track whether we are updating the doodle or not
+	self._updating = false;
+	self.init();
+}
+
+OphTrOperationnote_antSegListener.prototype.init = function()
+{
+	var self = this;
+
+	self.setDefaultDistance();
+	self.drawing.registerForNotifications(self, 'callback', ['doodleAdded', 'doodleDeleted', 'parameterChanged']);
+
+	$('#Element_OphTrOperationnote_AnteriorSegment_' + self.side + '_lens_status_id').bind('change', function() {
+		self.setDefaultDistance();
+	});
+}
+
+// get the default distance from the lens status
+OphTrOperationnote_antSegListener.prototype.setDefaultDistance = function() {
+	var self = this;
+
+	var selVal = $('#Element_OphTrOperationnote_AnteriorSegment_' + self.side + '_lens_status_id').val();
+	if (selVal) {
+		$('#Element_OphTrOperationnote_AnteriorSegment_' + self.side + '_lens_status_id').find('option').each(function() {
+			if ($(this).val() == selVal) {
+				self._default_distance = $(this).attr('data-default-distance');
+				return false;
+			}
+		});
+		self.updateDistances();
+	}
+	else {
+		self._default_distance = null;
+	}
+}
+
+// update individual injection distance
+OphTrOperationnote_antSegListener.prototype.updateDoodleDistance = function(doodle, distance)
+{
+	validityArray = doodle.validateParameter('distance', distance.toString());
+	if (validityArray.valid) {
+		doodle.setParameterWithAnimation('distance', validityArray.value);
+	}
+	else { console.log('SYNC ERROR: invalid distance from lens status for doodle'); }
+}
+
+// iterate through all registered injection site doodles, and update those that have not been manually altered
+OphTrOperationnote_antSegListener.prototype.updateDistances = function()
+{
+	var self = this;
+	for (var id in self._injectionDoodles) {
+		var obj = self._injectionDoodles[id];
+		skip = false;
+		for (var j = 0; j <= self._unsynced.length; j++) {
+			if (self._unsynced[j] == id) {
+				skip = true;
+				break;
+			}
+		}
+		// it's not synced
+		if (skip) {
+			continue;
+		}
+		self.updateDoodleDistance(obj, self._default_distance);
+	}
+}
+
+// listener callback function for eyedraw
+OphTrOperationnote_antSegListener.prototype.callback = function(_messageArray) {
+	var self = this;
+
+
+	if (_messageArray.eventName == "doodleAdded" && _messageArray.object.className == 'InjectionSite') {
+		// set the distance to the default value from the lens status
+		self._injectionDoodles[_messageArray.object.id] = _messageArray.object;
+		if (self._default_distance) {
+			self.updateDoodleDistance(_messageArray.object, self._default_distance);
+		}
+	}
+	// we get parameter change noticed for changes initiated by our object, so we don't want to unsync those sites
+	else if (_messageArray.eventName == "parameterChanged"
+		&& _messageArray.object.doodle.className == "InjectionSite"
+		&& _messageArray.object.parameter == "distance") {
+
+		// when editing/after validation, initial doodles are not added, so need to verify the doodle is known to our listener
+		var id = _messageArray.object.doodle.id;
+		if (!self._injectionDoodles[id]) {
+			self._injectionDoodles[id] = _messageArray.object.doodle;
+		}
+
+		if (_messageArray.object.value != _messageArray.object.oldvalue
+			&& _messageArray.object.value != self._default_distance) {
+			// unsync this injection from future changes to lens status
+			for (var i = 0; i <= self._unsynced.length; i++) {
+				if (self._unsynced[i] == _messageArray.object.doodle.id) {
+					return;
+				}
+			}
+			self._unsynced.push(_messageArray.object.doodle.id);
+		}
+	}
+
+};
