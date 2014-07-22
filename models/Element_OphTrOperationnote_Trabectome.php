@@ -69,8 +69,7 @@ class Element_OphTrOperationnote_Trabectome extends Element_OnDemand
 		// will receive user inputs.
 		return array(
 			array('power_id, blood_reflux, hpmc, description', 'required'),
-			array('event_id, power_id, blood_reflux, hpmc, description, eyedraw, complication_other, complications', 'safe'),
-			array('complication_other', 'requiredIfComplicationOther'),
+			array('event_id, power_id, blood_reflux, hpmc, description, eyedraw, complications', 'safe'),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
 			array('id, event_id, power_id, blood_reflux, hpmc, report', 'safe', 'on' => 'search'),
@@ -90,8 +89,6 @@ class Element_OphTrOperationnote_Trabectome extends Element_OnDemand
 				'user' => array(self::BELONGS_TO, 'User', 'created_user_id'),
 				'usermodified' => array(self::BELONGS_TO, 'User', 'last_modified_user_id'),
 				'power' => array(self::BELONGS_TO, 'OphTrOperationnote_Trabectome_Power', 'power_id'),
-				'complication_assignments' => array(self::HAS_MANY, 'OphTrOperationnote_Trabectome_ComplicationAssignment', 'element_id'),
-				'complications' => array(self::HAS_MANY, 'OphTrOperationnote_Trabectome_Complication', 'complication_id', 'through' => 'complication_assignments')
 		);
 	}
 
@@ -127,75 +124,5 @@ class Element_OphTrOperationnote_Trabectome extends Element_OnDemand
 		return new CActiveDataProvider(get_class($this), array(
 				'criteria' => $criteria,
 		));
-	}
-
-	/**
-	 * Ensures the attribute is provided when an 'other' complication is selected
-	 *
-	 * @param $attribute
-	 * @param $params
-	 */
-	public function requiredIfComplicationOther($attribute, $params)
-	{
-		if ($this->hasOtherComplication() && !$this->$attribute) {
-			$this->addError($attribute, $this->getAttributeLabel($attribute)." cannot be blank.");
-		}
-	}
-
-	/**
-	 * Check if any of the complications on the element is an "other" complication (i.e. in need of further information)
-	 *
-	 * @return bool
-	 */
-	public function hasOtherComplication()
-	{
-		foreach ($this->complications as $comp) {
-			if ($comp->other) {
-				return true;
-			}
-		}
-		return false;
-	}
-	/**
-	 * Get a list of the ids of the currently assigned complications on this element
-	 *
-	 * @return array
-	 */
-	public function getComplicationIDs()
-	{
-		$res = array();
-		foreach ($this->complications as $comp) {
-			$res[] = $comp->id;
-		}
-		return $res;
-	}
-
-	/**
-	 * Returns comma separated list of complications on this procedure note
-	 *
-	 * @param $default
-	 * @return string
-	 */
-	public function getComplicationsString($default = "None")
-	{
-		$res = array();
-		$other = false;
-		foreach ($this->complications as $comp) {
-			if ($comp->other) {
-				$other = true;
-			}
-			else {
-				$res[] = $comp->name;
-			}
-		}
-		if ($other) {
-			$res[] = $this->complication_other;
-		}
-		if ($res) {
-			return implode(', ', $res);
-		}
-		else {
-			return $default;
-		}
 	}
 }

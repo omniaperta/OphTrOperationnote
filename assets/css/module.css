@@ -21,11 +21,11 @@
 }
 /* line 19, ../sass/components/_event.scss */
 .event .event-content {
-  background-image: url('../img/watermark.png?1399992053');
+  background-image: url('../img/watermark.png?1400240773');
 }
 /* line 22, ../sass/components/_event.scss */
 .event .event-title {
-  background-image: url('../img/medium.png?1399992053');
+  background-image: url('../img/medium.png?1400240773');
 }
 
 /* line 29, ../sass/components/_event.scss */
@@ -47,6 +47,22 @@
 /* line 44, ../sass/components/_event.scss */
 .view .data-value.highlight {
   margin: 0 -10px;
+}
+
+/* line 51, ../sass/components/_event.scss */
+.complications .complication_type {
+  width: 10em;
+}
+/* line 54, ../sass/components/_event.scss */
+.complications .complication_list {
+  width: 25em;
+}
+
+/* line 59, ../sass/components/_event.scss */
+.other_complication {
+  width: 19em !important;
+  display: inline-block !important;
+  margin-left: 1em !important;
 }
 
 @media print {

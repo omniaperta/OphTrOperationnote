@@ -35,6 +35,11 @@
 			$this->renderElement($anaesthetic_element, 'print', false, false);
 		?>
 
+		<?php
+			$complications_element = Element_OphTrOperationnote_Complications::model()->find("event_id = ?", array($this->event->id));
+			$this->renderElement($complications_element, 'print', false, false);
+		?>
+
 		<!-- Per-operative drugs -->
 		<?php
 			$postdrugs_element = Element_OphTrOperationnote_PostOpDrugs::model()->find("event_id = ?", array($this->event->id));

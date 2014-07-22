@@ -18,19 +18,18 @@
  */
 
 /**
- * This is the model class for table "element_procedurelist".
+ * This is the model class for table "ophtroperationnote_complication".
  *
- * The followings are the available columns in table 'element_operation':
+ * The followings are the available columns in table 'ophtroperationnote_complication':
  * @property string $id
- * @property integer $event_id
- * @property integer $surgeon_id
- * @property integer $assistant_id
- * @property integer $anaesthetic_type
+ * @property integer $cataract_id
+ * @property integer $complication_id
  *
  * The followings are the available model relations:
- * @property Event $event
+ * @property Element_OphTrOperationnote_Cataract $cataract
+ * @property Element_OphTrOperationnote_Complications $complication
  */
-class OphTrOperationnote_AnaestheticComplications extends BaseActiveRecordVersioned
+class OphTrOperationnote_Complication extends BaseActiveRecordVersioned
 {
 	/**
 	 * Returns the static model of the specified AR class.
@@ -46,12 +45,16 @@ class OphTrOperationnote_AnaestheticComplications extends BaseActiveRecordVersio
 	 */
 	public function tableName()
 	{
-		return 'ophtroperationnote_anaesthetic_anaesthetic_complications';
+		return 'ophtroperationnote_complication';
 	}
 
-	public function defaultScope()
+	public function relations()
 	{
-		return array('order' => $this->getTableAlias(true, false) . '.display_order');
+		// NOTE: you may need to adjust the relation name and the related
+		// class name for the relations automatically generated below.
+		return array(
+			'type' => array(self::BELONGS_TO, 'OphTrOperationnote_Complication_Type', 'type_id'),
+		);
 	}
 
 	/**
@@ -65,37 +68,6 @@ class OphTrOperationnote_AnaestheticComplications extends BaseActiveRecordVersio
 		);
 	}
 
-	/**
-	 * @return array relational rules.
-	 */
-	public function relations()
-	{
-		// NOTE: you may need to adjust the relation name and the related
-		// class name for the relations automatically generated below.
-		return array(
-		);
-	}
-
-	/**
-	 * @return array customized attribute labels (name=>label)
-	 */
-	public function attributeLabels()
-	{
-		return array(
-		);
-	}
-
-	public function behaviors()
-	{
-		return array(
-			'LookupTable' => 'LookupTable',
-		);
-	}
-
-	/**
-	 * Retrieves a list of models based on the current search/filter conditions.
-	 * @return CActiveDataProvider the data provider that can return the models based on the search/filter conditions.
-	 */
 	public function search()
 	{
 		// Warning: Please modify the following code to remove attributes that
@@ -106,7 +78,7 @@ class OphTrOperationnote_AnaestheticComplications extends BaseActiveRecordVersio
 		$criteria->compare('id', $this->id, true);
 
 		return new CActiveDataProvider(get_class($this), array(
-				'criteria' => $criteria,
-			));
+			'criteria' => $criteria,
+		));
 	}
 }

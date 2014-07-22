@@ -2,7 +2,8 @@
 /**
  * OpenEyes
  *
- * (C) OpenEyes Foundation, 2014
+ * (C) Moorfields Eye Hospital NHS Foundation Trust, 2008-2011
+ * (C) OpenEyes Foundation, 2011-2013
  * This file is part of OpenEyes.
  * OpenEyes is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  * OpenEyes is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
@@ -11,26 +12,29 @@
  * @package OpenEyes
  * @link http://www.openeyes.org.uk
  * @author OpenEyes <info@openeyes.org.uk>
- * @copyright Copyright (c) 2014, OpenEyes Foundation
+ * @copyright Copyright (c) 2008-2011, Moorfields Eye Hospital NHS Foundation Trust
+ * @copyright Copyright (c) 2011-2013, OpenEyes Foundation
  * @license http://www.gnu.org/licenses/gpl-3.0.html The GNU General Public License V3.0
  */
 
 /**
- * This is the model class for table "ophtroperationnote_trabectome_complication".
+ * This is the model class for table "element_procedurelist".
  *
- * The followings are the available columns in table 'ophtroperationnote_trabectome_complication':
+ * The followings are the available columns in table 'element_operation':
  * @property string $id
- * @property string $name
- * @property boolean $active
- * @property boolean $other
- * @property integer $display_order
+ * @property integer $event_id
+ * @property integer $surgeon_id
+ * @property integer $assistant_id
+ * @property integer $anaesthetic_type
  *
+ * The followings are the available model relations:
+ * @property Event $event
  */
-class OphTrOperationnote_Trabectome_Complication extends BaseActiveRecordVersioned
+class OphTrOperationnote_Complication_Assignment extends BaseActiveRecordVersioned
 {
 	/**
 	 * Returns the static model of the specified AR class.
-	 * @return OphTrOperationnote_Trabectome_Complication the static model class
+	 * @return ElementOperation the static model class
 	 */
 	public static function model($className = __CLASS__)
 	{
@@ -42,12 +46,7 @@ class OphTrOperationnote_Trabectome_Complication extends BaseActiveRecordVersion
 	 */
 	public function tableName()
 	{
-		return 'ophtroperationnote_trabectome_complication';
-	}
-
-	public function defaultScope()
-	{
-		return array('order' => $this->getTableAlias(true, false) . '.display_order');
+		return 'ophtroperationnote_complication_assignment';
 	}
 
 	/**
@@ -69,6 +68,8 @@ class OphTrOperationnote_Trabectome_Complication extends BaseActiveRecordVersion
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
+			'complication' => array(self::BELONGS_TO, 'OphTrOperationnote_Complication', 'complication_id'),
+			'type' => array(self::HAS_ONE, 'OphTrOperationnote_Complication_Type', 'type_id', 'through' => 'complication'),
 		);
 	}
 
@@ -78,13 +79,6 @@ class OphTrOperationnote_Trabectome_Complication extends BaseActiveRecordVersion
 	public function attributeLabels()
 	{
 		return array(
-		);
-	}
-
-	public function behaviors()
-	{
-		return array(
-				'LookupTable' => 'LookupTable',
 		);
 	}
 
@@ -102,7 +96,7 @@ class OphTrOperationnote_Trabectome_Complication extends BaseActiveRecordVersion
 		$criteria->compare('id', $this->id, true);
 
 		return new CActiveDataProvider(get_class($this), array(
-				'criteria' => $criteria,
+			'criteria' => $criteria,
 		));
 	}
 }

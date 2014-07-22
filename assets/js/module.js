@@ -48,11 +48,55 @@ function callbackAddProcedure(procedure_id) {
 														$('.'+m[1]+':last').removeClass('hidden');
 							$('.'+m[1]+':last').slideToggle('fast');
 						}
+
+						updateComplicationTypes();
 					}
 				}
 			}
 		}
 	});
+}
+
+function updateComplicationTypes()
+{
+	var has_cataract = 0;
+	var has_trabectome = 0;
+	var has_trabeculectomy = 0;
+
+	if ($('.Element_OphTrOperationnote_Cataract').length >0) {
+		has_cataract = 1;
+	}
+
+	if ($('.Element_OphTrOperationnote_Trabectome').length >0) {
+		has_trabectome = 1;
+	}
+
+	if ($('.Element_OphTrOperationnote_Trabeculectomy').length >0) {
+		has_trabeculectomy = 1;
+	}
+
+	$.ajax({
+		'type': 'GET',
+		'url': baseUrl+'/OphTrOperationnote/default/getComplicationTypes?has_cataract=' + has_cataract + '&has_trabectome=' + has_trabectome + '&has_trabeculectomy=' + has_trabeculectomy,
+		'success': function(html) {
+			$('#complication_type').html(html);
+		}
+	});
+
+	if (!has_cataract) {
+		$('tr[data-type="Cataract"]').hide();
+		$('ul.Cataract_complications').html('');
+	}
+
+	if (!has_trabectome) {
+		$('tr[data-type="Trabectome"]').hide();
+		$('ul.Trabectome_complications').html('');
+	}
+
+	if (!has_trabeculectomy) {
+		$('tr[data-type="Trabeculectomy"]').hide();
+		$('ul.Trabeculectomy_complications').html('');
+	}
 }
 
 /*
@@ -89,6 +133,8 @@ function callbackRemoveProcedure(procedure_id) {
 			$.each(data, function(key, val) {
 				$('.'+val).slideToggle('fast',function() {
 					$('.'+val).remove();
+
+					updateComplicationTypes();
 				});
 			});
 		}
@@ -259,14 +305,109 @@ $(document).ready(function() {
 	$('#btn-trabeculectomy-report').die('click').live('click',function(e) {
 		e.preventDefault();
 		var element = $(this).closest('.element');
-		reportEyedraw(element,  ED.getInstance('ed_drawing_edit_Trabeculectomy'), 'report');
+		reportEyedraw(element,	ED.getInstance('ed_drawing_edit_Trabeculectomy'), 'report');
 	});
 
 	$('#btn-trabectome-report').die('click').live('click',function(e) {
 		e.preventDefault();
 		var element = $(this).closest('.element');
 		var drawing_name = $('#Element_OphTrOperationnote_Trabectome_eyedraw').prev('canvas').attr('id').replace(/canvas/,'drawing');
-		reportEyedraw(element,  ED.getInstance(drawing_name), 'description');
+		reportEyedraw(element,	ED.getInstance(drawing_name), 'description');
+	});
+
+	$('[data-element-type-class="Element_OphTrOperationnote_Complications"]').undelegate('.addComplication','click').delegate('.addComplication','click',function(e) {
+		e.preventDefault();
+
+		$.ajax({
+			'type': 'GET',
+			'url': baseUrl+'/OphTrOperationnote/default/newComplicationRow',
+			'success': function(html) {
+				$('.complications tbody').append(html);
+			}
+		});
+	});
+
+	$('[data-element-type-class="Element_OphTrOperationnote_Complications"]').undelegate('.removeComplication','click').delegate('.removeComplication','click',function(e) {
+		e.preventDefault();
+
+		var ul = $(this).closest('ul');
+
+		$(this).closest('li').remove();
+
+		$('[data-element-type-class="Element_OphTrOperationnote_Complications"] select[name="complication_type"]').change();
+
+		if (ul.children('li').length == 0) {
+			ul.closest('tr').hide();
+		}
+	});
+
+	$('[data-element-type-class="Element_OphTrOperationnote_Complications"]').undelegate('select[name="complication_type"]','change').delegate('select[name="complication_type"]','change',function(e) {
+		e.preventDefault();
+
+		var target = $(this).parent().next('td').children('select');
+
+		if ($(this).val() == '') {
+			target.html('');
+		} else {
+			var type_id = $(this).val();
+
+			var selected_ids = {};
+			selected_ids['selected_ids'] = [];
+
+			$('#complication_type_' + type_id + ' input[type="hidden"]').map(function() {
+				selected_ids['selected_ids'].push($(this).val());
+			});
+
+			$.ajax({
+				'type': 'GET',
+				'url': baseUrl+'/OphTrOperationnote/default/getComplications?type_id=' + type_id + '&' + $.param(selected_ids),
+				'success': function(html) {
+					target.html(html);
+				}
+			});
+		}
+	});
+
+	$('[data-element-type-class="Element_OphTrOperationnote_Complications"]').undelegate('select[name="complication"]','change').delegate('select[name="complication"]','change',function(e) {
+		e.preventDefault();
+
+		if ($(this).val() != '') {
+			var type_name = $('[data-element-type-class="Element_OphTrOperationnote_Complications"] select[name="complication_type"] option:selected').text();
+
+			var html = '<li><span class="text">' + $(this).children('option:selected').text() + '</span><a class="removeComplication remove-one">Remove</a><input type="hidden" name="Element_OphTrOperationnote_Complications[complications][]" value="' + $(this).val() + '" />';
+
+			if ($(this).children('option:selected').text() == 'Other') {
+				html += '<input class="other_complication" type="text" name="Element_OphTrOperationnote_Complications[other][]" value="" /></li>';
+			} else {
+				html += '<input type="hidden" name="Element_OphTrOperationnote_Complications[other][]" value="" /></li>';
+			}
+
+			$('[data-element-type-class="Element_OphTrOperationnote_Complications"] ul.' + type_name + '_complications').append(html);
+
+			$('#complication_type_' + $('[data-element-type-class="Element_OphTrOperationnote_Complications"] select[name="complication_type"]').val()).show();
+
+			$('tr[data-type="' + type_name + '"] input.other_complication').focus();
+
+			$(this).children('option:selected').remove();
+		}
+	});
+
+	$('body').undelegate('.showComplicationsElement','click').delegate('.showComplicationsElement','click',function(e) {
+		e.preventDefault();
+
+		var element = $('section.Element_OphTrOperationnote_Complications');
+
+		setTimeout(function() {
+			var offTop = element.offset().top - 90;
+			var speed = (Math.abs($(window).scrollTop() - offTop)) * 1.5;
+			$('body').animate({
+				scrollTop : offTop
+			}, speed, null, function() {
+				$('.element-title', element).effect('pulsate', {
+					times : 2
+				}, 600);
+			});
+		}, 100);
 	});
 });
 

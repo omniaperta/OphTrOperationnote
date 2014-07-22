@@ -131,22 +131,6 @@
 					<?php }?>
 				</div>
 			</div>
-			<div class="large-4 column">
-				<h3 class="data-title">Complications</h3>
-				<div class="data-value highlight">
-					<?php if (!$element->complications) {?>
-						None
-					<?php } else {?>
-						<?php foreach ($element->complications as $complication) {?>
-							<?php if ($complication->name == 'Other') {?>
-								<?php echo str_replace("\n",'<br/>',$element->complication_other)?>
-							<?php }else{?>
-								<?php echo $complication->name?><br/>
-							<?php }?>
-						<?php }?>
-					<?php }?>
-				</div>
-			</div>
 		</div>
 	</div>
 </section>

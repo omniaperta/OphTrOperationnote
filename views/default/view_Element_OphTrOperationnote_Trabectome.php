@@ -71,18 +71,6 @@
 						</div>
 					</div>
 				</div>
-				<div class="row data-row">
-					<div class="large-4 column">
-						<div class="data-label">
-							<?php echo CHtml::encode($element->getAttributeLabel('complications'))?>
-						</div>
-					</div>
-					<div class="large-8 column">
-						<div class="data-value">
-							<?= $element->getComplicationsString(); ?>
-						</div>
-					</div>
-				</div>
 			</div>
 			<div class="large-6 column">
 				<?php

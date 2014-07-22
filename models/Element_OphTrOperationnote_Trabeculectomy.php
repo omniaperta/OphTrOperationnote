@@ -25,7 +25,7 @@ class Element_OphTrOperationnote_Trabeculectomy extends Element_OnDemand
 	public function rules()
 	{
 		return array(
-			array('eyedraw, conjunctival_flap_type_id, stay_suture, site_id, size_id, sclerostomy_type_id, viscoelastic_type_id, viscoelastic_removed, viscoelastic_flow_id, report, difficulty_other, complication_other, difficulties, complications', 'safe'),
+			array('eyedraw, conjunctival_flap_type_id, stay_suture, site_id, size_id, sclerostomy_type_id, viscoelastic_type_id, viscoelastic_removed, viscoelastic_flow_id, report, difficulty_other, complication_other, difficulties', 'safe'),
 		);
 	}
 
@@ -58,8 +58,6 @@ class Element_OphTrOperationnote_Trabeculectomy extends Element_OnDemand
 			'viscoelastic_flow' => array(self::BELONGS_TO, 'OphTrOperationnote_Trabeculectomy_Viscoelastic_Flow', 'viscoelastic_flow_id'),
 			'difficulties' => array(self::MANY_MANY, 'OphTrOperationnote_Trabeculectomy_Difficulty', 'ophtroperationnote_trabeculectomy_difficulties(element_id, difficulty_id)'),
 			'difficulty_assignments' => array(self::HAS_MANY, 'OphTrOperationnote_Trabeculectomy_Difficulties', 'element_id'),
-			'complications' => array(self::MANY_MANY, 'OphTrOperationnote_Trabeculectomy_Complication', 'ophtroperationnote_trabeculectomy_complications(element_id, complication_id)'),
-			'complication_assignments' => array(self::HAS_MANY, 'OphTrOperationnote_Trabeculectomy_Complications', 'element_id'),
 		);
 	}
 
@@ -73,12 +71,6 @@ class Element_OphTrOperationnote_Trabeculectomy extends Element_OnDemand
 		if ($this->hasMultiSelectValue('difficulties','Other')) {
 			if (!$this->difficulty_other) {
 				$this->addError('difficulty_other',$this->getAttributeLabel('difficulty_other').' cannot be blank.');
-			}
-		}
-
-		if ($this->hasMultiSelectValue('complications','Other')) {
-			if (!$this->complication_other) {
-				$this->addError('complication_other',$this->getAttributeLabel('complication_other').' cannot be blank.');
 			}
 		}
 

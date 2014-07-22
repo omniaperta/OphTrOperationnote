@@ -36,7 +36,6 @@
 		</div>
 		<?php echo $form->multiSelectList($element, 'difficulties', 'difficulties', 'difficulty_id', CHtml::listData(OphTrOperationnote_Trabeculectomy_Difficulty::model()->findAll(array('order'=>'display_order asc')),'id','name'), array(), array('empty' => '- Select -','label' => 'Operative difficulties','class' => 'linked-fields','data-linked-fields' => 'difficulty_other', 'data-linked-values' => 'Other'), false, false, null, false, false, array('field' => 4))?>
 		<?php echo $form->textArea($element, 'difficulty_other', array(), !$element->hasMultiSelectValue('difficulties','Other'), array(), array('field' => 6))?>
-		<?php echo $form->multiSelectList($element, 'complications', 'complications', 'complication_id', CHtml::listData(OphTrOperationnote_Trabeculectomy_Complication::model()->findAll(array('order'=>'display_order asc')),'id','name'), array(), array('empty' => '- Select -','label' => 'Complications','class' => 'linked-fields','data-linked-fields' => 'complication_other', 'data-linked-values' => 'Other'), false, false, null, false, false, array('field' => 4))?>
-		<?php echo $form->textArea($element, 'complication_other', array(), !$element->hasMultiSelectValue('complications','Other'), array(), array('field' => 6))?>
+		<span class="error">Complications for trabeculectomy operations are now in the <a class="showComplicationsElement">complications element</a></span>
 	</div>
 </div>
