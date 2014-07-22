@@ -34,7 +34,7 @@ foreach ($complications as $comp) {
 		'data-other' => $comp->other
 	);
 }
-echo $form->multiSelectList($element, CHtml::modelName($element) . '[complications]', 'complications', 'id', CHtml::listData($complications, 'id', 'name'), null, $html_options,false,false,null,false,false,array('field'=>4))?>
+echo $form->multiSelectList($element, 'complications', 'complications', 'id', CHtml::listData($complications, 'id', 'name'), null, $html_options,false,false,null,false,false,array('field'=>4))?>
 <div class="row field-row<?php if (!$element->hasOtherComplication()) { echo ' hidden'; }?>" id="div_<?= CHtml::modelName($element)?>_complication_other">
 	<div class="large-3 column">
 		<label for="<?php echo CHtml::modelName($element)?>_complication_other">
