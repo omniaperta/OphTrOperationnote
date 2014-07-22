@@ -21,7 +21,7 @@
 	<h3 class="element-title highlight"><?php echo $element->elementType->name ?></h3>
 	<div class="element-data">
 		<div class="row data-row">
-			<div class="large-3 column">
+			<div class="large-3 column end">
 				<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('anaesthetic_complications'))?></h4>
 				<div class="data-value">
 					<?php if ($element->anaesthetic_complications) {?>
@@ -34,7 +34,7 @@
 				</div>
 			</div>
 			<?php if (Element_OphTrOperationnote_Cataract::model()->find('event_id=?',array($element->event_id))) {?>
-				<div class="large-3 column">
+				<div class="large-3 column end">
 					<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('cataract_complications'))?></h4>
 					<div class="data-value">
 						<?php if ($element->cataract_complications) {?>
@@ -47,8 +47,29 @@
 					</div>
 				</div>
 			<?php }?>
+			<?php if (Element_OphTrOperationnote_Trabectome::model()->find('event_id=?',array($element->event_id))) {?>
+				<div class="large-3 column end">
+					<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('trabectome_complications'))?></h4>
+					<div class="data-value">
+						<?php if ($element->trabectome_complications) {?>
+							<?php foreach ($element->complication_assignments as $assignment) {
+								if ($assignment->complication->type->name == 'Trabectome') {?>
+									<?php if ($assignment->other) {
+										echo $assignment->other;
+									} else {
+										echo $assignment->complication->name;
+									}?>
+									<br/>
+								<?php }?>
+							<?php }?>
+						<?php }else{?>
+							None
+						<?php }?>
+					</div>
+				</div>
+			<?php }?>
 			<?php if (Element_OphTrOperationnote_Trabeculectomy::model()->find('event_id=?',array($element->event_id))) {?>
-				<div class="large-3 column">
+				<div class="large-3 column end">
 					<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('trabeculectomy_complications'))?></h4>
 					<div class="data-value">
 						<?php if ($element->trabeculectomy_complications) {?>
@@ -68,6 +89,8 @@
 					</div>
 				</div>
 			<?php }?>
+		</div>
+		<div class="row data-row">
 			<div class="large-3 column end">
 				<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('comments'))?></h4>
 				<div class="data-value<?php if (!$element->comments) {?> none<?php }?>"><?php echo CHtml::encode($element->comments) ? Yii::app()->format->Ntext($element->comments) : 'None'?></div>

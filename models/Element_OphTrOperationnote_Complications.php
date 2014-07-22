@@ -83,7 +83,8 @@ class Element_OphTrOperationnote_Complications extends Element_OpNote
 			'complications' => array(self::HAS_MANY, 'OphTrOperationnote_Complication', 'complication_id', 'through' => 'complication_assignments'),
 			'anaesthetic_complications' => array(self::HAS_MANY, 'OphTrOperationnote_Complication', 'complication_id', 'through' => 'complication_assignments', 'condition' => 'type_id = 1'),
 			'cataract_complications' => array(self::HAS_MANY, 'OphTrOperationnote_Complication', 'complication_id', 'through' => 'complication_assignments', 'condition' => 'type_id = 2'),
-			'trabeculectomy_complications' => array(self::HAS_MANY, 'OphTrOperationnote_Complication', 'complication_id', 'through' => 'complication_assignments', 'condition' => 'type_id = 3'),
+			'trabectome_complications' => array(self::HAS_MANY, 'OphTrOperationnote_Complication', 'complication_id', 'through' => 'complication_assignments', 'condition' => 'type_id = 3'),
+			'trabeculectomy_complications' => array(self::HAS_MANY, 'OphTrOperationnote_Complication', 'complication_id', 'through' => 'complication_assignments', 'condition' => 'type_id = 4'),
 		);
 	}
 
