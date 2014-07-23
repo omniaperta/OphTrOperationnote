@@ -15,7 +15,7 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.html The GNU General Public License V3.0
  */
 ?>
-<?php echo $form->dropDownList($element, 'power_id', CHtml::listData(OphTrOperationnote_Trabectome_Power::model()->activeOrPk($element->power_id)->findAll(),'id','name'),array('empty'=>'- Please select -'),false,array('field'=>3))?>
+<?php echo $form->dropDownList($element, 'power_id', CHtml::listData(OphTrOperationnote_Trabectome_Power::model()->activeOrPk($element->power_id)->findAll(),'id','name'),array('empty'=>'- Please select -'),false,array('label'=>3,'field'=>3))?>
 <?php echo $form->checkbox($element, 'blood_reflux', array('class' => 'clearWithEyedraw'))?>
 <?php echo $form->checkbox($element, 'hpmc', array('class' => 'clearWithEyedraw'))?>
 <?php echo $form->textArea($element, 'description', array('rows' => 4, 'class' => 'autosize clearWithEyedraw'))?>

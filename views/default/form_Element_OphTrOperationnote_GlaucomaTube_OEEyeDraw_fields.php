@@ -22,7 +22,7 @@ $html_options = array('label' => $element->getAttributeLabel('plate_position_id'
 foreach ($plate_positions as $pp) {
 	$html_options['options'][$pp->id] = array('data-value' => $pp->eyedraw_value);
 }
-echo $form->dropDownList($element, 'plate_position_id', CHtml::listData($plate_positions,'id','name'),$html_options,false,array('field'=>3))?>
+echo $form->dropDownList($element, 'plate_position_id', CHtml::listData($plate_positions,'id','name'),$html_options,false,array('label' => 3, 'field'=>3))?>
 <div id="div_Element_OphTrOperationnote_GlaucomaTube_plate_limbus" class="row field-row">
 	<div class="large-3 column">
 		<label for="Element_OphTrOperationnote_GlaucomaTube_plate_limbus"><?= $element->getAttributeLabel('plate_limbus'); ?></label>
@@ -35,7 +35,7 @@ echo $form->dropDownList($element, 'plate_position_id', CHtml::listData($plate_p
 	</div>
 </div>
 
-<?php echo $form->dropDownList($element, 'tube_position_id', CHtml::listData(OphTrOperationnote_GlaucomaTube_TubePosition::model()->activeOrPk($element->tube_position_id)->findAll(),'id','name'),array('empty'=>'- Please select -'),false,array('field'=>3))?>
+<?php echo $form->dropDownList($element, 'tube_position_id', CHtml::listData(OphTrOperationnote_GlaucomaTube_TubePosition::model()->activeOrPk($element->tube_position_id)->findAll(),'id','name'),array('empty'=>'- Please select -'),false,array('label' => 3, 'field'=>3))?>
 <?php echo $form->checkbox($element, 'stent', array('class' => 'clearWithEyedraw'))?>
 <?php echo $form->checkbox($element, 'slit', array('class' => 'clearWithEyedraw'))?>
 <?php echo $form->checkbox($element, 'visco_in_ac', array('class' => 'clearWithEyedraw'))?>

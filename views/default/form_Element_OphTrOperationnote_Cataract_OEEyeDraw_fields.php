@@ -18,18 +18,18 @@
  */
 ?>
 
-<?php echo $form->dropDownList($element, 'incision_site_id', 'OphTrOperationnote_IncisionSite' ,array('empty'=>'- Please select -','textAttribute'=>'data-value'),false,array('field'=>4))?>
+<?php echo $form->dropDownList($element, 'incision_site_id', 'OphTrOperationnote_IncisionSite' ,array('empty'=>'- Please select -','textAttribute'=>'data-value'),false,array('label'=>3,'field'=>4))?>
 <?php echo $form->textField($element, 'length', array(),array(),array_merge($form->layoutColumns,array('field'=>3)))?>
 <?php echo $form->textField($element, 'meridian', array(),array(),array_merge($form->layoutColumns,array('field'=>3)))?>
-<?php echo $form->dropDownList($element, 'incision_type_id', 'OphTrOperationnote_IncisionType', array('empty'=>'- Please select -','textAttribute'=>'data-value'),false,array('field'=>4))?>
+<?php echo $form->dropDownList($element, 'incision_type_id', 'OphTrOperationnote_IncisionType', array('empty'=>'- Please select -','textAttribute'=>'data-value'),false,array('label'=>3,'field'=>4))?>
 <?php echo $form->textArea($element, 'report',array(),false,array('rows'=>6))?>
 <?php echo $form->dropDownList($element, 'iol_type_id', array(
 		CHtml::listData(OphTrOperationnote_IOLType::model()->activeOrPk($element->iol_type_id)->findAll(array('condition'=>'private=0','order'=>'display_order asc')),'id','name'),
 		CHtml::listData(OphTrOperationnote_IOLType::model()->activeOrPk($element->iol_type_id)->findAll(array('condition'=>'private=1','order'=>'display_order')),'id','name'),
 	),
-	array('empty' => '- Please select -','divided' => true),$element->iol_hidden,array('field' => 4))?>
+	array('empty' => '- Please select -','divided' => true),$element->iol_hidden,array('label' => 3, 'field' => 4))?>
 <?php echo $form->textField($element, 'predicted_refraction',array(),array(),array_merge($form->layoutColumns,array('field'=>2)))?>
 <?php echo $form->textField($element, 'iol_power', array('hide' => $element->iol_hidden),array(),array_merge($form->layoutColumns,array('field'=>2)))?>
-<?php echo $form->dropDownList($element, 'iol_position_id', 'OphTrOperationnote_IOLPosition', array('empty'=>'- Please select -'),$element->iol_hidden,array('field'=>4))?>
-<?php echo $form->multiSelectList($element, 'operative_devices', 'operative_devices', 'id', $this->getOperativeDeviceList($element), $this->getOperativeDeviceDefaults(), array('empty' => '- Devices -', 'label' => 'Devices'),false,false,null,false,false,array('field'=>4))?>
+<?php echo $form->dropDownList($element, 'iol_position_id', 'OphTrOperationnote_IOLPosition', array('empty'=>'- Please select -'),$element->iol_hidden,array('label' => 3, 'field'=>4))?>
+<?php echo $form->multiSelectList($element, 'operative_devices', 'operative_devices', 'id', $this->getOperativeDeviceList($element), $this->getOperativeDeviceDefaults(), array('empty' => '- Devices -', 'label' => 'Devices'),false,false,null,false,false,array('label' => 3, 'field'=>4))?>
 <span class="error">Complications for cataract operations are now in the <a class="showComplicationsElement">complications element</a></span>
