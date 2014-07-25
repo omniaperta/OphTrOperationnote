@@ -26,6 +26,8 @@
  */
 class Element_OphTrOperationnote_Injection extends Element_OnDemand
 {
+	public $auto_update_relations = true;
+
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @return Element_OphTrOperationnote_Injection the static model class
@@ -51,7 +53,7 @@ class Element_OphTrOperationnote_Injection extends Element_OnDemand
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('event_id, eyedraw, lens_status_id, pre_antisept_drug_id, pre_skin_drug_id, pre_ioplowering_required, drug_id, number, batch_number, batch_expiry_date, injection_given_by_id, injection_time, post_ioplowering_required, finger_count, iop_checked, postinject_drops_id', 'safe'),
+			array('event_id, eyedraw, lens_status_id, pre_antisept_drug_id, pre_skin_drug_id, pre_ioplowering_required, drug_id, number, batch_number, batch_expiry_date, injection_given_by_id, injection_time, post_ioplowering_required, finger_count, iop_checked, postinject_drops_id, pre_ioploweringdrugs, post_ioploweringdrugs', 'safe'),
 			array('eyedraw, lens_status_id', 'required'),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
