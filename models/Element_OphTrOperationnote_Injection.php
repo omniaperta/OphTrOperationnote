@@ -51,7 +51,7 @@ class Element_OphTrOperationnote_Injection extends Element_OnDemand
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('event_id, eyedraw, lens_status_id', 'safe'),
+			array('event_id, eyedraw, lens_status_id, pre_antisept_drug_id, pre_skin_drug_id, pre_ioplowering_required, drug_id, number, batch_number, batch_expiry_date, injection_given_by_id, injection_time, post_ioplowering_required, finger_count, iop_checked, postinject_drops_id', 'safe'),
 			array('eyedraw, lens_status_id', 'required'),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
@@ -69,6 +69,11 @@ class Element_OphTrOperationnote_Injection extends Element_OnDemand
 		return array(
 			'event' => array(self::BELONGS_TO, 'Event', 'event_id'),
 			'lens_status' => array(self::BELONGS_TO, 'OphTrOperationnote_LensStatus', 'lens_status_id'),
+			'pre_antisept_drug' => array(self::BELONGS_TO, 'OphTrOperationnote_Injection_Antiseptic_Drug', 'pre_antisept_drug_id'),
+			'pre_skin_drug' => array(self::BELONGS_TO, 'OphTrOperationnote_Injection_Skin_Drug', 'pre_skin_drug_id'),
+			'drug' => array(self::BELONGS_TO, 'OphTrOperationnote_Injection_Treatment_Drug', 'drug_id'),
+			'injection_given_by' => array(self::BELONGS_TO, 'User', 'injection_given_by_id'),
+			'postinject_drops' => array(self::BELONGS_TO, 'OphTrOperationnote_Injection_Drop', 'postinject_drops_id'),
 		);
 	}
 
@@ -80,6 +85,16 @@ class Element_OphTrOperationnote_Injection extends Element_OnDemand
 		return array(
 			'id' => 'ID',
 			'lens_status_id' => 'Lens status',
+			'drug_id' => 'Drug',
+			'number' => 'Number of Injections',
+			'batch_number' => 'Batch Number',
+			'batch_expiry_date' => 'Batch Expiry Date',
+			'injection_given_by_id' => 'Injection Given By',
+			'injection_time' => 'Injection Time',
+			'pre_antisept_drug_id' => 'Pre Injection Antiseptic',
+			'pre_skin_drug_id' => 'Pre Injection Skin Cleanser',
+			'pre_ioploweringdrugs' => 'Pre Injection IOP Lowering Therapy',
+			'post_ioploweringdrugs' => 'Post Injection IOP Lowering Therapy',
 		);
 	}
 
