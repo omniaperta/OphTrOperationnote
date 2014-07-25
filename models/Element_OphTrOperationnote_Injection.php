@@ -74,6 +74,10 @@ class Element_OphTrOperationnote_Injection extends Element_OnDemand
 			'drug' => array(self::BELONGS_TO, 'OphTrOperationnote_Injection_Treatment_Drug', 'drug_id'),
 			'injection_given_by' => array(self::BELONGS_TO, 'User', 'injection_given_by_id'),
 			'postinject_drops' => array(self::BELONGS_TO, 'OphTrOperationnote_Injection_Drop', 'postinject_drops_id'),
+			'pre_ioploweringdrugs_assignment' => array(self::HAS_MANY, 'OphTrOperationnote_Injection_Pre_IOP_Lowering_Assignment', 'element_id'),
+			'pre_ioploweringdrugs' => array(self::HAS_MANY, 'OphTrOperationnote_Injection_IOP_Lowering', 'iopl_id', 'through' => 'pre_ioploweringdrugs_assignment'),
+			'post_ioploweringdrugs_assignment' => array(self::HAS_MANY, 'OphTrOperationnote_Injection_Post_IOP_Lowering_Assignment', 'element_id'),
+			'post_ioploweringdrugs' => array(self::HAS_MANY, 'OphTrOperationnote_Injection_IOP_Lowering', 'iopl_id', 'through' => 'post_ioploweringdrugs_assignment'),
 		);
 	}
 
@@ -86,15 +90,18 @@ class Element_OphTrOperationnote_Injection extends Element_OnDemand
 			'id' => 'ID',
 			'lens_status_id' => 'Lens status',
 			'drug_id' => 'Drug',
-			'number' => 'Number of Injections',
-			'batch_number' => 'Batch Number',
-			'batch_expiry_date' => 'Batch Expiry Date',
-			'injection_given_by_id' => 'Injection Given By',
-			'injection_time' => 'Injection Time',
-			'pre_antisept_drug_id' => 'Pre Injection Antiseptic',
-			'pre_skin_drug_id' => 'Pre Injection Skin Cleanser',
-			'pre_ioploweringdrugs' => 'Pre Injection IOP Lowering Therapy',
-			'post_ioploweringdrugs' => 'Post Injection IOP Lowering Therapy',
+			'number' => 'Number of injections',
+			'batch_number' => 'Batch number',
+			'batch_expiry_date' => 'Batch expiry date',
+			'injection_given_by_id' => 'Injection given by',
+			'injection_time' => 'Injection time',
+			'pre_antisept_drug_id' => 'Pre injection antiseptic',
+			'pre_skin_drug_id' => 'Pre injection skin cleanser',
+			'pre_ioploweringdrugs' => 'Pre injection IOP lowering therapy',
+			'post_ioploweringdrugs' => 'Post injection IOP lowering therapy',
+			'finger_count' => 'Counting fingers checked?',
+			'iop_checked' => 'IOP needs to be checked?',
+			'postinject_drops_id' => 'Post injection drops',
 		);
 	}
 

@@ -24,9 +24,21 @@ foreach (OphTrOperationnote_LensStatus::model()->findAll() as $lens_status) {
 	$options[$lens_status->id]['data-default-distance'] = $lens_status->default_distance;
 }
 ?>
-<div class="large-3 column end">
-	<label for="<?php echo get_class($element).'_lens_status_id';?>">
-		<?php echo CHtml::encode($element->getAttributeLabel('lens_status_id'));?>:
-	</label>
-	<?php echo $form->dropDownList($element, 'lens_status_id', CHtml::listData($values,'id','name'),array('nowrapper' => true, 'empty'=>'- Please select -', 'options' => $options) )?>
+<div class="large-12 column end">
+	<?php echo $form->dropDownList($element, 'lens_status_id', CHtml::listData($values,'id','name'),array('empty'=>'- Please select -', 'options' => $options), false, array('label' => 5, 'field' => 4))?>
+	<?php echo $form->dropDownList($element, 'pre_antisept_drug_id', CHtml::listData(OphTrOperationnote_Injection_Antiseptic_Drug::model()->findAll(array('order'=>'display_order asc')),'id','name'),array('empty' => '- Please select -'),false,array('label' => 5, 'field' => 4))?>
+	<?php echo $form->dropDownList($element, 'pre_skin_drug_id', CHtml::listData(OphTrOperationnote_Injection_Skin_Drug::model()->findAll(array('order'=>'display_order asc')),'id','name'),array('empty' => '- Please select -'),false,array('label' => 5, 'field' => 4))?>
+	<?php echo $form->checkbox($element, 'pre_ioplowering_required', array('text-align' => 'right','class' => 'linked-fields','data-linked-fields' => 'pre_ioploweringdrugs', 'data-linked-values' => '1'), array('label' => 5, 'field' => 4))?>
+	<?php echo $form->multiSelectList($element, 'pre_ioploweringdrugs', 'pre_ioploweringdrugs', 'id', CHtml::listData(OphTrOperationnote_Injection_IOP_Lowering::model()->findAll(array('order' => 'display_order asc')),'id','name'),array(),array('empty' => '- Please select -', 'label' => $element->getAttributeLabel('pre_ioploweringdrugs')),!$element->pre_ioplowering_required,false,null,false,false,array('label' => 5, 'field'=>4))?>
+	<?php echo $form->dropDownList($element, 'drug_id', CHtml::listData(OphTrOperationnote_Injection_Treatment_Drug::model()->findAll(array('order'=>'display_order asc')),'id','name'),array('empty' => '- Please select -'),false,array('label' => 5, 'field'=>4))?>
+	<?php echo $form->textField($element, 'number', array('size' => '10'), array(), array('label' => 5, 'field' => 2))?>
+	<?php echo $form->textField($element, 'batch_number', array('size' => '10'), array(), array('label' => 5, 'field' => 4))?>
+	<?php echo $form->datePicker($element, 'batch_expiry_date', !$element->getIsNewRecord() ? array('minDate' => Helper::convertDate2NHS($element->created_date)) : array('minDate' => 'yesterday'), array(), array('label' => 5, 'field' => 2))?>
+	<?php echo $form->dropDownList($element, 'injection_given_by_id', CHtml::listData(OphTrOperationnote_Injection_User::model()->with('user')->findAll(array('order'=>'first_name asc, last_name asc')),'id','user.fullName'),array('empty' => '- Please select -'),false,array('label' => 5, 'field'=>4))?>
+	<?php echo $form->timePicker($element, 'injection_time', array(), array(), array('label' => 5, 'field' => 4))?>
+	<?php echo $form->checkbox($element, 'post_ioplowering_required', array('text-align' => 'right', 'class' => 'linked-fields', 'data-linked-fields' => 'post_ioploweringdrugs', 'data-linked-values' => '1'), array('label' => 5, 'field' => 4))?>
+	<?php echo $form->multiSelectList($element, 'post_ioploweringdrugs', 'post_ioploweringdrugs', 'id', CHtml::listData(OphTrOperationnote_Injection_IOP_Lowering::model()->findAll(array('order' => 'display_order asc')),'id','name'),array(),array('empty' => '- Please select -', 'label' => $element->getAttributeLabel('post_ioploweringdrugs')),!$element->post_ioplowering_required,false,null,false,false,array('label' => 5, 'field'=>4))?>
+	<?php echo $form->radioBoolean($element, 'finger_count', array(), array('label' => 5, 'field' => 4))?>
+	<?php echo $form->radioBoolean($element, 'iop_checked', array(), array('label' => 5, 'field' => 4))?>
+	<?php echo $form->dropDownList($element, 'postinject_drops_id', CHtml::listData(OphTrOperationnote_Injection_Drop::model()->findAll(array('order'=>'display_order')),'id','name'),array('empty'=>'- Please select -'), false, array('label' => 5, 'field' => 4))?>
 </div>
