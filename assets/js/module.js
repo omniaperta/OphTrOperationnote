@@ -62,6 +62,7 @@ function updateComplicationTypes()
 	var has_cataract = 0;
 	var has_trabectome = 0;
 	var has_trabeculectomy = 0;
+	var has_injection = 0;
 
 	if ($('.Element_OphTrOperationnote_Cataract').length >0) {
 		has_cataract = 1;
@@ -75,9 +76,13 @@ function updateComplicationTypes()
 		has_trabeculectomy = 1;
 	}
 
+	if ($('.Element_OphTrOperationnote_Injection').length >0) {
+		has_injection = 1;
+	}
+
 	$.ajax({
 		'type': 'GET',
-		'url': baseUrl+'/OphTrOperationnote/default/getComplicationTypes?has_cataract=' + has_cataract + '&has_trabectome=' + has_trabectome + '&has_trabeculectomy=' + has_trabeculectomy,
+		'url': baseUrl+'/OphTrOperationnote/default/getComplicationTypes?has_cataract=' + has_cataract + '&has_trabectome=' + has_trabectome + '&has_trabeculectomy=' + has_trabeculectomy + '&has_injection=' + has_injection,
 		'success': function(html) {
 			$('#complication_type').html(html);
 		}
@@ -96,6 +101,11 @@ function updateComplicationTypes()
 	if (!has_trabeculectomy) {
 		$('tr[data-type="Trabeculectomy"]').hide();
 		$('ul.Trabeculectomy_complications').html('');
+	}
+
+	if (!has_injection) {
+		$('tr[data-type="Injection"]').hide();
+		$('ul.Injection_complications').html('');
 	}
 }
 

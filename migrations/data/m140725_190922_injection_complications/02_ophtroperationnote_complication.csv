@@ -1,0 +1,7 @@
+id,type_id,name,display_order,active
+40,5,Subconjunctival haemorrhage,10,1
+41,5,Conjunctival damage (e.g. tear),20,1
+42,5,Corneal abrasion,30,1
+43,5,Lens damage,40,1
+44,5,Retinal damage,50,1
+45,5,Other,60,1

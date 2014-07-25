@@ -766,6 +766,7 @@ class DefaultController extends BaseEventTypeController
 		$element->has_cataract = @$_GET['has_cataract'];
 		$element->has_trabectome = @$_GET['has_trabectome'];
 		$element->has_trabeculectomy = @$_GET['has_trabeculectomy'];
+		$element->has_injection = @$_GET['has_injection'];
 
 		foreach ($element->getComplicationTypesByOpenElements() as $type) {
 			echo '<option value="'.$type->id.'">'.$type->name.'</option>';
@@ -779,6 +780,7 @@ class DefaultController extends BaseEventTypeController
 		$has_cataract = false;
 		$has_trabectome = false;
 		$has_trabeculectomy = false;
+		$has_injection = false;
 
 		foreach ($elements as $i => $element) {
 			if (CHtml::modelName($element) == 'Element_OphTrOperationnote_Complications') {
@@ -794,12 +796,15 @@ class DefaultController extends BaseEventTypeController
 				$has_trabectome = true;
 			} else if (CHtml::modelName($element) == 'Element_OphTrOperationnote_Trabeculectomy') {
 				$has_trabeculectomy = true;
+			} else if (CHtml::modelName($element) == 'Element_OphTrOperationnote_Injection') {
+				$has_injection = true;
 			}
 		}
 
 		$elements[$complications_i]->has_cataract = $has_cataract;
 		$elements[$complications_i]->has_trabectome = $has_trabectome;
 		$elements[$complications_i]->has_trabeculectomy = $has_trabeculectomy;
+		$elements[$complications_i]->has_injection = $has_injection;
 
 		return $elements;
 	}

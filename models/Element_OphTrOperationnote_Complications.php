@@ -34,6 +34,7 @@ class Element_OphTrOperationnote_Complications extends Element_OpNote
 	public $has_cataract = false;
 	public $has_trabectome = false;
 	public $has_trabeculectomy = false;
+	public $has_injection = false;
 
 	/**
 	 * Returns the static model of the specified AR class.
@@ -163,6 +164,10 @@ class Element_OphTrOperationnote_Complications extends Element_OpNote
 
 		if (!$this->has_trabectome) {
 			$criteria->addCondition("name != 'Trabectome'");
+		}
+
+		if (!$this->has_injection) {
+			$criteria->addCondition("name != 'Injection'");
 		}
 
 		return OphTrOperationnote_Complication_Type::model()->findAll($criteria);
