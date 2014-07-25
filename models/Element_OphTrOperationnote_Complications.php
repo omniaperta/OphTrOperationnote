@@ -161,6 +161,10 @@ class Element_OphTrOperationnote_Complications extends Element_OpNote
 			$criteria->addCondition("name != 'Trabeculectomy'");
 		}
 
+		if (!$this->has_trabectome) {
+			$criteria->addCondition("name != 'Trabectome'");
+		}
+
 		return OphTrOperationnote_Complication_Type::model()->findAll($criteria);
 	}
 
