@@ -89,6 +89,27 @@
 					</div>
 				</div>
 			<?php }?>
+			<?php if (Element_OphTrOperationnote_Injection::model()->find('event_id=?',array($element->event_id))) {?>
+				<div class="large-3 column end">
+					<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('injection_complications'))?></h4>
+					<div class="data-value">
+						<?php if ($element->injection_complications) {?>
+							<?php foreach ($element->complication_assignments as $assignment) {
+								if ($assignment->complication->type->name == 'Injection') {?>
+									<?php if ($assignment->other) {
+										echo $assignment->other;
+									} else {
+										echo $assignment->complication->name;
+									}?>
+									<br/>
+								<?php }?>
+							<?php }?>
+						<?php }else{?>
+							None
+						<?php }?>
+					</div>
+				</div>
+			<?php }?>
 		</div>
 		<div class="row data-row">
 			<div class="large-3 column end">
