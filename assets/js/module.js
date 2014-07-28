@@ -59,54 +59,30 @@ function callbackAddProcedure(procedure_id) {
 
 function updateComplicationTypes()
 {
-	var has_cataract = 0;
-	var has_trabectome = 0;
-	var has_trabeculectomy = 0;
-	var has_injection = 0;
+	var element_classes = {'element_classes':[]};
 
-	if ($('.Element_OphTrOperationnote_Cataract').length >0) {
-		has_cataract = 1;
-	}
+	$('section.element').map(function() {
+		element_classes['element_classes'].push($(this).data('element-type-class'));
+	});
 
-	if ($('.Element_OphTrOperationnote_Trabectome').length >0) {
-		has_trabectome = 1;
-	}
-
-	if ($('.Element_OphTrOperationnote_Trabeculectomy').length >0) {
-		has_trabeculectomy = 1;
-	}
-
-	if ($('.Element_OphTrOperationnote_Injection').length >0) {
-		has_injection = 1;
-	}
+	$('section.sub-element').map(function() {
+		element_classes['element_classes'].push($(this).data('element-type-class'));
+	});
 
 	$.ajax({
 		'type': 'GET',
-		'url': baseUrl+'/OphTrOperationnote/default/getComplicationTypes?has_cataract=' + has_cataract + '&has_trabectome=' + has_trabectome + '&has_trabeculectomy=' + has_trabeculectomy + '&has_injection=' + has_injection,
+		'url': baseUrl+'/OphTrOperationnote/default/getComplicationTypes?' + $.param(element_classes),
 		'success': function(html) {
 			$('#complication_type').html(html);
 		}
 	});
 
-	if (!has_cataract) {
-		$('tr[data-type="Cataract"]').hide();
-		$('ul.Cataract_complications').html('');
-	}
-
-	if (!has_trabectome) {
-		$('tr[data-type="Trabectome"]').hide();
-		$('ul.Trabectome_complications').html('');
-	}
-
-	if (!has_trabeculectomy) {
-		$('tr[data-type="Trabeculectomy"]').hide();
-		$('ul.Trabeculectomy_complications').html('');
-	}
-
-	if (!has_injection) {
-		$('tr[data-type="Injection"]').hide();
-		$('ul.Injection_complications').html('');
-	}
+	$('section.Element_OphTrOperationnote_Complications').find('table.complications').children('tbody').children('tr').map(function() {
+		if ($.inArray("Element_OphTrOperationnote_"+$(this).data('type'),element_classes['element_classes']) == -1) {
+			$(this).hide();
+			$(this).children('td:last').children('ul').html('');
+		}
+	});
 }
 
 /*

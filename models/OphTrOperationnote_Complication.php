@@ -53,7 +53,7 @@ class OphTrOperationnote_Complication extends BaseActiveRecordVersioned
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			'type' => array(self::BELONGS_TO, 'OphTrOperationnote_Complication_Type', 'type_id'),
+			'element_type' => array(self::BELONGS_TO, 'ElementType', 'element_type_id'),
 		);
 	}
 
@@ -80,5 +80,22 @@ class OphTrOperationnote_Complication extends BaseActiveRecordVersioned
 		return new CActiveDataProvider(get_class($this), array(
 			'criteria' => $criteria,
 		));
+	}
+
+	public function getTypes($element_classes=false)
+	{
+		$ids = array();
+		$types = array();
+
+		foreach (OphTrOperationnote_Complication::model()->findAll(array('order' => 'id asc')) as $complication) {
+			if (!is_array($element_classes) || in_array($complication->element_type->class_name,$element_classes)) {
+				if (!in_array($complication->element_type_id,$ids)) {
+					$types[] = $complication->element_type;
+					$ids[] = $complication->element_type_id;
+				}
+			}
+		}
+
+		return $types;
 	}
 }

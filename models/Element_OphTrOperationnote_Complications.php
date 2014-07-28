@@ -31,10 +31,7 @@
  */
 class Element_OphTrOperationnote_Complications extends Element_OpNote
 {
-	public $has_cataract = false;
-	public $has_trabectome = false;
-	public $has_trabeculectomy = false;
-	public $has_injection = false;
+	public $element_classes = array();
 
 	/**
 	 * Returns the static model of the specified AR class.
@@ -83,11 +80,6 @@ class Element_OphTrOperationnote_Complications extends Element_OpNote
 			'usermodified' => array(self::BELONGS_TO, 'User', 'last_modified_user_id'),
 			'complication_assignments' => array(self::HAS_MANY, 'OphTrOperationnote_Complication_Assignment', 'element_id'),
 			'complications' => array(self::HAS_MANY, 'OphTrOperationnote_Complication', 'complication_id', 'through' => 'complication_assignments'),
-			'anaesthetic_complications' => array(self::HAS_MANY, 'OphTrOperationnote_Complication', 'complication_id', 'through' => 'complication_assignments', 'condition' => 'type_id = 1'),
-			'cataract_complications' => array(self::HAS_MANY, 'OphTrOperationnote_Complication', 'complication_id', 'through' => 'complication_assignments', 'condition' => 'type_id = 2'),
-			'trabectome_complications' => array(self::HAS_MANY, 'OphTrOperationnote_Complication', 'complication_id', 'through' => 'complication_assignments', 'condition' => 'type_id = 3'),
-			'trabeculectomy_complications' => array(self::HAS_MANY, 'OphTrOperationnote_Complication', 'complication_id', 'through' => 'complication_assignments', 'condition' => 'type_id = 4'),
-			'injection_complications' => array(self::HAS_MANY, 'OphTrOperationnote_Complication', 'complication_id', 'through' => 'complication_assignments', 'condition' => 'type_id = 5'),
 		);
 	}
 
@@ -100,9 +92,6 @@ class Element_OphTrOperationnote_Complications extends Element_OpNote
 			'id' => 'ID',
 			'event_id' => 'Event',
 			'comments' => 'Comments',
-			'anaesthetic_complications' => 'Anaesthetic complications',
-			'cataract_complications' => 'Cataract complications',
-			'trabeculectomy_complications' => 'Trabeculectomy complications',
 		);
 	}
 
@@ -126,21 +115,17 @@ class Element_OphTrOperationnote_Complications extends Element_OpNote
 		));
 	}
 
-	public function getComplicationsNotSelectedByType($type_id)
+	public function getComplicationsNotSelectedByType($element_type_id)
 	{
-		if (!$type = OphTrOperationnote_Complication_Type::model()->findByPk($type_id)) {
-			throw new Exception("complication type not found: $type_id");
-		}
-
 		$selected_ids = array();
 
-		foreach ($this->{strtolower($type->name)."_complications"} as $complication) {
+		foreach ($this->complications as $complication) {
 			$selected_ids[] = $complication->id;
 		}
 
 		$criteria = new CDbCriteria;
-		$criteria->addCondition('type_id = :type_id');
-		$criteria->params[':type_id'] = $type->id;
+		$criteria->addCondition('element_type_id = :element_type_id');
+		$criteria->params[':element_type_id'] = $element_type_id;
 		$criteria->order = 'display_order asc';
 
 		if (!empty($selected_ids)) {
@@ -152,26 +137,7 @@ class Element_OphTrOperationnote_Complications extends Element_OpNote
 
 	public function getComplicationTypesByOpenElements()
 	{
-		$criteria = new CDbCriteria;
-		$criteria->order = 'display_order asc';
-
-		if (!$this->has_cataract) {
-			$criteria->addCondition("name != 'Cataract'");
-		}
-
-		if (!$this->has_trabeculectomy) {
-			$criteria->addCondition("name != 'Trabeculectomy'");
-		}
-
-		if (!$this->has_trabectome) {
-			$criteria->addCondition("name != 'Trabectome'");
-		}
-
-		if (!$this->has_injection) {
-			$criteria->addCondition("name != 'Injection'");
-		}
-
-		return OphTrOperationnote_Complication_Type::model()->findAll($criteria);
+		return OphTrOperationnote_Complication::model()->getTypes($this->element_classes);
 	}
 
 	public function hasComplicationsOfType($type)

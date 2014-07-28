@@ -744,13 +744,9 @@ class DefaultController extends BaseEventTypeController
 
 	public function actionGetComplications()
 	{
-		if (!$complication_type = OphTrOperationnote_Complication_Type::model()->findByPk(@$_GET['type_id'])) {
-			throw new Exception("Complication type not found: ".@$_GET['type_id']);
-		}
-
 		$criteria = new CDbCriteria;
-		$criteria->addCondition('type_id = :type_id');
-		$criteria->params[':type_id'] = $complication_type->id;
+		$criteria->addCondition('element_type_id = :element_type_id');
+		$criteria->params[':element_type_id'] = $_GET['type_id'];
 		$criteria->order = 'display_order asc';
 
 		if (!empty($_GET['selected_ids'])) {
@@ -763,10 +759,7 @@ class DefaultController extends BaseEventTypeController
 	public function actionGetComplicationTypes()
 	{
 		$element = new Element_OphTrOperationnote_Complications;
-		$element->has_cataract = @$_GET['has_cataract'];
-		$element->has_trabectome = @$_GET['has_trabectome'];
-		$element->has_trabeculectomy = @$_GET['has_trabeculectomy'];
-		$element->has_injection = @$_GET['has_injection'];
+		$element->element_classes = $_GET['element_classes'];
 
 		foreach ($element->getComplicationTypesByOpenElements() as $type) {
 			echo '<option value="'.$type->id.'">'.$type->name.'</option>';
@@ -777,34 +770,21 @@ class DefaultController extends BaseEventTypeController
 	{
 		$elements = parent::getElements();
 
-		$has_cataract = false;
-		$has_trabectome = false;
-		$has_trabeculectomy = false;
-		$has_injection = false;
+		$element_classes = array();
 
 		foreach ($elements as $i => $element) {
 			if (CHtml::modelName($element) == 'Element_OphTrOperationnote_Complications') {
 				$complications_i = $i;
-				break;
 			}
+
+			$element_classes[] = CHtml::modelName($element);
 		}
 
 		foreach ($this->getChildElements(ElementType::model()->find('class_name=?',array('Element_OphTrOperationnote_ProcedureList'))) as $element) {
-			if (CHtml::modelName($element) == 'Element_OphTrOperationnote_Cataract') {
-				$has_cataract = true;
-			} else if (CHtml::modelName($element) == 'Element_OphTrOperationnote_Trabectome') {
-				$has_trabectome = true;
-			} else if (CHtml::modelName($element) == 'Element_OphTrOperationnote_Trabeculectomy') {
-				$has_trabeculectomy = true;
-			} else if (CHtml::modelName($element) == 'Element_OphTrOperationnote_Injection') {
-				$has_injection = true;
-			}
+			$element_classes[] = CHtml::modelName($element);
 		}
 
-		$elements[$complications_i]->has_cataract = $has_cataract;
-		$elements[$complications_i]->has_trabectome = $has_trabectome;
-		$elements[$complications_i]->has_trabeculectomy = $has_trabeculectomy;
-		$elements[$complications_i]->has_injection = $has_injection;
+		$elements[$complications_i]->element_classes = $element_classes;
 
 		return $elements;
 	}

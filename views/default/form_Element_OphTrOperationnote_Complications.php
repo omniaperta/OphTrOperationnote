@@ -38,8 +38,8 @@ $layoutColumns = array(
 					</tr>
 				</thead>
 				<tbody>
-					<?php foreach (OphTrOperationnote_Complication_Type::model()->findAll(array('order' => 'display_order asc')) as $type) {?>
-						<tr id="complication_type_<?php echo $type->id?>" data-type="<?php echo $type->name?>" <?php if (!$element->hasComplicationsOfType($type)) {?> style="display: none"<?php }?>>
+					<?php foreach (OphTrOperationnote_Complication::model()->types as $type) {?>
+						<tr id="complication_type_<?php echo $type->id?>" data-type="<?php echo $type->name?>" <?php if (!$element->hasComplicationsOfType($type->id)) {?> style="display: none"<?php }?>>
 							<td><?php echo $type->name?></td>
 							<td>
 								<div class="multi-select multi-select-list">
@@ -72,7 +72,7 @@ $layoutColumns = array(
 							<?php echo CHtml::dropDownList('complication_type','',CHtml::listData($element->getComplicationTypesByOpenElements(),'id','name'),array('class' => 'complication_type'))?>
 						</td>
 						<td>
-							<?php echo CHtml::dropDownList('complication','',CHtml::listData($element->getComplicationsNotSelectedByType(1),'id','name'),array('empty' => '- Select -', 'class' => 'complication_list'))?>
+							<?php echo CHtml::dropDownList('complication','',CHtml::listData($element->getComplicationsNotSelectedByType(ElementType::model()->find('class_name=?',array('Element_OphTrOperationnote_Anaesthetic'))->id),'id','name'),array('empty' => '- Select -', 'class' => 'complication_list'))?>
 						</td>
 					</tr>
 				</tfoot>
