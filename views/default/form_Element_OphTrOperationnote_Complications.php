@@ -46,7 +46,7 @@ $layoutColumns = array(
 									<ul class="MultiSelectList multi-select-selections <?php echo $type->name?>_complications">
 										<?php if (!empty($element->complication_assignments)) {
 											foreach ($element->complication_assignments as $i => $assignment) {
-												if ($assignment->complication->type->id == $type->id) {?>
+												if ($assignment->complication->element_type_id == $type->id) {?>
 													<li>
 														<span class="text"><?php echo $assignment->complication->name?></span>
 														<a class="removeComplication remove-one">Remove</a>

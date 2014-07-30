@@ -140,14 +140,52 @@ class Element_OphTrOperationnote_Complications extends Element_OpNote
 		return OphTrOperationnote_Complication::model()->getTypes($this->element_classes);
 	}
 
-	public function hasComplicationsOfType($type)
+	public function hasComplicationsOfType($element_type_id)
 	{
 		foreach ($this->complication_assignments as $assignment) {
-			if ($assignment->complication->type_id == $type->id) {
+			if ($assignment->complication->element_type_id == $element_type_id) {
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	public function getComplicationsByType($type='all')
+	{
+		$complications = array();
+
+		foreach ($this->complication_assignments as $assignment) {
+			if ($type == 'all') {
+				if (!isset($complications[$assignment->complication->element_type->name])) {
+					$complications[$assignment->complication->element_type->name] = array();
+				}
+
+				$complications[$assignment->complication->element_type->name][] = $assignment;
+			} else if ($type == $assignment->complication->element_type->name) {
+				$complications[] = $assignment;
+			}
+		}
+
+		if ($type != 'all' && empty($complications)) {
+			return false;
+		}
+
+		return $complications;
+	}
+
+	public function getComplicationElementTypes()
+	{
+		$element_type_ids = array();
+		$element_types = array();
+
+		foreach (OphTrOperationnote_Complication::model()->findAll(array('order' => 'element_type_id asc, display_order asc')) as $complication) {
+			if (!in_array($complication->element_type_id,$element_type_ids) && in_array($complication->element_type->class_name,$this->element_classes)) {
+				$element_type_ids[] = $complication->element_type_id;
+				$element_types[] = $complication->element_type;
+			}
+		}
+
+		return $element_types;
 	}
 }
