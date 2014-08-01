@@ -39,7 +39,6 @@
  * @property AnaestheticDelivery $anaesthetic_delivery
  * @property OphTrOperationnote_OperationAnaestheticAgent[] $anaesthetic_agent_assignments
  * @property AnaestheticAgent[] $anaesthetic_agents
- * @property OphTrOperationnote_AnaestheticComplication[] $anaesthetic_complications
  * @property User $witness
  */
 class Element_OphTrOperationnote_Anaesthetic extends Element_OpNote

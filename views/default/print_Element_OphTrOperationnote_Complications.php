@@ -22,10 +22,10 @@
 	<div class="element-data">
 		<div class="row data-row">
 			<div class="large-3 column end">
-				<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('anaesthetic_complications'))?></h4>
+				<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('complications'))?></h4>
 				<div class="data-value">
-					<?php if ($element->anaesthetic_complications) {?>
-						<?php foreach ($element->anaesthetic_complications as $complication) {?>
+					<?php if ($element->complications) {?>
+						<?php foreach ($element->complications as $complication) {?>
 							<?php echo $complication->name?><br/>
 						<?php }?>
 					<?php }else{?>
