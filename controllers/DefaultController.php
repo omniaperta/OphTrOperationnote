@@ -313,7 +313,7 @@ class DefaultController extends BaseEventTypeController
 	 */
 	public function getOptionalElements()
 	{
-		return array();
+		return parent::getOptionalElements();
 	}
 
 	/**

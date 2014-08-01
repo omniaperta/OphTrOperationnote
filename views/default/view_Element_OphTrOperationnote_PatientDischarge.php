@@ -17,24 +17,18 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.html The GNU General Public License V3.0
  */
 ?>
-
-<?php $this->beginContent('//patient/event_container'); ?>
-	<?php
-		$this->breadcrumbs=array($this->module->id);
-		$this->event_actions[] = EventAction::button('Save', 'save', array('level' => 'save'), array('form'=>'examination-update'));
-	?>
-	<?php $form = $this->beginWidget('BaseEventTypeCActiveForm', array(
-		'id'=>'examination-update',
-		'enableAjaxValidation'=>false,
-		'layoutColumns' => array(
-			'label' => 4,
-			'field' => 8
-		)
-	));
-	?>
-		<?php $this->displayErrors($errors)?>
-		<?php $this->renderPartial('//patient/event_elements', array('form' => $form));?>
-		<?php $this->displayErrors($errors, true)?>
-
-	<?php $this->endWidget()?>
-<?php $this->endContent() ;?>
+<section class="element">
+	<h3 class="element-title highlight"><?php echo $element->elementType->name ?></h3>
+	<div class="element-data">
+		<div class="row data-row">
+			<div class="large-6 column">
+				<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('tolerated_procedure'))?></h4>
+				<div class="data-value"><?php echo $element->tolerated_procedure ? 'Yes' : 'No'?></div>
+			</div>
+			<div class="large-6 column end">
+				<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('ocular_stable'))?></h4>
+				<div class="data-value"><?php echo $element->ocular_stable ? 'Yes' : 'No'?></div>
+			</div>
+		</div>
+	</div>
+</section>

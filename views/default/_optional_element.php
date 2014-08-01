@@ -17,24 +17,6 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.html The GNU General Public License V3.0
  */
 ?>
-
-<?php $this->beginContent('//patient/event_container'); ?>
-	<?php
-		$this->breadcrumbs=array($this->module->id);
-		$this->event_actions[] = EventAction::button('Save', 'save', array('level' => 'save'), array('form'=>'examination-update'));
-	?>
-	<?php $form = $this->beginWidget('BaseEventTypeCActiveForm', array(
-		'id'=>'examination-update',
-		'enableAjaxValidation'=>false,
-		'layoutColumns' => array(
-			'label' => 4,
-			'field' => 8
-		)
-	));
-	?>
-		<?php $this->displayErrors($errors)?>
-		<?php $this->renderPartial('//patient/event_elements', array('form' => $form));?>
-		<?php $this->displayErrors($errors, true)?>
-
-	<?php $this->endWidget()?>
-<?php $this->endContent() ;?>
+<li data-element-type-class="<?php echo CHtml::modelName($element)?>" data-element-type-id="<?php echo $element->elementType->id?>" data-element-type-name="<?php echo $element->elementType->name?>" data-element-display-order="<?php echo $element->elementType->display_order?>">
+	<a href="#"><?php echo $element->elementType->name?></a>
+</li>

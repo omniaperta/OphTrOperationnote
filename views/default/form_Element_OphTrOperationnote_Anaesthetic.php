@@ -18,18 +18,18 @@
  */
 ?>
 <div class="element-fields">
-	<?php echo $form->radioButtons($element, 'anaesthetic_type_id', 'AnaestheticType')?>
-	<?php echo $form->radioButtons($element, 'anaesthetist_id', 'Anaesthetist', false, false, $element->hidden)?>
+	<?php echo $form->radioButtons($element, 'anaesthetic_type_id', 'AnaestheticType',null,false,false,false,false,array(),array('label' => 2,'field' => 8))?>
+	<?php echo $form->radioButtons($element, 'anaesthetist_id', 'Anaesthetist', false, false, $element->hidden, false,false,array(),array('label' => 2,'field' => 8))?>
 	<?php if ($element->getSetting('fife')) {?>
-		<?php echo $form->dropDownList($element, 'anaesthetic_witness_id', CHtml::listData($element->surgeons, 'id', 'FullName'), array('empty'=>'- Please select -'), $element->witness_hidden,array('field'=>3));?>
+		<?php echo $form->dropDownList($element, 'anaesthetic_witness_id', CHtml::listData($element->surgeons, 'id', 'FullName'), array('empty'=>'- Please select -'), $element->witness_hidden,array('label'=>2,'field'=>4));?>
 	<?php }?>
-	<?php echo $form->radioButtons($element, 'anaesthetic_delivery_id', 'AnaestheticDelivery', false,4, $element->hidden)?>
-	<?php echo $form->multiSelectList($element, 'anaesthetic_agents', 'anaesthetic_agents', 'id', $this->getAnaesthetic_agent_list($element), null, array('empty' => '- Anaesthetic agents -', 'label' => 'Agents'), $element->hidden,false,null,false,false,array('field'=>3))?>
+	<?php echo $form->radioButtons($element, 'anaesthetic_delivery_id', 'AnaestheticDelivery', false,4, $element->hidden,false,false,array(),array('label' => 2,'field' => 8))?>
+	<?php echo $form->multiSelectList($element, 'anaesthetic_agents', 'anaesthetic_agents', 'id', $this->getAnaesthetic_agent_list($element), null, array('empty' => '- Anaesthetic agents -', 'label' => 'Agents'), $element->hidden,false,null,false,false,array('label'=>2,'field'=>3))?>
 	<div class="eventDetail row field-row">
 		<div class="large-2 column"><label></label></div>
 		<div class="large-8 column end">
 			<span class="error">Anaesthetic complications are now in the <a class="showComplicationsElement">complications element</a></span>
 		</div>
 	</div>
-	<?php echo $form->textArea($element, 'anaesthetic_comment', array(), $element->hidden, array('rows'=>4))?>
+	<?php echo $form->textArea($element, 'anaesthetic_comment', array(), $element->hidden, array('rows'=>4), array('label' => 2, 'field' => 4))?>
 </div>

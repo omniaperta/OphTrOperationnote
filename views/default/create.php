@@ -17,24 +17,24 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.html The GNU General Public License V3.0
  */
 ?>
+
 <?php $this->beginContent('//patient/event_container'); ?>
-
 	<?php
-		$form = $this->beginWidget('BaseEventTypeCActiveForm', array(
-			'id'=>'opnote-create',
-			'enableAjaxValidation'=>false,
-			'focus'=>'#procedure_id',
-			'layoutColumns'=>array('label'=>2,'field'=>10),
-		));
-
-		// Event actions
-		$this->event_actions[] = EventAction::button('Save', 'save', array('level' => 'save'), array('form'=>'opnote-create'));
+		$this->event_actions[] = EventAction::button('Save', 'save', array('level' => 'save'), array('form'=>'examination-create'));
 	?>
 
+	<?php $form = $this->beginWidget('BaseEventTypeCActiveForm', array(
+		'id'=>'examination-create',
+		'enableAjaxValidation'=>false,
+		'layoutColumns' => array(
+			'label' => 4,
+			'field' => 8
+		)
+	));
+	?>
 		<?php $this->displayErrors($errors)?>
-		<?php $this->renderOpenElements($this->action->id, $form); ?>
-		<?php $this->renderOptionalElements($this->action->id, $form); ?>
+		<?php $this->renderPartial('//patient/event_elements', array('form' => $form));?>
 		<?php $this->displayErrors($errors, true)?>
 
-	<?php $this->endWidget(); ?>
+	<?php $this->endWidget()?>
 <?php $this->endContent() ;?>
