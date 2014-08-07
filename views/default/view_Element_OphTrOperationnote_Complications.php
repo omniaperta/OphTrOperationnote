@@ -21,37 +21,37 @@
 	<h3 class="element-title highlight"><?php echo $element->elementType->name ?></h3>
 	<div class="element-data">
 		<div class="row data-row">
-			<div class="large-3 column end">
-				<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('anaesthetic_complications'))?></h4>
-				<div class="data-value">
-					<?php if ($element->getComplicationsByType('Anaesthetic')) {?>
-						<?php foreach ($element->getComplicationsByType('Anaesthetic') as $complication) {?>
-							<?php echo $complication->complication->name?><br/>
-						<?php }?>
-					<?php }else{?>
-						None
-					<?php }?>
-				</div>
-			</div>
-			<?php foreach ($element->getComplicationElementTypes() as $element_type) {
-				if ($element_type->name != 'Anaesthetic') {?>
-					<div class="large-3 column end">
-						<h4 class="data-title"><?php echo $element_type->name?> complications</h4>
-						<div class="data-value">
-							<?php if ($element->getComplicationsByType($element_type->name)) {
-								foreach ($element->getComplicationsByType($element_type->name) as $assignment) {
-									echo $assignment->complication->name?><br/>
-								<?php }
-							}else{?>
-								None
+			<div class="large-4 column">
+				<div class="data-row">
+					<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('anaesthetic_complications'))?></h4>
+					<div class="data-value">
+						<?php if ($element->getComplicationsByType('Anaesthetic')) {?>
+							<?php foreach ($element->getComplicationsByType('Anaesthetic') as $complication) {?>
+								<?php echo $complication->complication->name?><br/>
 							<?php }?>
-						</div>
+						<?php }else{?>
+							None
+						<?php }?>
 					</div>
-				<?php }
-			}?>
-		</div>
-		<div class="row data-row">
-			<div class="large-3 column end">
+				</div>
+				<?php foreach ($element->getComplicationElementTypes() as $element_type) {
+					if ($element_type->name != 'Anaesthetic') {?>
+						<div class="data-row">
+							<h4 class="data-title"><?php echo $element_type->name?> complications</h4>
+							<div class="data-value">
+								<?php if ($element->getComplicationsByType($element_type->name)) {
+									foreach ($element->getComplicationsByType($element_type->name) as $assignment) {
+										echo $assignment->complication->name?><br/>
+									<?php }
+								}else{?>
+									None
+								<?php }?>
+							</div>
+						</div>
+					<?php }
+				}?>
+			</div>
+			<div class="large-8 column">
 				<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('comments'))?></h4>
 				<div class="data-value<?php if (!$element->comments) {?> none<?php }?>"><?php echo CHtml::encode($element->comments) ? Yii::app()->format->Ntext($element->comments) : 'None'?></div>
 			</div>

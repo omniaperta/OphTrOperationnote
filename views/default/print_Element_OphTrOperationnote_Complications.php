@@ -17,83 +17,87 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.html The GNU General Public License V3.0
  */
 ?>
-<section class="element">
+<section class="element <?php echo $element->elementType->class_name?>">
 	<h3 class="element-title highlight"><?php echo $element->elementType->name ?></h3>
-	<div class="element-data">
-		<div class="row data-row">
-			<div class="large-3 column end">
-				<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('complications'))?></h4>
-				<div class="data-value">
-					<?php if ($element->complications) {?>
-						<?php foreach ($element->complications as $complication) {?>
-							<?php echo $complication->name?><br/>
-						<?php }?>
-					<?php }else{?>
-						None
+	<div class="details">
+		<div class="element-data">
+			<div class="row">
+				<div class="large-4 column">
+					<div class="data-row">
+						<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('complications'))?></h4>
+						<div class="data-value">
+							<?php if ($element->complications) {?>
+								<?php foreach ($element->complications as $complication) {?>
+									<?php echo $complication->name?><br/>
+								<?php }?>
+							<?php }else{?>
+								None
+							<?php }?>
+						</div>
+					</div>
+					<?php if (Element_OphTrOperationnote_Cataract::model()->find('event_id=?',array($element->event_id))) {?>
+						<div class="data-row">
+							<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('cataract_complications'))?></h4>
+							<div class="data-value">
+								<?php if ($element->cataract_complications) {?>
+									<?php foreach ($element->cataract_complications as $complication) {?>
+										<?php echo $complication->name?><br/>
+									<?php }?>
+								<?php }else{?>
+									None
+								<?php }?>
+							</div>
+						</div>
+					<?php }?>
+					<?php if (Element_OphTrOperationnote_Trabectome::model()->find('event_id=?',array($element->event_id))) {?>
+						<div class="data-row">
+							<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('trabectome_complications'))?></h4>
+							<div class="data-value">
+								<?php if ($element->trabectome_complications) {?>
+									<?php foreach ($element->complication_assignments as $assignment) {
+										if ($assignment->complication->type->name == 'Trabectome') {?>
+											<?php if ($assignment->other) {
+												echo $assignment->other;
+											} else {
+												echo $assignment->complication->name;
+											}?>
+											<br/>
+										<?php }?>
+									<?php }?>
+								<?php }else{?>
+									None
+								<?php }?>
+							</div>
+						</div>
+					<?php }?>
+					<?php if (Element_OphTrOperationnote_Trabeculectomy::model()->find('event_id=?',array($element->event_id))) {?>
+						<div class="data-row">
+							<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('trabeculectomy_complications'))?></h4>
+							<div class="data-value">
+								<?php if ($element->trabeculectomy_complications) {?>
+									<?php foreach ($element->complication_assignments as $assignment) {
+										if ($assignment->complication->type->name == 'Trabeculectomy') {?>
+											<?php if ($assignment->other) {
+												echo $assignment->other;
+											} else {
+												echo $assignment->complication->name;
+											}?>
+											<br/>
+										<?php }?>
+									<?php }?>
+								<?php }else{?>
+									None
+								<?php }?>
+							</div>
+						</div>
 					<?php }?>
 				</div>
-			</div>
-			<?php if (Element_OphTrOperationnote_Cataract::model()->find('event_id=?',array($element->event_id))) {?>
-				<div class="large-3 column end">
-					<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('cataract_complications'))?></h4>
-					<div class="data-value">
-						<?php if ($element->cataract_complications) {?>
-							<?php foreach ($element->cataract_complications as $complication) {?>
-								<?php echo $complication->name?><br/>
-							<?php }?>
-						<?php }else{?>
-							None
-						<?php }?>
+				<div class="large-8 column">
+					<div class="data-row">
+						<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('comments'))?></h4>
+						<div class="data-value<?php if (!$element->comments) {?> none<?php }?>"><?php echo CHtml::encode($element->comments) ? Yii::app()->format->Ntext($element->comments) : 'None'?></div>
 					</div>
 				</div>
-			<?php }?>
-			<?php if (Element_OphTrOperationnote_Trabectome::model()->find('event_id=?',array($element->event_id))) {?>
-				<div class="large-3 column end">
-					<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('trabectome_complications'))?></h4>
-					<div class="data-value">
-						<?php if ($element->trabectome_complications) {?>
-							<?php foreach ($element->complication_assignments as $assignment) {
-								if ($assignment->complication->type->name == 'Trabectome') {?>
-									<?php if ($assignment->other) {
-										echo $assignment->other;
-									} else {
-										echo $assignment->complication->name;
-									}?>
-									<br/>
-								<?php }?>
-							<?php }?>
-						<?php }else{?>
-							None
-						<?php }?>
-					</div>
-				</div>
-			<?php }?>
-			<?php if (Element_OphTrOperationnote_Trabeculectomy::model()->find('event_id=?',array($element->event_id))) {?>
-				<div class="large-3 column end">
-					<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('trabeculectomy_complications'))?></h4>
-					<div class="data-value">
-						<?php if ($element->trabeculectomy_complications) {?>
-							<?php foreach ($element->complication_assignments as $assignment) {
-								if ($assignment->complication->type->name == 'Trabeculectomy') {?>
-									<?php if ($assignment->other) {
-										echo $assignment->other;
-									} else {
-										echo $assignment->complication->name;
-									}?>
-									<br/>
-								<?php }?>
-							<?php }?>
-						<?php }else{?>
-							None
-						<?php }?>
-					</div>
-				</div>
-			<?php }?>
-		</div>
-		<div class="row data-row">
-			<div class="large-3 column end">
-				<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('comments'))?></h4>
-				<div class="data-value<?php if (!$element->comments) {?> none<?php }?>"><?php echo CHtml::encode($element->comments) ? Yii::app()->format->Ntext($element->comments) : 'None'?></div>
 			</div>
 		</div>
 	</div>

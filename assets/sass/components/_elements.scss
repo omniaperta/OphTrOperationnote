@@ -45,6 +45,21 @@
 	}
 }
 
+.Element_OphTrOperationnote_Complications {
+	.data-title {
+		@media print {
+			padding-left: 0;
+			font-weight: bold;
+		}
+	}
+	.element-data {
+		@media print {
+			padding-left: 0;
+			padding-right: 0;
+		}
+	}
+}
+
 .Element_OphTrOperationnote_GenericProcedure {
 	@media print {
 		border-bottom: 1px dotted #666;
@@ -80,6 +95,12 @@
 	}
 	#ed_canvas_edit_Position {
 		margin-top: 10px;
+	}
+}
+
+.Element_OphTrOperationnote_ProcedureList {
+	.sub-elements {
+		padding: 0;
 	}
 }
 

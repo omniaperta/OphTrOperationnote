@@ -21,11 +21,11 @@
 }
 /* line 19, ../sass/components/_event.scss */
 .event .event-content {
-  background-image: url('../img/watermark.png?1400240773');
+  background-image: url('../img/watermark.png?1392372889');
 }
 /* line 22, ../sass/components/_event.scss */
 .event .event-title {
-  background-image: url('../img/medium.png?1400240773');
+  background-image: url('../img/medium.png?1383822786');
 }
 
 /* line 29, ../sass/components/_event.scss */
@@ -93,13 +93,28 @@
 }
 
 @media print {
-  /* line 48, ../sass/components/_elements.scss */
+  /* line 49, ../sass/components/_elements.scss */
+  .Element_OphTrOperationnote_Complications .data-title {
+    padding-left: 0;
+    font-weight: bold;
+  }
+}
+@media print {
+  /* line 55, ../sass/components/_elements.scss */
+  .Element_OphTrOperationnote_Complications .element-data {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+@media print {
+  /* line 63, ../sass/components/_elements.scss */
   .Element_OphTrOperationnote_GenericProcedure {
     border-bottom: 1px dotted #666;
     padding-bottom: 20px;
     margin-bottom: 20px;
   }
-  /* line 53, ../sass/components/_elements.scss */
+  /* line 68, ../sass/components/_elements.scss */
   .Element_OphTrOperationnote_GenericProcedure:last-child {
     border-bottom: 0;
     margin-bottom: 0;
@@ -107,13 +122,13 @@
   }
 }
 @media print {
-  /* line 59, ../sass/components/_elements.scss */
+  /* line 74, ../sass/components/_elements.scss */
   .Element_OphTrOperationnote_GenericProcedure .element-title {
     margin-top: 10px;
   }
 }
 @media print {
-  /* line 64, ../sass/components/_elements.scss */
+  /* line 79, ../sass/components/_elements.scss */
   .Element_OphTrOperationnote_GenericProcedure .data-title {
     margin-top: 0;
     font-size: 1rem;
@@ -122,27 +137,32 @@
 }
 
 @media print {
-  /* line 75, ../sass/components/_elements.scss */
+  /* line 90, ../sass/components/_elements.scss */
   .Element_OphTrOperationnote_Cataract .pronounced ul {
     margin-bottom: 0;
   }
 }
-/* line 81, ../sass/components/_elements.scss */
+/* line 96, ../sass/components/_elements.scss */
 .Element_OphTrOperationnote_Cataract #ed_canvas_edit_Position {
   margin-top: 10px;
 }
 
+/* line 102, ../sass/components/_elements.scss */
+.Element_OphTrOperationnote_ProcedureList .sub-elements {
+  padding: 0;
+}
+
 @media print {
-  /* line 89, ../sass/components/_elements.scss */
+  /* line 110, ../sass/components/_elements.scss */
   .operation-details > .details > .element-data {
     padding-top: 0;
   }
 
-  /* line 95, ../sass/components/_elements.scss */
+  /* line 116, ../sass/components/_elements.scss */
   .operation-meta .data-label {
     font-weight: bold;
   }
-  /* line 99, ../sass/components/_elements.scss */
+  /* line 120, ../sass/components/_elements.scss */
   .operation-meta .surgeons .column, .operation-meta .surgeons .columns {
     text-align: center;
   }
