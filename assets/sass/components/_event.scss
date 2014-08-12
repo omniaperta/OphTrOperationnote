@@ -61,3 +61,40 @@
 	display: inline-block !important;
 	margin-left: 1em !important;
 }
+
+.remove-eyedraw {
+	right: 17px !important;
+}
+
+.anterior-segment {
+	.ed-doodle-popup {
+		z-index: 130;
+	}
+}
+
+.posterior-pole {
+	.ed-doodle-popup {
+		z-index: 125;
+	}
+} 
+
+.fundus {
+	.ed-doodle-popup {
+		z-index: 120;
+	}
+} 
+
+#Element_OphTrOperationnote_Laser_power {
+	width: 5em;
+	display: inline-block !important;
+}
+
+#Element_OphTrOperationnote_Laser_yag_power {
+	width: 5em;
+	display: inline-block !important;
+}
+
+#Element_OphTrOperationnote_Laser_yag_energy {
+	width: 5em;
+	display: inline-block !important;
+}

@@ -395,6 +395,32 @@ $(document).ready(function() {
 			});
 		}, 100);
 	});
+
+	$('.add-eyedraw').unbind('click').click(function(e) {
+		e.preventDefault();
+
+		$(this).closest('.inactive-form').next('.active-form').show();
+		$(this).closest('.inactive-form').next('.active-form').children('input[type="hidden"]').attr('disabled','disabled');
+		$(this).closest('.inactive-form').hide();
+	});
+
+	$('.remove-eyedraw').unbind('click').click(function(e) {
+		e.preventDefault();
+
+		$(this).closest('.active-form').prev('.inactive-form').show();
+		$(this).closest('.active-form').hide();
+		$(this).closest('.active-form').children('input[type="hidden"]').removeAttr('disabled');
+	});
+
+	$('#Element_OphTrOperationnote_Laser_lens_id').die('change').live('change',function(e) {
+		e.preventDefault();
+
+		if ($(this).children('option:selected').text() == 'YAG') {
+			$('.yag-fields').slideDown('fast');
+		} else {
+			$('.yag-fields').slideUp('fast');
+		}
+	});
 });
 
 function reportEyedraw(element, eyedraw, fieldName)

@@ -21,11 +21,11 @@
 }
 /* line 19, ../sass/components/_event.scss */
 .event .event-content {
-  background-image: url('../img/watermark.png?1392372889');
+  background-image: url('../img/watermark.png?1406619616');
 }
 /* line 22, ../sass/components/_event.scss */
 .event .event-title {
-  background-image: url('../img/medium.png?1383822786');
+  background-image: url('../img/medium.png?1406619616');
 }
 
 /* line 29, ../sass/components/_event.scss */
@@ -63,6 +63,44 @@
   width: 19em !important;
   display: inline-block !important;
   margin-left: 1em !important;
+}
+
+/* line 65, ../sass/components/_event.scss */
+.remove-eyedraw {
+  right: 17px !important;
+}
+
+/* line 70, ../sass/components/_event.scss */
+.anterior-segment .ed-doodle-popup {
+  z-index: 130;
+}
+
+/* line 76, ../sass/components/_event.scss */
+.posterior-pole .ed-doodle-popup {
+  z-index: 125;
+}
+
+/* line 82, ../sass/components/_event.scss */
+.fundus .ed-doodle-popup {
+  z-index: 120;
+}
+
+/* line 87, ../sass/components/_event.scss */
+#Element_OphTrOperationnote_Laser_power {
+  width: 5em;
+  display: inline-block !important;
+}
+
+/* line 92, ../sass/components/_event.scss */
+#Element_OphTrOperationnote_Laser_yag_power {
+  width: 5em;
+  display: inline-block !important;
+}
+
+/* line 97, ../sass/components/_event.scss */
+#Element_OphTrOperationnote_Laser_yag_energy {
+  width: 5em;
+  display: inline-block !important;
 }
 
 @media print {
