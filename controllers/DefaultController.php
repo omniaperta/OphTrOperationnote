@@ -389,9 +389,10 @@ class DefaultController extends BaseEventTypeController
 	{
 		$criteria = new CDbCriteria;
 		$criteria->compare('procedure_id',$procedure_id);
-		$criteria->order = 'display_order asc';
+		$criteria->order = 't.display_order asc';
+		$criteria->addCondition('element_type.active=1');
 
-		return OphTrOperationnote_ProcedureListOperationElement::model()->findAll($criteria);
+		return OphTrOperationnote_ProcedureListOperationElement::model()->with('element_type')->findAll($criteria);
 	}
 
 	/**
