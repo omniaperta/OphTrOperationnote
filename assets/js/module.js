@@ -396,7 +396,7 @@ $(document).ready(function() {
 		}, 100);
 	});
 
-	$('.add-eyedraw').unbind('click').click(function(e) {
+	$('.add-eyedraw').die('click').live('click',function(e) {
 		e.preventDefault();
 
 		$(this).closest('.inactive-form').next('.active-form').show();
@@ -404,7 +404,7 @@ $(document).ready(function() {
 		$(this).closest('.inactive-form').hide();
 	});
 
-	$('.remove-eyedraw').unbind('click').click(function(e) {
+	$('.remove-eyedraw').die('click').live('click',function(e) {
 		e.preventDefault();
 
 		$(this).closest('.active-form').prev('.inactive-form').show();
