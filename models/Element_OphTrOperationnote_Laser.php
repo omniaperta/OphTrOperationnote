@@ -57,7 +57,7 @@ class Element_OphTrOperationnote_Laser extends Element_OnDemand
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('antseg, postpole, fundus, lens_id, duration_id, power, shots, spot_size_id, pattern_id, yag_pulses, yag_power, yag_energy', 'safe'),
+			array('antseg, postpole, fundus, lens_id, duration_id, power, shots, spot_size_id, pattern_id, yag_pulses, yag_power, yag_energy, comments', 'safe'),
 			array('lens_id, duration_id, power, shots, spot_size_id, pattern_id', 'required'),
 		);
 	}
@@ -142,5 +142,12 @@ class Element_OphTrOperationnote_Laser extends Element_OnDemand
 		}
 
 		return parent::beforeValidate();
+	}
+
+	public function setDefaultOptions($proc=null)
+	{
+		if ($proc && $proc->snomed_code == '172532006') {
+			$this->lens_id = OphTrOperationnote_Laser_Lens::model()->find('name=?',array('YAG'))->id;
+		}
 	}
 }

@@ -24,3 +24,4 @@
 <?php echo $form->textField($element,'shots',array(),array(),array('label' => 2, 'field' => 1))?>
 <?php echo $form->dropDownList($element,'spot_size_id',CHtml::listData(OphTrOperationnote_Laser_Spot_Size::model()->findAll(array('order'=>'display_order asc')),'id','name'),array('empty' => '- Please select -'),false,array('label' => 2, 'field' => 2))?>
 <?php echo $form->dropDownList($element,'pattern_id',CHtml::listData(OphTrOperationnote_Laser_Pattern::model()->findAll(array('order'=>'display_order asc')),'id','name'),array('empty' => '- Please select -'),false,array('label' => 2, 'field' => 2))?>
+<?php echo $form->textArea($element,'comments',array(),false,array(),array('label' => 2, 'field' => 3))?>

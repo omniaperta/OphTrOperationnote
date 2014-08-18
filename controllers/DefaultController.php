@@ -344,8 +344,8 @@ class DefaultController extends BaseEventTypeController
 				}
 			}
 
-			$element->setDefaultOptions();
-			$this->renderElement($element, 'create', $form, array(), array('ondemand' => true), false, true);
+			$element->setDefaultOptions($proc);
+			$this->renderElement($element, 'create', $form, array(), array('ondemand' => true, 'procedure' => $proc), false, true);
 		}
 
 		if (count($procedureSpecificElements) == 0) {
@@ -836,5 +836,16 @@ class DefaultController extends BaseEventTypeController
 		}
 
 		OphTrOperationnote_Complication_Assignment::model()->deleteAll($criteria);
+	}
+
+	protected function setElementDefaultOptions_Element_OphTrOperationnote_Laser($element, $action)
+	{
+		if ($action == 'create' && $procedures = $this->getBookingProcedures()) {
+			foreach ($procedures as $procedure) {
+				if ($procedure->snomed_code == '172532006') {
+					$element->lens_id = OphTrOperationnote_Laser_Lens::model()->find('name=?',array('YAG'))->id;
+				}
+			}
+		}
 	}
 }

@@ -82,6 +82,14 @@
 						<div class="data-value"><?php echo CHtml::encode($element->pattern->name)?></div>
 					</div>
 				</div>
+				<div class="row data-row">
+					<div class="large-4 column">
+						<div class="data-label"><?php echo CHtml::encode($element->getAttributeLabel('comments'))?>:</div>
+					</div>
+					<div class="large-8 column">
+						<div class="data-value"><?php echo $element->comments ? CHtml::encode($element->textWithLineBreaks('comments')) : 'None'?></div>
+					</div>
+				</div>
 				<?php if ($element->lens->name == 'YAG') {?>
 					<div class="row data-row">
 						<header class="sub-element-header">
