@@ -22,8 +22,56 @@
 		<h3 class="sub-element-title"><?php echo $element->elementType->name ?></h3>
 	</header>
 	<div class="sub-element-data">
-		<div class="row highlight-container">
-			<div class="large-6 column data-value highlight">
+		<div class="row">
+			<div class="large-12 column">
+				<div class="row">
+					<?php if ($element->antseg) {?>
+						<div class="large-3 column end">
+							<?php
+							$this->widget('application.modules.eyedraw.OEEyeDrawWidget', array(
+									'idSuffix'=>'AnteriorSegment',
+									'side'=>$element->eye->getShortName(),
+									'mode'=>'view',
+									'width'=>200,
+									'height'=>200,
+									'model'=>$element,
+									'attribute'=>'antseg',
+								))?>
+						</div>
+					<?php }?>
+					<?php if ($element->postpole) {?>
+						<div class="large-3 column end">
+							<?php
+							$this->widget('application.modules.eyedraw.OEEyeDrawWidget', array(
+									'idSuffix'=>'PosteriorPole',
+									'side'=>$element->eye->getShortName(),
+									'mode'=>'view',
+									'width'=>200,
+									'height'=>200,
+									'model'=>$element,
+									'attribute'=>'postpole',
+								))?>
+						</div>
+					<?php }?>
+					<?php if ($element->fundus) {?>
+						<div class="large-3 column end">
+							<?php
+							$this->widget('application.modules.eyedraw.OEEyeDrawWidget', array(
+									'idSuffix'=>'Fundus',
+									'side'=>$element->eye->getShortName(),
+									'mode'=>'view',
+									'width'=>200,
+									'height'=>200,
+									'model'=>$element,
+									'attribute'=>'fundus',
+								))?>
+						</div>
+					<?php }?>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="large-12 column data-value data-highlight">
 				<div class="row data-row">
 					<div class="large-4 column">
 						<div class="data-label"><?php echo CHtml::encode($element->getAttributeLabel('lens_id'))?>:</div>
@@ -121,42 +169,6 @@
 						</div>
 					</div>
 				<?php }?>
-			</div>
-			<div class="large-6 column">
-				<?php if ($element->antseg) {
-					$this->widget('application.modules.eyedraw.OEEyeDrawWidget', array(
-							'idSuffix'=>'AnteriorSegment',
-							'side'=>$element->eye->getShortName(),
-							'mode'=>'view',
-							'width'=>200,
-							'height'=>200,
-							'model'=>$element,
-							'attribute'=>'antseg',
-						));
-				}
-				if ($element->postpole) {
-					$this->widget('application.modules.eyedraw.OEEyeDrawWidget', array(
-							'idSuffix'=>'PosteriorPole',
-							'side'=>$element->eye->getShortName(),
-							'mode'=>'view',
-							'width'=>200,
-							'height'=>200,
-							'model'=>$element,
-							'attribute'=>'postpole',
-						));
-				}
-				if ($element->fundus) {
-					$this->widget('application.modules.eyedraw.OEEyeDrawWidget', array(
-							'idSuffix'=>'Fundus',
-							'side'=>$element->eye->getShortName(),
-							'mode'=>'view',
-							'width'=>200,
-							'height'=>200,
-							'model'=>$element,
-							'attribute'=>'fundus',
-						));
-				}
-				?>
 			</div>
 		</div>
 	</div>
