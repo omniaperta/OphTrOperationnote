@@ -23,15 +23,15 @@
  * The followings are the available columns in table 'element_operation':
  * @property string $id
  * @property integer $event_id
+ * @property integer $surgeon_id
+ * @property integer $assistant_id
+ * @property integer $anaesthetic_type
  *
  * The followings are the available model relations:
  * @property Event $event
  */
-class Element_OphTrOperationnote_Surgeon extends Element_OpNote
+class OphTrOperationnote_Personnel_Item extends BaseActiveRecordVersioned
 {
-	public $service;
-	public $surgeonlist;
-
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @return ElementOperation the static model class
@@ -46,7 +46,7 @@ class Element_OphTrOperationnote_Surgeon extends Element_OpNote
 	 */
 	public function tableName()
 	{
-		return 'et_ophtroperationnote_surgeon';
+		return 'ophtroperationnote_personnel_item';
 	}
 
 	/**
@@ -57,9 +57,8 @@ class Element_OphTrOperationnote_Surgeon extends Element_OpNote
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('items', 'safe'),
-			// The following rule is used by search().
-			// Please remove those attributes that should not be searched.
+			array('role_id, user_id', 'safe'),
+			array('role_id, user_id', 'required'),
 		);
 	}
 
@@ -71,12 +70,9 @@ class Element_OphTrOperationnote_Surgeon extends Element_OpNote
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			'element_type' => array(self::HAS_ONE, 'ElementType', 'id','on' => "element_type.class_name='".get_class($this)."'"),
-			'eventType' => array(self::BELONGS_TO, 'EventType', 'event_type_id'),
-			'event' => array(self::BELONGS_TO, 'Event', 'event_id'),
-			'user' => array(self::BELONGS_TO, 'User', 'created_user_id'),
-			'usermodified' => array(self::BELONGS_TO, 'User', 'last_modified_user_id'),
-			'items' => array(self::HAS_MANY, 'OphTrOperationnote_Personnel_Item', 'element_id'),
+			'element' => array(self::BELONGS_TO, 'Element_OphTrOperationnote_Surgeon', 'element_id'),
+			'role' => array(self::BELONGS_TO, 'OphTrOperationnote_Personnel_Role', 'role_id'),
+			'user' => array(self::BELONGS_TO, 'User', 'user_id'),
 		);
 	}
 
@@ -86,9 +82,13 @@ class Element_OphTrOperationnote_Surgeon extends Element_OpNote
 	public function attributeLabels()
 	{
 		return array(
-			'id' => 'ID',
-			'event_id' => 'Event',
+			'role_id' => 'Role',
+			'user_id' => 'Person',
 		);
+	}
+
+	public function getAttributeSuffix()
+	{
 	}
 
 	/**
@@ -103,61 +103,9 @@ class Element_OphTrOperationnote_Surgeon extends Element_OpNote
 		$criteria = new CDbCriteria;
 
 		$criteria->compare('id', $this->id, true);
-		$criteria->compare('event_id', $this->event_id, true);
 
 		return new CActiveDataProvider(get_class($this), array(
-			'criteria' => $criteria,
-		));
-	}
-
-	/**
-	* Set default values for forms on create
-	*/
-	public function setDefaultOptions()
-	{
-		$user = Yii::app()->session['user'];
-
-		if ($user->is_doctor) {
-			$item = new OphTrOperationnote_Personnel_Item;
-			$item->role_id = OphTrOperationnote_Personnel_Role::model()->find('name=?',array('Surgeon'))->id;
-			$item->user_id = $user->id;
-
-			$this->items = array($item);
-		}
-	}
-
-	public function afterValidate()
-	{
-		if (empty($this->items)) {
-			$this->addError('items','You must specify the surgeon');
-		} else {
-			$surgeon = false;
-			foreach ($this->items as $item) {
-				if ($item->role->name == 'Surgeon') {
-					$surgeon = true;
-				}
-			}
-
-			if (!$surgeon) {
-				$this->addError('items','You must specify the surgeon');
-			}
-		}
-
-		return parent::afterValidate();
-	}
-
-	/**
-	 * wrapper function for retrieving surgeon list
-	 *
-	 * @return User[]
-	 * @see User::getSurgeons()
-	 */
-	public function getSurgeons()
-	{
-		if (!$this->surgeonlist) {
-			$this->surgeonlist = User::model()->getSurgeons();
-		}
-
-		return $this->surgeonlist;
+				'criteria' => $criteria,
+			));
 	}
 }

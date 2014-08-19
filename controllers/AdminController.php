@@ -74,11 +74,11 @@ class AdminController extends ModuleAdminController
 			Audit::add('admin-OphTrOperationnote_PostopDrug','view',$id);
 		}
 
-    $this->render('/admin/editpostopdrug',array(
-      'drug' => $drug,
-      'errors' => @$errors,
-    ));
-  }
+		$this->render('/admin/editpostopdrug',array(
+			'drug' => $drug,
+			'errors' => @$errors,
+		));
+	}
 
 	public function actionDeletePostOpDrugs()
 	{
@@ -105,5 +105,10 @@ class AdminController extends ModuleAdminController
 				}
 			}
 		}
+	}
+
+	public function actionEditRoles()
+	{
+		$this->genericAdmin('Roles','OphTrOperationnote_Personnel_Role');
 	}
 }

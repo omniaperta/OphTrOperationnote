@@ -26,6 +26,7 @@ class DefaultController extends BaseEventTypeController
 		'newComplicationRow' => self::ACTION_TYPE_FORM,
 		'getComplications' => self::ACTION_TYPE_FORM,
 		'getComplicationTypes' => self::ACTION_TYPE_FORM,
+		'validatePersonnelItem' => self::ACTION_TYPE_FORM,
 	);
 
 	/* @var Element_OphTrOperationbooking_Operation operation that this note is for when creating */
@@ -847,5 +848,70 @@ class DefaultController extends BaseEventTypeController
 				}
 			}
 		}
+	}
+
+	public function actionValidatePersonnelItem()
+	{
+		$item = new OphTrOperationnote_Personnel_Item;
+		$item->attributes = $_POST;
+
+		$item->validate();
+
+		$errors = array();
+
+		foreach ($item->errors as $field => $error) {
+			$errors[$field] = $error[0];
+		}
+
+		if (empty($errors)) {
+			$errors['row'] = $this->renderPartial('_personnel_row',array('item' => $item, 'i' => $_POST['i'], 'edit' => true),true);
+		}
+
+		echo json_encode($errors);
+	}
+
+	public function setComplexAttributes_Element_OphTrOperationnote_Surgeon($element, $data, $index)
+	{
+		$items = array();
+
+		if (!empty($data['OphTrOperationnote_Personnel_Item'])) {
+			foreach ($data['OphTrOperationnote_Personnel_Item'] as $data_item) {
+				if (!$data_item['id'] || !($item = OphTrOperationnote_Personnel_Item::model()->findByPk($data_item['id']))) {
+					$item = new OphTrOperationnote_Personnel_Item;
+				}
+
+				$item->role_id = $data_item['role_id'];
+				$item->user_id = $data_item['user_id'];
+
+				$items[] = $item;
+			}
+		}
+
+		$element->items = $items;
+	}
+
+	public function saveComplexAttributes_Element_OphTrOperationnote_Surgeon($element, $data, $index)
+	{
+		$ids = array();
+
+		foreach ($element->items as $item) {
+			$item->element_id = $element->id;
+
+			if (!$item->save()) {
+				throw new Exception("Unable to save surgeon item: ".print_r($item->errors,true));
+			}
+
+			$ids[] = $item->id;
+		}
+
+		$criteria = new CDbCriteria;
+		$criteria->addCondition('element_id = :ei');
+		$criteria->params[':ei'] = $element->id;
+
+		if (!empty($ids)) {
+			$criteria->addNotInCondition('id',$ids);
+		}
+
+		OphTrOperationnote_Personnel_Item::model()->deleteAll($criteria);
 	}
 }

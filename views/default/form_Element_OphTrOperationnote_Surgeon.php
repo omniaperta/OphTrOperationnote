@@ -18,21 +18,40 @@
  */
 ?>
 <div class="element-fields">
-	<?php echo $form->dropDownListRow(
-		$element,
-		array(
-			'surgeon_id',
-			'assistant_id',
+	<?php $form->widget('application.widgets.Records', array(
+		'form' => $form,
+		'element' => $element,
+		'model' => new OphTrOperationnote_Personnel_Item,
+		'field' => 'items',
+		'validate_method' => '/OphTrOperationnote/default/validatePersonnelItem',
+		'row_view' => 'protected/modules/OphTrOperationnote/views/default/_personnel_row.php',
+		'label_width' => 2,
+		'columns' => array(
+			array(
+				'width' => 5,
+				'field_width' => 6,
+				'fields' => array(
+					array(
+						'field' => 'role_id',
+						'type' => 'dropdown',
+						'options' => CHtml::listData(OphTrOperationnote_Personnel_Role::model()->findAll(array('order' => 'display_order asc')),'id','name'),
+						'empty' => '- Select -',
+						'once_per_row' => true,
+					),
+					array(
+						'field' => 'user_id',
+						'type' => 'dropdown',
+						'options' => CHtml::listData($element->surgeons,'id','reversedFullName'),
+						'empty' => '- Select -',
+					),
+				),
+			),
 		),
-		array(
-			CHtml::listData($element->surgeons, 'id', 'ReversedFullName'),
-			CHtml::listData($element->surgeons, 'id', 'ReversedFullName'),
-		),
-		array(
-			array('empty'=>'- Please select -'),
-			array('empty'=>'- None -'),
-		),
-		array('field'=>9)
-	)?>
-	<?php echo $form->dropDownList($element, 'supervising_surgeon_id', CHtml::listData($element->surgeons, 'id', 'ReversedFullName'), array('empty' => '- None -'),false,array('field'=>3))?>
+		'no_items_text' => 'No personnel specified for this operation.',
+		'add_button_text' => 'Add personnel',
+		'use_last_button_text' => false,
+		'include_timestamp' => false,
+		'headings' => array('Role','Person'),
+	))?>
+	<input type="hidden" name="<?php echo CHtml::modelName($element)?>[present]" value="1" />
 </div>
