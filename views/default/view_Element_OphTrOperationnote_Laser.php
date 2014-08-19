@@ -135,7 +135,7 @@
 						<div class="data-label"><?php echo CHtml::encode($element->getAttributeLabel('comments'))?>:</div>
 					</div>
 					<div class="large-8 column">
-						<div class="data-value"><?php echo $element->comments ? CHtml::encode($element->textWithLineBreaks('comments')) : 'None'?></div>
+						<div class="data-value"><?php echo $element->comments ? $element->textWithLineBreaks('comments') : 'None'?></div>
 					</div>
 				</div>
 				<?php if ($element->lens->name == 'YAG') {?>
