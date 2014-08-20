@@ -18,15 +18,15 @@
  */
 ?>
 <section class="element">
-	<h3 class="element-title highlight"><?php echo $element->elementType->name ?></h3>
-	<div class="element-data">
-		<div class="row data-row">
+	<h3 class="element-title"><?php echo $element->elementType->name ?></h3>
+	<div class="details">
+		<div class="element-data row">
 			<div class="large-6 column">
-				<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('tolerated_procedure'))?></h4>
+				<h4 class="data-label"><?php echo CHtml::encode($element->getAttributeLabel('tolerated_procedure'))?>?</h4>
 				<div class="data-value"><?php echo $element->tolerated_procedure ? 'Yes' : 'No'?></div>
 			</div>
 			<div class="large-6 column end">
-				<h4 class="data-title"><?php echo CHtml::encode($element->getAttributeLabel('ocular_stable'))?></h4>
+				<h4 class="data-label"><?php echo CHtml::encode($element->getAttributeLabel('ocular_stable'))?>?</h4>
 				<div class="data-value"><?php echo $element->ocular_stable ? 'Yes' : 'No'?></div>
 			</div>
 		</div>

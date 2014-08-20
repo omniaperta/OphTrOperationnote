@@ -52,6 +52,12 @@
 			$this->renderElement($comments_element, 'print', false, false);
 		?>
 
+		<!-- Patient discharge -->
+		<?php
+			$patient_discharge_element = Element_OphTrOperationnote_PatientDischarge::model()->find("event_id = ?", array($this->event->id));
+			$this->renderElement($patient_discharge_element, 'print', false, false);
+		?>
+
 		<!-- Metadata -->
 		<?php $this->renderPartial('//print/event_metadata', array(
 			'hide_modified' => @$hide_modified

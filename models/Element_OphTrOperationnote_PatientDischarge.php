@@ -30,7 +30,7 @@
  * The followings are the available model relations:
  * @property Event $event
  */
-class Element_OphTrOperationnote_PatientDischarge extends BaseEventTypeElement
+class Element_OphTrOperationnote_PatientDischarge extends Element_OpNote
 {
 	/**
 	 * Returns the static model of the specified AR class.
