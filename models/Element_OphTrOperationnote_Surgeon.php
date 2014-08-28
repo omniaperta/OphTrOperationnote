@@ -116,10 +116,11 @@ class Element_OphTrOperationnote_Surgeon extends Element_OpNote
 	public function setDefaultOptions()
 	{
 		$user = Yii::app()->session['user'];
+		$surgeon_role = OphTrOperationnote_Personnel_Role::model()->find('name=?',array('Surgeon'));
 
-		if ($user->is_doctor) {
+		if ($user->is_doctor && $surgeon_role) {
 			$item = new OphTrOperationnote_Personnel_Item;
-			$item->role_id = OphTrOperationnote_Personnel_Role::model()->find('name=?',array('Surgeon'))->id;
+			$item->role_id = $surgeon_role->id;
 			$item->user_id = $user->id;
 
 			$this->items = array($item);
