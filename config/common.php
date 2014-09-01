@@ -25,6 +25,7 @@ return array(
 			'ToricPCIOL',
 		),
 		'OphTrOperationnote_SurgeonRequiredRole' => 'Surgeon',
+		'OphTrOperationnote_Injection_ShowAllUsers' => false,
 		'admin_menu' => array(
 			'Post-op drugs' => '/OphTrOperationnote/admin/viewPostOpDrugs',
 			'Roles' => '/OphTrOperationnote/admin/editRoles',

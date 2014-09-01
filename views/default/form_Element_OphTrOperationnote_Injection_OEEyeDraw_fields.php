@@ -34,7 +34,11 @@ foreach (OphTrOperationnote_LensStatus::model()->findAll() as $lens_status) {
 	<?php echo $form->textField($element, 'number', array('size' => '10'), array(), array('label' => 5, 'field' => 2))?>
 	<?php echo $form->textField($element, 'batch_number', array('size' => '10'), array(), array('label' => 5, 'field' => 4))?>
 	<?php echo $form->datePicker($element, 'batch_expiry_date', !$element->getIsNewRecord() ? array('minDate' => Helper::convertDate2NHS($element->created_date)) : array('minDate' => 'yesterday'), array(), array('label' => 5, 'field' => 2))?>
-	<?php echo $form->dropDownList($element, 'injection_given_by_id', CHtml::listData(OphTrOperationnote_Injection_User::model()->with('user')->findAll(array('order'=>'first_name asc, last_name asc')),'id','user.fullName'),array('empty' => '- Please select -'),false,array('label' => 5, 'field'=>4))?>
+	<?php if (Yii::app()->params['OphTrOperationnote_Injection_ShowAllUsers']) {?>
+		<?php echo $form->dropDownList($element, 'injection_given_by_id', CHtml::listData(User::model()->findAll(array('order'=>'first_name asc, last_name asc')),'id','fullName'),array('empty' => '- Please select -'),false,array('label' => 5, 'field'=>4))?>
+	<?php }else{?>
+		<?php echo $form->dropDownList($element, 'injection_given_by_id', CHtml::listData(OphTrOperationnote_Injection_User::model()->with('user')->findAll(array('order'=>'first_name asc, last_name asc')),'id','user.fullName'),array('empty' => '- Please select -'),false,array('label' => 5, 'field'=>4))?>
+	<?php }?>
 	<?php echo $form->timePicker($element, 'injection_time', array(), array(), array('label' => 5, 'field' => 4))?>
 	<?php echo $form->checkbox($element, 'post_ioplowering_required', array('text-align' => 'right', 'class' => 'linked-fields', 'data-linked-fields' => 'post_ioploweringdrugs', 'data-linked-values' => '1'), array('label' => 5, 'field' => 4))?>
 	<?php echo $form->multiSelectList($element, 'post_ioploweringdrugs', 'post_ioploweringdrugs', 'id', CHtml::listData(OphTrOperationnote_Injection_IOP_Lowering::model()->findAll(array('order' => 'display_order asc')),'id','name'),array(),array('empty' => '- Please select -', 'label' => $element->getAttributeLabel('post_ioploweringdrugs')),!$element->post_ioplowering_required,false,null,false,false,array('label' => 5, 'field'=>4))?>
