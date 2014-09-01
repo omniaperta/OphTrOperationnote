@@ -130,17 +130,17 @@ class Element_OphTrOperationnote_Surgeon extends Element_OpNote
 	public function afterValidate()
 	{
 		if (empty($this->items)) {
-			$this->addError('items','You must specify the surgeon');
+			$this->addError('items',Yii::app()->params['OphTrOperationnote_SurgeonRequiredRole'].' is required');
 		} else {
 			$surgeon = false;
 			foreach ($this->items as $item) {
-				if ($item->role->name == 'Surgeon') {
+				if ($item->role->name == Yii::app()->params['OphTrOperationnote_SurgeonRequiredRole']) {
 					$surgeon = true;
 				}
 			}
 
 			if (!$surgeon) {
-				$this->addError('items','You must specify the surgeon');
+				$this->addError('items',Yii::app()->params['OphTrOperationnote_SurgeonRequiredRole'].' is required');
 			}
 		}
 

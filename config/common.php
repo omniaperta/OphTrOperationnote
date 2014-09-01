@@ -24,6 +24,7 @@ return array(
 			'ACIOL',
 			'ToricPCIOL',
 		),
+		'OphTrOperationnote_SurgeonRequiredRole' => 'Surgeon',
 		'admin_menu' => array(
 			'Post-op drugs' => '/OphTrOperationnote/admin/viewPostOpDrugs',
 			'Roles' => '/OphTrOperationnote/admin/editRoles',
