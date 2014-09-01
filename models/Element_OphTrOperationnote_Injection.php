@@ -104,6 +104,8 @@ class Element_OphTrOperationnote_Injection extends Element_OnDemand
 			'finger_count' => 'Counting fingers checked?',
 			'iop_checked' => 'IOP needs to be checked?',
 			'postinject_drops_id' => 'Post injection drops',
+			'pre_ioplowering_required' => 'Pre IOP lowering required',
+			'post_ioplowering_required' => 'Post IOP lowering required',
 		);
 	}
 
