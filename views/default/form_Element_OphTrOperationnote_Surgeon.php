@@ -36,7 +36,7 @@
 						'type' => 'dropdown',
 						'options' => CHtml::listData(OphTrOperationnote_Personnel_Role::model()->findAll(array('order' => 'display_order asc')),'id','name'),
 						'empty' => '- Select -',
-						'once_per_row' => true,
+						'once_per_row' => Yii::app()->params['OphTrOperationnote_SurgeonRolesOnceOnly'],
 					),
 					array(
 						'field' => 'user_id',
