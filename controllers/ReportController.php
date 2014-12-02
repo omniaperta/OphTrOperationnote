@@ -70,7 +70,7 @@ class ReportController extends BaseController
 
 			if (@$_GET['surgeon_id'] && (int)$_GET['surgeon_id']) {
 				$surgeon_id = (int)$_GET['surgeon_id'];
-				if(!$surgeon = User::model()->findByPk($surgeon_id)) {
+				if (!$surgeon = User::model()->findByPk($surgeon_id)) {
 					throw new CException("Unknown surgeon $surgeon_id");
 				}
 			}
@@ -97,16 +97,84 @@ class ReportController extends BaseController
 			$filename = 'operation_report_' . date('YmdHis') . '.csv';
 			$this->sendCsvHeaders($filename);
 
+			$columns = array(
+				'operation_date' => 'Operation date',
+				'hos_num' => 'Hospital No',
+				'first_name' => 'First name',
+				'last_name' => 'Last name',
+				'gender' => 'Gender',
+				'patient_dob' => 'Date of birth',
+				'procedures' => 'Procedure(s)',
+				'complications' => 'Complication(s)',
+				// booking
+				'bookingcomments' => 'Booking comments',
+				'booking_diagnosis' => 'Booking diagnosis',
+				'operation_date' => 'Surgery date',
+				'theatre' => 'Theatre',
+				// examination
+				'comorbidities' => 'Comorbidities',
+				'first_or_second_eye' => 'First or second eye',
+				'pre-op refraction' => 'Pre-op refraction',
+				'most recent post-op refraction' => 'Most recent post-op refraction',
+				'target_refraction' => 'Target refraction',
+				'pre-op va' => 'Pre-op VA',
+				'most recent post-op va' => 'Most recent post-op VA',
+				// opnote
+				'cataract_report' => 'Cataract report',
+				'tamponade_used' => 'Tamponade used',
+				'anaesthetic_type' => 'Anaesthetic type',
+				'anaesthetic_delivery' => 'Anaesthetic delivery',
+				'anaesthetic_complications' => 'Anaesthetic complications',
+				'anaesthetic_comments' => 'Anaesthetic comments',
+				'surgeon' => 'Surgeon',
+				'surgeon_role' => 'Surgeon role',
+				'assistant' => 'Assistant',
+				'assistant_role' => 'Assistant role',
+				'supervising_surgeon' => 'Supervising surgeon',
+				'supervising_surgeon_role' => 'Supervising surgeon role',
+				'opnote_comments' => 'Operation note comments',
+				// patient data
+				'patient_diagnoses' => 'Ophthalmic diagnoses',
+			);
+
+			$i = 0; $_columns = array();
+			foreach ($columns as $column => $label) {
+				$keys = array_keys($results[0]);
+
+				if (in_array($column,$keys)) {
+					$_columns[] = $column;
+
+					if ($i >0) {
+						echo ",";
+					}
+					echo $label;
+					$i++;
+				}
+			}
+
+			echo "\n";
+
+			foreach ($results as $result) {
+				foreach ($_columns as $i => $column) {
+					if ($i >0) {
+						echo ",";
+					}
+					echo '"'.$result[$column].'"';
+				}
+
+				echo "\n";
+			}
+
 			/*
 			echo "\"Operation report for ";
-			if($surgeon) {
+			if ($surgeon) {
 				echo "$surgeon->first_name $surgeon->last_name";
 			} else {
 				echo "all surgeons";
 			}
 			echo " from $date_from to $date_to\"\n";
 */
-			echo $this->array2Csv($results);
+			//echo $this->array2Csv($results);
 		} else {
 			$context['surgeons'] = CHtml::listData(User::model()->findAll(array('condition' => 'is_surgeon = 1', 'order' => 'first_name,last_name')), 'id', 'fullname');
 			$this->render('operation', $context);
@@ -128,10 +196,10 @@ class ReportController extends BaseController
 		$filter_procedures_method = 'OR';
 		$filter_complications_method = 'OR';
 
+		$select = "e.id, c.first_name, c.last_name, e.created_date, su.surgeon_id, su.assistant_id, su.supervising_surgeon_id, p.hos_num,".
+			"p.gender, p.dob, pl.id as plid, cat.id as cat_id, eye.name AS eye, ep.patient_id, pl.booking_event_id";
+		
 		$command = Yii::app()->db->createCommand()
-			->select(
-				"e.id, c.first_name, c.last_name, e.created_date, su.surgeon_id, su.assistant_id, su.supervising_surgeon_id, p.hos_num,p.gender, p.dob, pl.id as plid, cat.id as cat_id, eye.name AS eye"
-			)
 			->from("event e")
 			->join("episode ep", "e.episode_id = ep.id")
 			->join("patient p", "ep.patient_id = p.id")
@@ -142,9 +210,105 @@ class ReportController extends BaseController
 			->leftJoin("et_ophtroperationnote_cataract cat", "cat.event_id = e.id")
 			->where("e.deleted = 0 and ep.deleted = 0 and e.created_date >= :from_date and e.created_date < :to_date + interval 1 day")
 			->order("p.id, e.created_date asc");
+
+		if (@$_GET['booking_diagnosis'] || @$_GET['theatre'] || @$_GET['booking']) {
+			if (Yii::app()->db->getSchema()->getTable('et_ophtroperationbooking_operation')) {
+				$command->leftJoin('et_ophtroperationbooking_operation eo','eo.event_id = pl.booking_event_id');
+
+				if (@$_GET['booking']) {
+					$select .= ", eo.comments as bookingcomments";
+				}
+
+				if (@$_GET['booking_diagnosis']) {
+					$command->leftJoin('et_ophtroperationbooking_diagnosis di','di.event_id = pl.booking_event_id')
+						->leftJoin('disorder bd','di.disorder_id = bd.id')
+						->leftJoin('eye bde','di.eye_id = bde.id');
+					$select .= ", bd.term as bd_disorder, bde.name as bd_eye";
+				}
+
+				if (@$_GET['theatre'] || @$_GET['surgerydate']) {
+					$command->leftJoin('ophtroperationbooking_operation_booking b','eo.latest_booking_id = b.id');
+
+					if (@$_GET['theatre']) {
+						$command->leftJoin('ophtroperationbooking_operation_theatre t','b.session_theatre_id = t.id');
+						$select .= ", t.name as theatre";
+					}
+				}
+			}
+		}
+
+		if (@$_GET['anaesthetic_type'] || @$_GET['anaesthetic_delivery'] || @$_GET['anaesthetic_comments'] || @$_GET['anaesthetic_complications']) {
+			$command->join('et_ophtroperationnote_anaesthetic an','an.event_id = e.id');
+			$select .= ", an.id as an_id";
+
+			if (@$_GET['anaesthetic_comments']) {
+				$select .= ", an.anaesthetic_comment as anaesthetic_comments";
+			}
+
+			if (@$_GET['anaesthetic_type']) {
+				$command->join('anaesthetic_type ant','an.anaesthetic_type_id = ant.id');
+				$select .= ", ant.name as anaesthetic_type";
+			}
+
+			if (@$_GET['anaesthetic_delivery']) {
+				$command->join('anaesthetic_delivery and','an.anaesthetic_delivery_id = and.id');
+				$select .= ", and.name as anaesthetic_delivery";
+			}
+		}
+
+		if (@$_GET['cataract_report']) {
+			$command->leftJoin('ophtroperationnote_cataract_iol_type iol','iol.id = cat.iol_type_id');
+			$select .= ", cat.report as cataract_report, cat.predicted_refraction as cataract_predicted_refraction, iol.name as cataract_iol_type, cat.iol_power as cataract_iol_power";
+		}
+
+		if (@$_GET['tamponade_used']) {
+			$command->leftJoin('et_ophtroperationnote_tamponade tam','tam.event_id = e.id')
+				->leftJoin('ophtroperationnote_gas_type gas','tam.gas_type_id = tam.id');
+			$select .= ", gas.name as tamponade_used";
+		}
+
+		if (@$_GET['surgeon'] || @$_GET['surgeon_role'] || @$_GET['assistant'] || @$_GET['assistant_role'] || @$_GET['supervising_surgeon'] || @$_GET['supervising_surgeon_role']) {
+			if (@$_GET['surgeon'] || @$_GET['surgeon_role']) {
+				$command->leftJoin('user surgeon_user','surgeon_user.id = su.surgeon_id');
+
+				if (@$_GET['surgeon']) {
+					$select .= ", surgeon_user.first_name as surgeon_first_name, surgeon_user.last_name as surgeon_last_name";
+				}
+				if (@$_GET['surgeon_role']) {
+					$select .= ", surgeon_user.role as surgeon_role";
+				}
+			}
+			if (@$_GET['assistant'] || @$_GET['assistant_role']) {
+				$command->leftJoin('user assistant_user','assistant_user.id = assistant_id');
+
+				if (@$_GET['assistant']) {
+					$select .= ", assistant_user.first_name as assistant_first_name, assistant_user.last_name as assistant_last_name";
+				}
+				if (@$_GET['assistant_role']) {
+					$select .= ", assistant_user.role as assistant_role";
+				}
+			}
+
+			if (@$_GET['supervising_surgeon'] || @$_GET['supervising_surgeon_role']) {
+				$command->leftJoin('user supervisor_user','supervisor_user.id = supervising_surgeon_id');
+
+				if (@$_GET['supervising_surgeon']) {
+					$select .= ", supervisor_user.first_name as supervising_surgeon_first_name, supervisor_user.last_name as supervising_surgeon_last_name";
+				}
+				if (@$_GET['supervising_surgeon_role']) {
+					$select .= ", supervisor_user.role as supervising_surgeon_role";
+				}
+			}
+		}
+
+		if (@$_GET['opnote_comments']) {
+			$command->leftJoin('et_ophtroperationnote_comments comments','comments.event_id = e.id');
+			$select .= ", comments.comments as opnote_comments";
+		}
+
+		$command->select($select);
+
 		$params = array(':from_date' => $from_date, ':to_date' => $to_date);
-
-
 
 		if ($surgeon) {
 			$command->andWhere(
@@ -153,19 +317,104 @@ class ReportController extends BaseController
 			$params[':user_id'] = $surgeon->id;
 		}
 
-		$results = array();
+		$this->debug('executing query: '.$command->getText()."\n");
+		$this->debug('params: '.print_r($params,true)."\n");
+
+		$results = $command->queryAll(true, $params);
+
+		$patient_ids = array();
+		$cat_ids = array();
+		$pl_ids = array();
+		$an_ids = array();
+
+		foreach ($results as $row) {
+			$patient_ids[] = $row['patient_id'];
+			$pl_ids[] = $row['plid'];
+
+			if (@$row['an_id']) {
+				$an_ids[] = $row['an_id'];
+			}
+
+			if ($row['cat_id']) {
+				$cat_ids[] = $row['cat_id'];
+			}
+		}
+
 		$cache = array();
-		foreach ($command->queryAll(true, $params) as $row) {
+
+		if (!empty($cat_ids)) {
+			foreach (Yii::app()->db->createCommand()
+				->select("ophtroperationnote_cataract_complications.*, ophtroperationnote_cataract_complication.cataract_id")
+				->from("ophtroperationnote_cataract_complication")
+				->join("ophtroperationnote_cataract_complications","ophtroperationnote_cataract_complication.complication_id = ophtroperationnote_cataract_complications.id")
+				->where("cataract_id in (".implode(',',$cat_ids).")")
+				->queryAll() as $cc) {
+				$cache['complications'][$cc['cataract_id']][$cc['id']] = $cc['name'];
+			}
+		}
+
+		foreach (Yii::app()->db->createCommand()
+			->select("ophtroperationnote_procedurelist_procedure_assignment.procedurelist_id, proc.*")
+			->from("ophtroperationnote_procedurelist_procedure_assignment")
+			->join("proc","ophtroperationnote_procedurelist_procedure_assignment.proc_id = proc.id")
+			->where("procedurelist_id in (".implode(',',$pl_ids).")")
+			->queryAll() as $pa) {
+			$cache['procedures'][$pa['procedurelist_id']][$pa['id']] = $pa['term'];
+		}
+
+		if (@$_GET['patient_oph_diagnoses']) {
+			$oph = Specialty::model()->find('name=?',array('Ophthalmology'))->id;
+
+			foreach (Yii::app()->db->createCommand()
+				->select("sd.patient_id, d.term, e.name")
+				->from("secondary_diagnosis sd")
+				->join("disorder d","sd.disorder_id = d.id")
+				->leftJoin("eye e","sd.eye_id = e.id")
+				->where("sd.patient_id in (".implode(',',$patient_ids).") and d.specialty_id = $oph")
+				->queryAll() as $sd) {
+				$eye = $sd['name'] ? ($sd['name'] == 'Both' ? 'Bilateral' : $sd['name']) : null;
+				$cache['oph_diagnoses'][$sd['patient_id']][] = ($eye ? "$eye " : "") . $sd['term'];
+			}
+
+			foreach (Yii::app()->db->createCommand()
+				->select("disorder_id, eye_id, patient_id, disorder.term, eye.name")
+				->from("episode")
+				->leftJoin('eye','eye_id = eye.id')
+				->join('disorder','disorder_id = disorder.id')
+				->where("patient_id in (".implode(',',$patient_ids).") and episode.deleted = 0")
+				->queryAll() as $episode) {
+				$eye = $episode['name'] ? ($episode['name'] == 'Both' ? 'Bilateral' : $episode['name']) : null;
+				$cache['ep_diagnoses'][$episode['patient_id']][] = ($eye ? "$eye " : "") . $episode['term'];
+			}
+		}
+
+		if (@$_GET['anaesthetic_complications']) {
+			foreach (Yii::app()->db->createCommand()
+				->select("ophtroperationnote_anaesthetic_anaesthetic_complication.et_ophtroperationnote_anaesthetic_id, com.*")
+				->from("ophtroperationnote_anaesthetic_anaesthetic_complication")
+				->join("ophtroperationnote_anaesthetic_anaesthetic_complications com","com.id = anaesthetic_complication_id")
+				->where("et_ophtroperationnote_anaesthetic_id in (".implode(',',$an_ids).")")
+				->queryAll() as $ac) {
+				$cache['anaesthetic_complications'][$ac['et_ophtroperationnote_anaesthetic_id']][] = $ac['name'];
+			}
+		}
+
+		$_results = array();
+
+		foreach ($results as $row) {
+			$this->debug('query finished');
+
 			set_time_limit(1);
 			$complications = array();
 			if ($row['cat_id']) {
-				foreach (OphTrOperationnote_CataractComplication::model()->findAll('cataract_id = ?', array($row['cat_id'])) as $complication) {
-					if(!isset($cache['complications'][$complication->complication_id])) {
-						$cache['complications'][$complication->complication_id] = $complication->complication->name;
+				if (!empty($cache['complications'][$cc['cataract_id']])) {
+					foreach ($cache['complications'][$cc['cataract_id']] as $id => $name) {
+						$complications[(string)$id] = $name;
 					}
-					$complications[(string)$complication->complication_id] = $cache['complications'][$complication->complication_id];
 				}
 			}
+
+			$this->debug('done complications');
 
 			$matched_complications = 0;
 			if ($filter_complications) {
@@ -182,13 +431,18 @@ class ReportController extends BaseController
 				}
 			}
 
+			$this->debug('done complications 2');
+
 			$procedures = array();
-			foreach (OphTrOperationnote_ProcedureListProcedureAssignment::model()->findAll('procedurelist_id = ?', array($row['plid'])) as $pa) {
-				if(!isset($cache['procedures'][$pa->proc_id])) {
-					$cache['procedures'][$pa->proc_id] = $pa->procedure->term;
+
+			if (!empty($cache['procedures'][$row['plid']])) {
+				foreach ($cache['procedures'][$row['plid']] as $id => $term) {
+					$procedures[(string)$id] = $term;
 				}
-				$procedures[(string)$pa->proc_id] = $cache['procedures'][$pa->proc_id];
 			}
+
+			$this->debug('done proclist assignment');
+
 			$matched_procedures = 0;
 			if ($filter_procedures) {
 				foreach ($filter_procedures as $filter_procedure) {
@@ -204,7 +458,9 @@ class ReportController extends BaseController
 				}
 			}
 
-			$record = array(
+			$this->debug('done proclist assignment 2');
+
+			$record = array_merge($row,array(
 				"operation_date" => date('j M Y', strtotime($row['created_date'])),
 				"patient_hosnum" => $row['hos_num'],
 				"patient_firstname" => $row['first_name'],
@@ -214,7 +470,7 @@ class ReportController extends BaseController
 				"eye" => $row['eye'],
 				"procedures" => implode(', ', $procedures),
 				"complications" => implode(', ', $complications),
-			);
+			));
 
 			if ($surgeon) {
 				if ($row['surgeon_id'] == $surgeon->id) {
@@ -230,74 +486,119 @@ class ReportController extends BaseController
 				}
 			}
 
-			//appenders
-			$this->appendPatientValues($record, $row['id']);
-			$this->appendBookingValues($record, $row['id']);
-			$this->appendOpNoteValues($record, $row['id']);
-			$this->appendExaminationValues($record, $row['id']);
+			$this->debug('surgeon stuff');
 
-			$results[] = $record;
+			//appenders
+			if (@$_GET['patient_oph_diagnoses']) {
+				$this->appendPatientValues($record, @$cache['ep_diagnoses'][$row['patient_id']], @$cache['oph_diagnoses'][$row['patient_id']]);
+			}
+
+			$this->debug('patient values');
+			$this->appendBookingDiagnosis($record);
+
+			if (@$_GET['anaesthetic_complications']) {
+				if (isset($cache['anaesthetic_complications'][$row['an_id']])) {
+					$record['anaesthetic_complications'] = implode(', ',$cache['anaesthetic_complications'][$row['an_id']]);
+				} else {
+					$record['anaesthetic_complications'] = '';
+				}
+			}
+
+			if (@$_GET['cataract_report']) {
+				if (!$record['cataract_iol_type']) {
+					$record['cataract_iol_type'] = 'Unknown';
+				}
+				$record['cataract_report'] = trim(preg_replace('/\s\s+/', ' ', $record['cataract_report']));
+			}
+
+			if (@$_GET['tamponade_used']) {
+				if (!$record['tamponade_used']) {
+					$record['tamponade_used'] = 'None';
+				}
+			}
+
+			if (@$_GET['surgeon']) {
+				$record['surgeon'] = $record['surgeon_first_name'] ? $record['surgeon_first_name'].' '.$record['surgeon_last_name'] : 'None';
+			}
+			if (@$_GET['surgeon_role']) {
+				if (!$record['surgeon_role']) {
+					$record['surgeon_role'] = 'None';
+				}
+			}
+
+			if (@$_GET['assistant']) {
+				$record['assistant'] = $record['assistant_first_name'] ? $record['assistant_first_name'].' '.$record['assistant_last_name'] : 'None';
+			}
+			if (@$_GET['assistant_role']) {
+				if (!$record['assistant_role']) {
+					$record['assistant_role'] = 'None';
+				}
+			}
+
+			if (@$_GET['supervising_surgeon']) {
+				$record['supervising_surgeon'] = $record['supervising_surgeon_first_name'] ? $record['supervising_surgeon_first_name'].' '.$record['supervising_surgeon_last_name'] : 'None';
+			}
+			if (@$_GET['supervising_surgeon_role']) {
+				if (!$record['supervising_surgeon_role']) {
+					$record['supervising_surgeon_role'] = 'None';
+				}
+			}
+
+			if (@$_GET['opnote_comments']) {
+				$record['opnote_comments'] = trim(preg_replace('/\s\s+/', ' ', $record['opnote_comments']));
+			}
+
+			$this->debug('booking values');
+			$this->appendExaminationValues($record, $row['id']);
+			$this->debug('examination values');
+
+			$_results[] = $record;
 		}
-		return $results;
+
+		return $_results;
 	}
-	protected function appendPatientValues(&$record, $event_id)
+
+	public function debug($msg)
 	{
-		$event = Event::model()->findByPk($event_id);
-		$patient = $event->episode->patient;
+		$fp = fopen("/home/mark/debug.log","a+");
+		fwrite($fp,date('H:i:s')." - $msg\n");
+		fclose($fp);
+	}
+
+	protected function appendPatientValues(&$record, $ep_diagnoses, $oph_diagnoses)
+	{
 		if (@$_GET['patient_oph_diagnoses']) {
 			$diagnoses = array();
-			foreach ($patient->episodes as $ep) {
-				if ($ep->diagnosis) {
-					$diagnoses[] = (($ep->eye) ? $ep->eye->adjective . " " : "") . $ep->diagnosis->term;
+
+			if (!empty($ep_diagnoses)) {
+				foreach ($ep_diagnoses as $diagnosis) {
+					$diagnoses[] = $diagnosis;
 				}
 			}
-			foreach ($patient->getOphthalmicDiagnoses() as $sd) {
-				$diagnoses[] = $sd->eye->adjective . " " . $sd->disorder->term;
+
+			if (!empty($oph_diagnoses)) {
+				foreach ($oph_diagnoses as $diagnosis) {
+					$diagnoses[] = $diagnosis;
+				}
 			}
-			$record['patient_diagnoses'] = implode(', ', $diagnoses);
+
+			if (!empty($diagnoses)) {
+				$record['patient_diagnoses'] = implode(', ', $diagnoses);
+			} else {
+				$record['patient_diagnoses'] = '';
+			}
 		}
 	}
 
-	protected function appendBookingValues(&$record, $event_id)
+	protected function appendBookingDiagnosis(&$record)
 	{
-		if ($api = Yii::app()->moduleAPI->get('OphTrOperationbooking')) {
-			$procedure = Element_OphTrOperationnote_ProcedureList::model()->find('event_id=:event_id',array(':event_id'=>$event_id));
-			$bookingEventID = $procedure['booking_event_id'];
-			foreach (array('booking_diagnosis', 'theatre', 'bookingcomments','surgerydate') as $k) {
-				if (@$_GET[$k]) {
-					$record[$k] = '';
-				}
-			}
-			if(isset($bookingEventID)){
-				{
-					$operationElement = $api->getOperationForEvent($bookingEventID);
-					$latestBookingID = $operationElement['latest_booking_id'];
-					$operationBooking = OphTrOperationbooking_Operation_Booking::model()->find('id=:id',array('id'=>$latestBookingID));
+		if (@$_GET['booking_diagnosis']) {
+			if ($record['bd_disorder']) {
+				$eye = $record['bd_eye'] == 'Both' ? 'Bilateral' : $record['bd_eye'];
 
-					if (@$_GET['booking_diagnosis']) {
-						$diag_el = $operationElement->getDiagnosis();
-						$disorder = $diag_el->disorder();
-						if ($disorder) {
-							$record['booking_diagnosis'] = $diag_el->eye->adjective  . " " . $disorder->term;
-						} else {
-							$record['booking_diagnosis'] = 'Unknown';
-						}
-					}
-
-					if(@$_GET['theatre']) {
-
-					$theatreName = $operationElement->site['name'].' '.$operationBooking->theatre['name'];
-					$record['theatre'] = $theatreName;
-					}
-
-					if(@$_GET['bookingcomments']){
-						$record['bookingcomments'] = $operationElement['comments'];
-					}
-
-					if( @$_GET['surgerydate']){
-						$record['surgerydate']=$operationBooking['session_date'];
-					}
-				}
+				$record['booking_diagnosis'] = $eye.' '.$record['bd_disorder'];
+			} else {
+				$record['booking_diagnosis'] = 'Unknown';
 			}
 		}
 	}
@@ -311,15 +612,15 @@ class ReportController extends BaseController
 			$preOpCriteria = $this->preOperationNoteCriteria($event);
 			$postOpCriteria = $this->postOperationNoteCriteria($event);
 
-			if(@$_GET['comorbidities']) {
+			if (@$_GET['comorbidities']) {
 				$record['comorbidities'] = $this->getComorbidities($preOpCriteria);
 			}
 
-			if(@$_GET['target_refraction']) {
+			if (@$_GET['target_refraction']) {
 				$record['target_refraction']= $this->getTargetRefraction($preOpCriteria);
 			}
 
-			if(@$_GET['first_eye']) {
+			if (@$_GET['first_eye']) {
 				$record['first_or_second_eye']=$this->getFirstEyeOrSecondEye($preOpCriteria);
 			}
 
@@ -348,7 +649,7 @@ class ReportController extends BaseController
 	public function operationNoteCriteria($event, $searchBackwards)
 	{
 		$criteria = new CDbCriteria();
-		if($searchBackwards) {
+		if ($searchBackwards) {
 			$criteria->addCondition('event.created_date < :op_date');
 		}
 		else {
@@ -378,8 +679,8 @@ class ReportController extends BaseController
 		$comorbiditiesElement = \OEModule\OphCiExamination\models\Element_OphCiExamination_Comorbidities::model()->with(array('event'))->find($criteria);
 
 		$comorbidities = array();
-		if(isset($comorbiditiesElement->items)) {
-			foreach($comorbiditiesElement->items as $comorbiditity){
+		if (isset($comorbiditiesElement->items)) {
+			foreach($comorbiditiesElement->items as $comorbiditity) {
 				$comorbidities[] = $comorbiditity['name'];
 			}
 		return implode(',', $comorbidities);
@@ -389,7 +690,7 @@ class ReportController extends BaseController
 	protected function getTargetRefraction($criteria)
 	{
 		$cataractManagementElement = \OEModule\OphCiExamination\models\Element_OphCiExamination_CataractSurgicalManagement::model()->with(array('event'))->find($criteria);
-		if($cataractManagementElement ){
+		if ($cataractManagementElement) {
 		return $cataractManagementElement['target_postop_refraction'];
 		}
 	}
@@ -397,7 +698,7 @@ class ReportController extends BaseController
 	public function getFirstEyeOrSecondEye($criteria)
 	{
 		$cataractManagementElement = \OEModule\OphCiExamination\models\Element_OphCiExamination_CataractSurgicalManagement::model()->with(array('event'))->find($criteria);
-		if($cataractManagementElement ){
+		if ($cataractManagementElement) {
 		return $cataractManagementElement->eye['name'];
 		}
 	}
@@ -442,80 +743,6 @@ class ReportController extends BaseController
 			return 'Unknown';
 		}
 	}
-
-	protected function appendOpNoteValues(&$record, $event_id)
-	{
-		$anaesthetic=Element_OphTrOperationnote_Anaesthetic::model()->find('event_id = :event_id',array(':event_id'=>$event_id));
-
-		if (@$_GET['anaesthetic_type']) {
-			$record['anaesthetic_type']=$anaesthetic->anaesthetic_type['name'];
-		}
-
-		if (@$_GET['anaesthetic_delivery']) {
-			$record['anaesthetic_delivery']=$anaesthetic->anaesthetic_delivery['name'];
-		}
-
-		if (@$_GET['anaesthetic_comments']) {
-			$record['anaesthetic_comments']=$anaesthetic['anaesthetic_comment'];
-		}
-
-		if (@$_GET['anaesthetic_complications']) {
-			$complications = array();
-			if(isset($anaesthetic->anaesthetic_complications))
-			{
-			foreach($anaesthetic->anaesthetic_complications as $complication)
-			{
-			$complications[] = $complication['name'];
-			}
-			$record['anaesthetic_complications']=implode(',',$complications);
-		}
-
-		}
-
-		if (@$_GET['cataract_report']) {
-			foreach (array('cataract_report', 'cataract_predicted_refraction', 'cataract_iol_type', 'cataract_iol_power') as $k) {
-				$record[$k] = '';
-			}
-			if ($cataract_element = Element_OphTrOperationnote_Cataract::model()->find('event_id = :event_id',array(':event_id'=>$event_id))) {
-				$record['cataract_report']=	trim(preg_replace('/\s\s+/', ' ', $cataract_element['report']));
-				$record['cataract_predicted_refraction'] = $cataract_element->predicted_refraction;
-				if ($cataract_element->iol_type) {
-					$record['cataract_iol_type'] = $cataract_element->iol_type->name;
-				}
-				else {
-					$record['cataract_iol_type'] = 'None';
-				}
-				$record['cataract_iol_power'] = $cataract_element->iol_power;
-			}
-		}
-
-		if (@$_GET['tamponade_used']) {
-			if ($tamponade_element = Element_OphTrOperationnote_Tamponade::model()->find('event_id = :event_id', array(':event_id'=>$event_id))) {
-				$record['tamponade_used'] = $tamponade_element->gas_type->name;
-			}
-			else {
-				$record['tamponade_used'] = 'None';
-			}
-		}
-
-		if (@$_GET['surgeon'] || @$_GET['surgeon_role'] || @$_GET['assistant'] || @$_GET['assistant_role'] || @$_GET['supervising_surgeon'] || @$_GET['supervising_surgeon_role']) {
-			$surgeon_element = Element_OphTrOperationnote_Surgeon::model()->findByAttributes(array('event_id' => $event_id));
-
-			foreach (array('surgeon', 'assistant', 'supervising_surgeon') as $surgeon_type) {
-				if (@$_GET[$surgeon_type] || @$_GET["{$surgeon_type}_role"]) {
-					$surgeon = $surgeon_element->{$surgeon_type};
-					if (@$_GET[$surgeon_type]) $record[$surgeon_type] = $surgeon ? $surgeon->getFullName() : 'None';
-					if (@$_GET["{$surgeon_type}_role"]) $record["{$surgeon_type}_role"] = $surgeon ? $surgeon->role : 'None';
-				}
-			}
-		}
-
-		if (@$_GET['opnote_comments']) {
-			$comments=Element_OphTrOperationnote_Comments::model()->find('event_id = :event_id',array(':event_id'=>$event_id));
-			$record['opnote_comments']=	trim(preg_replace('/\s\s+/', ' ', $comments['comments']));
-		}
-	}
-
 
 	/**
 	 * Generates a cataract outcomes report
