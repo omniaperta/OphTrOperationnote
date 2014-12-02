@@ -22,7 +22,6 @@
 
 class ReportController extends BaseController
 {
-
 	public function accessRules()
 	{
 		return array(
@@ -137,48 +136,46 @@ class ReportController extends BaseController
 				'patient_diagnoses' => 'Ophthalmic diagnoses',
 			);
 
-			$i = 0; $_columns = array();
-			foreach ($columns as $column => $label) {
-				$keys = array_keys($results[0]);
+			if (count($results) > 0) {
+				$i = 0; $_columns = array();
+				foreach ($columns as $column => $label) {
+					$keys = array_keys($results[0]);
 
-				if (in_array($column,$keys)) {
-					$_columns[] = $column;
+					if (in_array($column,$keys)) {
+						$_columns[] = $column;
 
-					if ($i >0) {
-						echo ",";
+						if ($i >0) {
+							echo ",";
+						}
+						echo $label;
+						$i++;
 					}
-					echo $label;
-					$i++;
-				}
-			}
-
-			echo "\n";
-
-			foreach ($results as $result) {
-				foreach ($_columns as $i => $column) {
-					if ($i >0) {
-						echo ",";
-					}
-					echo '"'.$result[$column].'"';
 				}
 
 				echo "\n";
+
+				foreach ($results as $result) {
+					foreach ($_columns as $i => $column) {
+						if ($i >0) {
+							echo ",";
+						}
+						echo '"'.$result[$column].'"';
+					}
+
+					echo "\n";
+				}
+
+				return;
 			}
 
-			/*
-			echo "\"Operation report for ";
-			if ($surgeon) {
-				echo "$surgeon->first_name $surgeon->last_name";
-			} else {
-				echo "all surgeons";
-			}
-			echo " from $date_from to $date_to\"\n";
-*/
-			//echo $this->array2Csv($results);
-		} else {
-			$context['surgeons'] = CHtml::listData(User::model()->findAll(array('condition' => 'is_surgeon = 1', 'order' => 'first_name,last_name')), 'id', 'fullname');
-			$this->render('operation', $context);
+			$error = 'No results found, please widen your search criteria.';
 		}
+
+		Yii::app()->assetManager->registerCssFile('css/report.css', 'application.modules.OphTrOperationnote.assets', 10);
+
+		$context['surgeons'] = CHtml::listData(User::model()->findAll(array('condition' => 'is_surgeon = 1', 'order' => 'first_name,last_name')), 'id', 'fullname');
+		$context['error'] = @$error;
+		$this->render('operation', $context);
 	}
 
 	/**
@@ -353,13 +350,15 @@ class ReportController extends BaseController
 			}
 		}
 
-		foreach (Yii::app()->db->createCommand()
-			->select("ophtroperationnote_procedurelist_procedure_assignment.procedurelist_id, proc.*")
-			->from("ophtroperationnote_procedurelist_procedure_assignment")
-			->join("proc","ophtroperationnote_procedurelist_procedure_assignment.proc_id = proc.id")
-			->where("procedurelist_id in (".implode(',',$pl_ids).")")
-			->queryAll() as $pa) {
-			$cache['procedures'][$pa['procedurelist_id']][$pa['id']] = $pa['term'];
+		if (!empty($pl_ids)) {
+			foreach (Yii::app()->db->createCommand()
+				->select("ophtroperationnote_procedurelist_procedure_assignment.procedurelist_id, proc.*")
+				->from("ophtroperationnote_procedurelist_procedure_assignment")
+				->join("proc","ophtroperationnote_procedurelist_procedure_assignment.proc_id = proc.id")
+				->where("procedurelist_id in (".implode(',',$pl_ids).")")
+				->queryAll() as $pa) {
+				$cache['procedures'][$pa['procedurelist_id']][$pa['id']] = $pa['term'];
+			}
 		}
 
 		if (@$_GET['patient_oph_diagnoses']) {

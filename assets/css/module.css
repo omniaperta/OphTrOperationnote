@@ -49,12 +49,6 @@
   margin: 0 -10px;
 }
 
-/* line 50, ../sass/components/_event.scss */
-.report-error {
-  color: #f00;
-  font-weight: bold;
-}
-
 @media print {
   /* line 18, ../sass/components/_elements.scss */
   .Element_OphTrOperationnote_Anaesthetic .element-data {
