@@ -611,17 +611,17 @@ class DefaultController extends BaseEventTypeController
 	protected function setComplexAttributes_Element_OphTrOperationnote_Cataract($element, $data, $index)
 	{
 		$complications = array();
-		if (isset($data['OphTrOperationnote_CataractComplications'])) {
-			foreach ($data['OphTrOperationnote_CataractComplications'] as $c_id) {
-				$complications[] = OphTrOperationnote_CataractComplications::model()->findByPk($c_id);
+		if (!empty($data['OphTrOperationnote_CataractComplications'])) {
+			foreach ($data['OphTrOperationnote_CataractComplications'] as $c) {
+				$complications[] = OphTrOperationnote_CataractComplications::model()->findByPk($c['id']);
 			}
 		}
 		$element->complications = $complications;
 
 		$devices = array();
-		if (isset($data['OphTrOperationnote_CataractOperativeDevices'])) {
-			foreach ($data['OphTrOperationnote_CataractOperativeDevices'] as $oa_id) {
-				$devices[] = OphTrOperationnote_CataractComplications::model()->findByPk($oa_id);
+		if (!empty($data['OphTrOperationnote_CataractOperativeDevices'])) {
+			foreach ($data['OphTrOperationnote_CataractOperativeDevices'] as $oa) {
+				$devices[] = OphTrOperationnote_CataractComplications::model()->findByPk($oa['id']);
 			}
 		}
 		$element->operative_devices = $devices;
@@ -636,8 +636,8 @@ class DefaultController extends BaseEventTypeController
 	 */
 	protected function saveComplexAttributes_Element_OphTrOperationnote_Cataract($element, $data, $index)
 	{
-		$element->updateComplications(isset($data['OphTrOperationnote_CataractComplications']) ? $data['OphTrOperationnote_CataractComplications'] : array());
-		$element->updateOperativeDevices(isset($data['OphTrOperationnote_CataractOperativeDevices']) ? $data['OphTrOperationnote_CataractOperativeDevices'] : array());
+		$element->updateComplications(!empty($data['OphTrOperationnote_CataractComplications']) ? $data['OphTrOperationnote_CataractComplications'] : array());
+		$element->updateOperativeDevices(!empty($data['OphTrOperationnote_CataractOperativeDevices']) ? $data['OphTrOperationnote_CataractOperativeDevices'] : array());
 	}
 
 	/**
@@ -651,8 +651,8 @@ class DefaultController extends BaseEventTypeController
 	{
 		$drugs = array();
 		if (!empty($data['Drug'])) {
-			foreach ($data['Drug'] as $d_id) {
-				$drugs[] = OphTrOperationnote_PostopDrug::model()->findByPk($d_id);
+			foreach ($data['Drug'] as $d) {
+				$drugs[] = OphTrOperationnote_PostopDrug::model()->findByPk($d['id']);
 			}
 		}
 		$element->drugs = $drugs;
@@ -667,7 +667,7 @@ class DefaultController extends BaseEventTypeController
 	 */
 	protected function saveComplexAttributes_Element_OphTrOperationnote_PostOpDrugs($element, $data, $index)
 	{
-		$element->updateDrugs(isset($data['Drug']) ? $data['Drug'] : array());
+		$element->updateDrugs(!empty($data['Drug']) ? $data['Drug'] : array());
 
 	}
 
@@ -682,8 +682,8 @@ class DefaultController extends BaseEventTypeController
 		$model_name = CHtml::modelName($element);
 		$complications = array();
 		if (@$data[$model_name]['complications']) {
-			foreach ($data[$model_name]['complications'] as $id) {
-				$complications[] = OphTrOperationnote_Trabectome_Complication::model()->findByPk($id);
+			foreach ($data[$model_name]['complications'] as $c) {
+				$complications[] = OphTrOperationnote_Trabectome_Complication::model()->findByPk($c['id']);
 			}
 		}
 		$element->complications = $complications;
@@ -692,7 +692,7 @@ class DefaultController extends BaseEventTypeController
 	protected function saveComplexAttributes_Element_OphTrOperationnote_Trabectome($element, $data, $index)
 	{
 		$model_name = CHtml::modelName($element);
-		$element->updateComplications(isset($data[$model_name]['complications']) ? $data[$model_name]['complications'] : array() );
+		$element->updateComplications(!empty($data[$model_name]['complications']) ? $data[$model_name]['complications'] : array() );
 	}
 
 	/**
@@ -869,9 +869,9 @@ class DefaultController extends BaseEventTypeController
 		$difficulties = array();
 
 		if (!empty($data['MultiSelect_Difficulties'])) {
-			foreach ($data['MultiSelect_Difficulties'] as $difficulty_id) {
+			foreach ($data['MultiSelect_Difficulties'] as $difficulty) {
 				$assignment = new OphTrOperationnote_Trabeculectomy_Difficulties;
-				$assignment->difficulty_id = $difficulty_id;
+				$assignment->difficulty_id = $difficulty['id'];
 
 				$difficulties[] = $assignment;
 			}
@@ -882,9 +882,9 @@ class DefaultController extends BaseEventTypeController
 		$complications = array();
 
 		if (!empty($data['MultiSelect_Complications'])) {
-			foreach ($data['MultiSelect_Complications'] as $complication_id) {
+			foreach ($data['MultiSelect_Complications'] as $complication) {
 				$assignment = new OphTrOperationnote_Trabeculectomy_Complications;
-				$assignment->complication_id = $complication_id;
+				$assignment->complication_id = $complication['id'];
 
 				$complications[] = $assignment;
 			}

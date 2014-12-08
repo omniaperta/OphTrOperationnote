@@ -188,18 +188,18 @@ class Element_OphTrOperationnote_Cataract extends Element_OnDemand
 			$curr_by_id[$ca->complication_id] = $ca;
 		}
 
-		foreach ($complication_ids as $c_id) {
-			if (!isset($curr_by_id[$c_id])) {
+		foreach ($complication_ids as $c) {
+			if (!isset($curr_by_id[$c['id']])) {
 				$ca = new OphTrOperationnote_CataractComplication();
 				$ca->cataract_id = $this->id;
-				$ca->complication_id = $c_id;
+				$ca->complication_id = $c['id'];
 
 				if (!$ca->save()) {
 					throw new Exception('Unable to save complication assignment: '.print_r($ca->getErrors(),true));
 				}
 			}
 			else {
-				unset($curr_by_id[$c_id]);
+				unset($curr_by_id[$c['id']]);
 			}
 		}
 
@@ -224,18 +224,18 @@ class Element_OphTrOperationnote_Cataract extends Element_OnDemand
 			$curr_by_id[$oda->operative_device_id] = $oda;
 		}
 
-		foreach ($operative_device_ids as $od_id) {
-			if (!isset($curr_by_id[$od_id])) {
+		foreach ($operative_device_ids as $od) {
+			if (!isset($curr_by_id[$od['id']])) {
 				$oda = new OphTrOperationnote_CataractOperativeDevice();
 				$oda->cataract_id = $this->id;
-				$oda->operative_device_id = $od_id;
+				$oda->operative_device_id = $od['id'];
 
 				if (!$oda->save()) {
 					throw new Exception('Unable to save complication assignment: '.print_r($oda->getErrors(),true));
 				}
 			}
 			else {
-				unset($curr_by_id[$od_id]);
+				unset($curr_by_id[$od['id']]);
 			}
 		}
 
