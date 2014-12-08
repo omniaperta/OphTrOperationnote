@@ -681,7 +681,8 @@ class DefaultController extends BaseEventTypeController
 	{
 		$model_name = CHtml::modelName($element);
 		$complications = array();
-		if (@$data[$model_name]['complications']) {
+
+		if (!empty($data[$model_name]['complications'])) {
 			foreach ($data[$model_name]['complications'] as $c) {
 				$complications[] = OphTrOperationnote_Trabectome_Complication::model()->findByPk($c['id']);
 			}
