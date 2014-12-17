@@ -611,7 +611,7 @@ class DefaultController extends BaseEventTypeController
 	protected function setComplexAttributes_Element_OphTrOperationnote_Cataract($element, $data, $index)
 	{
 		$complications = array();
-		if (isset($data['OphTrOperationnote_CataractComplications'])) {
+		if (!empty($data['OphTrOperationnote_CataractComplications'])) {
 			foreach ($data['OphTrOperationnote_CataractComplications'] as $c_id) {
 				$complications[] = OphTrOperationnote_CataractComplications::model()->findByPk($c_id);
 			}
@@ -619,7 +619,7 @@ class DefaultController extends BaseEventTypeController
 		$element->complications = $complications;
 
 		$devices = array();
-		if (isset($data['OphTrOperationnote_CataractOperativeDevices'])) {
+		if (!empty($data['OphTrOperationnote_CataractOperativeDevices'])) {
 			foreach ($data['OphTrOperationnote_CataractOperativeDevices'] as $oa_id) {
 				$devices[] = OphTrOperationnote_CataractComplications::model()->findByPk($oa_id);
 			}
@@ -650,7 +650,7 @@ class DefaultController extends BaseEventTypeController
 	protected function setComplexAttributes_Element_OphTrOperationnote_PostOpDrugs($element, $data, $index)
 	{
 		$drugs = array();
-		if (isset($data['Drug'])) {
+		if (!empty($data['Drug'])) {
 			foreach ($data['Drug'] as $d_id) {
 				$drugs[] = OphTrOperationnote_PostopDrug::model()->findByPk($d_id);
 			}
