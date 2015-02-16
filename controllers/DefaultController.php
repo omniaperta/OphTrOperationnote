@@ -198,18 +198,18 @@ class DefaultController extends BaseEventTypeController
 	{
 		parent::initActionCreate();
 
-		if (isset($_GET['booking_event_id'])) {
-			if (!$api = Yii::app()->moduleAPI->get('OphTrOperationbooking')) {
-				throw new Exception('invalid request for booking event');
+		if ($api = Yii::app()->moduleAPI->get('OphTrOperationbooking')) {
+			if (isset($_GET['booking_event_id'])) {
+				if (!$this->booking_operation = $api->getOperationForEvent($_GET['booking_event_id'])) {
+					throw new Exception('booking event not found');
+				}
+			} elseif (isset($_GET['unbooked'])) {
+				$this->unbooked = true;
 			}
-			if (!$this->booking_operation = $api->getOperationForEvent($_GET['booking_event_id'])) {
-				throw new Exception('booking event not found');
-			}
-		}
-		elseif (isset($_GET['unbooked'])) {
+		} else {
+			// Booking module is not installed
 			$this->unbooked = true;
 		}
-
 		$this->initEdit();
 	}
 

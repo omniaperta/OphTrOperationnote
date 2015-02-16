@@ -31,6 +31,7 @@
 			</div>
 		</div>
 	</div>
+	<?php if(Yii::app()->moduleAPI->get('OphTrOperationbooking')) { ?>
 	<div class="element-data">
 		<div class="row data-row">
 			<div class="large-4 column">
@@ -39,4 +40,5 @@
 			</div>
 		</div>
 	</div>
+	<?php } ?>
 </section>
